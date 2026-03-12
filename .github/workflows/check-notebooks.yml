@@ -1,0 +1,34 @@
+name: Notebook output check
+
+on:
+  push:
+    paths: ['**/*.ipynb']
+  pull_request:
+    paths: ['**/*.ipynb']
+
+jobs:
+  check-notebook-outputs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install nbstripout
+        run: pip install nbstripout
+
+      - name: Check for cell outputs in notebooks
+        run: |
+          status=0
+          for nb in $(find . -name '*.ipynb' -not -path './.ipynb_checkpoints/*'); do
+            if nbstripout --verify "$nb" 2>/dev/null; then
+              echo "✓ $nb — clean"
+            else
+              echo "✗ $nb — CONTAINS OUTPUTS (student data risk!)"
+              status=1
+            fi
+          done
+          if [ $status -ne 0 ]; then
+            echo ""
+            echo "::error::Notebooks with cell outputs detected. Run 'nbstripout *.ipynb' before committing."
+            echo "To auto-strip on every commit: nbstripout --install --attributes .gitattributes"
+            exit 1
+          fi

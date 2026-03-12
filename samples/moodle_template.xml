@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<quiz>
+<!-- question: 0  -->
+  <question type="category">
+    <category>
+      <text>$course$/top/NombreDelModulo/Examen 1</text>
+    </category>
+    <info format="html">
+      <text></text>
+    </info>
+    <idnumber></idnumber>
+  </question>
+
+<!-- question: 406334  -->
+  <question type="multichoice">
+    <name>
+      <text>Este es el nombre de la pregunta</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<p>Este es el texto de la pregunta</p>]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text><![CDATA[<p>Este es el feedback general de la pregunta. Aquí se debe explicar en detalle, didácticamente, lo que la pregunta explica.</p>]]></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.0000000</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <correctfeedback format="html">
+      <text><![CDATA[<p>Your answer is correct.</p>]]></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is partially correct.</p>]]></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is incorrect.</p>]]></text>
+    </incorrectfeedback>
+    <shownumcorrect/>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Respuesta 1</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Feedback de la respuesta 1: aquí se explica por qué es incorrecta.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Respuesta 2</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Feedback de la respuesta 2: aquí se explica por qué es incorrecta.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Respuesta 3</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Feedback de la respuesta 3: aquí se explica por qué es incorrecta.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="100" format="html">
+      <text><![CDATA[<p>Respuesta correcta</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Feedback de la respuesta correcta: aquí se explica por qué lo es.</p>]]></text>
+      </feedback>
+    </answer>
+  </question>
+
+</quiz>

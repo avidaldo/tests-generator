@@ -1,0 +1,12 @@
+# Student data - NEVER publish
+results/data/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+

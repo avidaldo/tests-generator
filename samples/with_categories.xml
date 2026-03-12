@@ -1,0 +1,3814 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<quiz>
+  <question type="category">
+    <category>
+      <text>$course$/top/CSPy/Examen CSPy/SE &amp; Bank</text>
+    </category>
+    <info format="html">
+      <text></text>
+    </info>
+    <idnumber></idnumber>
+  </question>
+<question type="multichoice">
+    <name>
+      <text>SoC: dirección de dependencias (Bank)</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<p>En una arquitectura por capas se impone la regla: <strong>el dominio no depende de la UI</strong>. En el ejemplo <code>bank_*</code>, ¿qué relación respeta esa regla?</p>]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text><![CDATA[<p>Una dirección típica es: UI → services/manager → domain. Invertirla introduce acoplamiento y mezcla de responsabilidades.</p>]]></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.0000000</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <correctfeedback format="html">
+      <text><![CDATA[<p>Your answer is correct.</p>]]></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is partially correct.</p>]]></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is incorrect.</p>]]></text>
+    </incorrectfeedback>
+    <shownumcorrect/>
+    <answer fraction="100" format="html">
+      <text><![CDATA[<p><code>bank_gui.py</code> importa <code>bank_manager.py</code> y/o <code>bank_domain.py</code>.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Correcto: la capa superior usa las inferiores, no al revés.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p><code>bank_domain.py</code> importa <code>tkinter</code> para mostrar errores.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Eso mezcla dominio con presentación (UI).</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p><code>bank_manager.py</code> importa <code>tkinter.messagebox</code> para notificar al usuario.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>El service/manager debería ser agnóstico de UI.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p><code>bank_domain.py</code> importa <code>bank_gui.py</code> para abrir ventanas.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Es una inversión de dependencias que acopla fuertemente el dominio.</p>]]></text>
+      </feedback>
+    </answer>
+  </question>
+<question type="multichoice">
+    <name>
+      <text>SRP: una sola razón de cambio</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<p>Considera el principio SRP: “una clase/módulo debería tener una sola razón para cambiar”. ¿Qué diseño lo respeta mejor?</p>]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text><![CDATA[<p>Separar UI, reglas de negocio y entidades reduce el número de motivos por los que hay que modificar un archivo.</p>]]></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.0000000</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <correctfeedback format="html">
+      <text><![CDATA[<p>Your answer is correct.</p>]]></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is partially correct.</p>]]></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is incorrect.</p>]]></text>
+    </incorrectfeedback>
+    <shownumcorrect/>
+    <answer fraction="100" format="html">
+      <text><![CDATA[<p>La GUI gestiona widgets y delega la lógica de cuentas a una capa de servicio (manager) o a métodos del dominio.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Correcto: UI cambia por motivos de UX; la lógica por reglas de negocio.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Una única clase que valida DNI/IBAN, aplica reglas de negocio y además dibuja la interfaz.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Combina múltiples motivos de cambio: validación, negocio y presentación.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Duplicar la validación en cada archivo para evitar imports.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Eso aumenta mantenimiento (viola DRY) y no aporta SRP.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Modificar atributos privados del dominio desde la GUI para evitar escribir métodos.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Aumenta acoplamiento y rompe encapsulación.</p>]]></text>
+      </feedback>
+    </answer>
+  </question>
+<question type="multichoice">
+    <name>
+      <text>Acoplamiento: evitar tocar internals</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<p>Quieres reducir acoplamiento entre la GUI y el dominio. ¿Qué interacción es la más adecuada?</p>]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text><![CDATA[<p>Acoplamiento bajo: la GUI usa interfaces públicas (métodos/propiedades) y maneja errores mediante excepciones, sin depender de atributos internos.</p>]]></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.0000000</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <correctfeedback format="html">
+      <text><![CDATA[<p>Your answer is correct.</p>]]></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is partially correct.</p>]]></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is incorrect.</p>]]></text>
+    </incorrectfeedback>
+    <shownumcorrect/>
+    <answer fraction="100" format="html">
+      <text><![CDATA[<p>La GUI llama a <code>deposit</code>/<code>withdraw</code> y captura <code>InsufficientFundsError</code> cuando procede.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Correcto: se apoya en la API pública y errores tipados.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>La GUI modifica directamente <code>_balance</code> para “optimizar”.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Eso acopla a detalles internos y rompe encapsulación.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>La GUI copia el código de validación de IBAN para no importar el dominio.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Duplicación y riesgo de divergencia.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>El dominio usa <code>messagebox</code> para dialogar con el usuario.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>El dominio no debe conocer la UI.</p>]]></text>
+      </feedback>
+    </answer>
+  </question>
+<question type="multichoice">
+    <name>
+      <text>Excepciones de dominio: ventaja práctica</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<p>En el dominio Bank existe <code>InsufficientFundsError</code>. ¿Qué ventaja aporta frente a lanzar siempre <code>ValueError</code> genérico?</p>]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text><![CDATA[<p>Una excepción específica permite a capas superiores distinguir casos de negocio y reaccionar de manera precisa.</p>]]></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.0000000</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <correctfeedback format="html">
+      <text><![CDATA[<p>Your answer is correct.</p>]]></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is partially correct.</p>]]></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is incorrect.</p>]]></text>
+    </incorrectfeedback>
+    <shownumcorrect/>
+    <answer fraction="100" format="html">
+      <text><![CDATA[<p>Permite que la GUI trate “fondos insuficientes” como caso distinto de “entrada inválida”.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Correcto: separa categorías de error y mejora UX/mantenibilidad.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Evita que existan errores lógicos.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Ayuda a señalizar fallos, pero no elimina errores lógicos por sí sola.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Hace que el programa se ejecute más rápido siempre.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Las excepciones son sobre control de flujo de errores, no rendimiento.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Impide que se pueda importar el módulo desde otros archivos.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>No afecta a la importación.</p>]]></text>
+      </feedback>
+    </answer>
+  </question>
+<question type="multichoice">
+    <name>
+      <text>Bank: manejo de errores en UI</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<p>La GUI llama a una operación del dominio que puede fallar por reglas de negocio (p. ej. fondos insuficientes). ¿Dónde debería transformarse eso en un mensaje al usuario?</p>]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text><![CDATA[<p>La UI es responsable de presentar mensajes; el dominio debe expresar fallos mediante excepciones o valores de error.</p>]]></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.0000000</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <correctfeedback format="html">
+      <text><![CDATA[<p>Your answer is correct.</p>]]></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is partially correct.</p>]]></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is incorrect.</p>]]></text>
+    </incorrectfeedback>
+    <shownumcorrect/>
+    <answer fraction="100" format="html">
+      <text><![CDATA[<p>En la GUI (capa de presentación), capturando la excepción del dominio.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Correcto: el dominio no se acopla a la UI.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>En el dominio, llamando directamente a <code>messagebox</code>.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Acopla dominio con UI.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>En Git, mediante un hook de post-commit.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>No es parte del flujo de ejecución del programa.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>En <code>__pycache__</code>, escribiendo un log.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>No tiene relación.</p>]]></text>
+      </feedback>
+    </answer>
+  </question>
+
+  <question type="multichoice">
+    <name>
+      <text>BankManager: invariante de unicidad por DNI</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<p>¿Qué invariante mantiene <code>BankManager</code> usando <code>dni</code> como clave en <code>self._accounts</code>?</p>]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text><![CDATA[<p>Si el diccionario usa DNI como clave y se comprueba existencia al crear, se fuerza unicidad por DNI.</p>]]></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.0000000</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <correctfeedback format="html">
+      <text><![CDATA[<p>Your answer is correct.</p>]]></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is partially correct.</p>]]></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is incorrect.</p>]]></text>
+    </incorrectfeedback>
+    <shownumcorrect/>
+    <answer fraction="100" format="html">
+      <text><![CDATA[<p>No puede haber dos cuentas registradas con el mismo DNI.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Correcto: la clave del dict impone unicidad.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>No puede haber dos cuentas con el mismo IBAN, aunque DNI sea distinto.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Eso no se comprueba en <code>BankManager</code>.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>La GUI nunca necesitará manejar excepciones.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>La GUI aún debe manejar errores.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>El dominio puede depender de tkinter sin problemas.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Mezcla capas.</p>]]></text>
+      </feedback>
+    </answer>
+  </question>
+
+  <question type="multichoice">
+    <name>
+      <text>BankAccount: validación antes de asignar estado</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<p>En <code>BankAccount.__init__</code> se valida DNI e IBAN antes de asignar atributos. ¿Qué propiedad de diseño refuerza?</p>]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text><![CDATA[<p>Evita objetos “medio construidos” y asegura invariantes del dominio desde la creación.</p>]]></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.0000000</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <correctfeedback format="html">
+      <text><![CDATA[<p>Your answer is correct.</p>]]></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is partially correct.</p>]]></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is incorrect.</p>]]></text>
+    </incorrectfeedback>
+    <shownumcorrect/>
+    <answer fraction="100" format="html">
+      <text><![CDATA[<p>Garantizar invariantes del objeto desde su creación (estado válido).</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Correcto: el objeto nace válido o no nace.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Hacer que el tipo sea estático en runtime.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>No tiene relación.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Evitar que existan excepciones.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>De hecho, lanza excepciones en caso inválido.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Hacer que Git detecte cambios en el dominio.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>No tiene relación.</p>]]></text>
+      </feedback>
+    </answer>
+  </question>
+
+  <question type="multichoice">
+    <name>
+      <text>Bank: excepción de dominio vs ValueError</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<p>En el ejemplo del banco, ¿por qué tiene sentido usar una excepción específica como <code>InsufficientFundsError</code>?</p>]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text><![CDATA[<p>Una excepción de dominio expresa un caso de negocio concreto y permite manejarlo de forma diferenciada.</p>]]></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.0000000</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <correctfeedback format="html">
+      <text><![CDATA[<p>Your answer is correct.</p>]]></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is partially correct.</p>]]></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is incorrect.</p>]]></text>
+    </incorrectfeedback>
+    <shownumcorrect/>
+    <answer fraction="100" format="html">
+      <text><![CDATA[<p>Porque representa una regla de negocio y permite manejo específico.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Correcto.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Porque elimina la necesidad de validar cantidades.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Aún se validan cantidades.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Porque hace el código más rápido que usar <code>ValueError</code>.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>La motivación no es rendimiento.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Porque obliga a Python a ser fuertemente tipado.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>No tiene relación.</p>]]></text>
+      </feedback>
+    </answer>
+  </question>
+  <question type="category">
+    <category>
+      <text>$course$/top/CSPy/Examen CSPy/Git</text>
+    </category>
+    <info format="html">
+      <text></text>
+    </info>
+    <idnumber></idnumber>
+  </question>
+<question type="multichoice">
+    <name>
+      <text>Git: fetch vs pull (control)</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<p>Quieres descargar cambios remotos sin mezclarlos automáticamente en tu rama actual, para inspeccionarlos antes. ¿Qué comando encaja mejor?</p>]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text><![CDATA[<p><code>git fetch</code> descarga y actualiza referencias remotas sin fusionar; <code>git pull</code> suele hacer fetch + merge.</p>]]></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.0000000</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <correctfeedback format="html">
+      <text><![CDATA[<p>Your answer is correct.</p>]]></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is partially correct.</p>]]></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is incorrect.</p>]]></text>
+    </incorrectfeedback>
+    <shownumcorrect/>
+    <answer fraction="100" format="html">
+      <text><![CDATA[<p><code>git fetch</code></p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Correcto: descarga sin integrar automáticamente.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p><code>git pull</code></p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p><code>pull</code> integra cambios (normalmente merge) tras descargar.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p><code>git commit</code></p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Un commit crea un snapshot local; no descarga del remoto.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p><code>git add .</code></p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Stage prepara cambios locales; no interactúa con el remoto.</p>]]></text>
+      </feedback>
+    </answer>
+  </question>
+<question type="multichoice">
+    <name>
+      <text>Git: rutina para minimizar conflictos</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<p>Sigues una disciplina para minimizar conflictos al trabajar en dos ordenadores. ¿Qué secuencia es la más segura?</p>]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text><![CDATA[<p>Primero integra lo remoto (pull/sync), luego trabaja, y al final stage+commit+push.</p>]]></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.0000000</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <correctfeedback format="html">
+      <text><![CDATA[<p>Your answer is correct.</p>]]></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is partially correct.</p>]]></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is incorrect.</p>]]></text>
+    </incorrectfeedback>
+    <shownumcorrect/>
+    <answer fraction="100" format="html">
+      <text><![CDATA[<p>Pull/sync → trabajar → stage → commit → push/sync.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Correcto: integras antes de empezar y subes al terminar.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Trabajar → commit → pull → push.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Integrar después de commit puede crear merges inesperados.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Push → trabajar → pull.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Pullear al final puede generar conflictos cuando ya “cerraste” la sesión.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Stage → push → commit → pull.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>No puedes hacer push sin commits; el orden es incoherente.</p>]]></text>
+      </feedback>
+    </answer>
+  </question>
+<question type="multichoice">
+    <name>
+      <text>Git: staging area (propósito)</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<p>¿Qué describe mejor el propósito del <em>staging area</em> (index) en Git?</p>]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text><![CDATA[<p>Permite seleccionar exactamente qué cambios entran en el próximo commit, aunque tu working tree tenga más modificaciones.</p>]]></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.0000000</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <correctfeedback format="html">
+      <text><![CDATA[<p>Your answer is correct.</p>]]></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is partially correct.</p>]]></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is incorrect.</p>]]></text>
+    </incorrectfeedback>
+    <shownumcorrect/>
+    <answer fraction="100" format="html">
+      <text><![CDATA[<p>Seleccionar un subconjunto de cambios para el próximo commit.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Correcto: puedes “partir” cambios en commits coherentes.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Es una copia remota del repositorio en GitHub.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Eso es el remoto, no el index.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Es el lugar donde Python guarda <code>.pyc</code>.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>No tiene relación.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Es una función del kernel de Jupyter.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>No tiene relación.</p>]]></text>
+      </feedback>
+    </answer>
+  </question>
+<question type="multichoice">
+    <name>
+      <text>Git: working tree vs stage</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<p>Editas un archivo y ejecutas <code>git add</code>. Luego sigues editándolo sin volver a hacer add. ¿Qué pasa al hacer commit?</p>]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text><![CDATA[<p>El commit incluye lo que estaba staged (snapshot al momento de add), no necesariamente los cambios posteriores.</p>]]></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.0000000</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <correctfeedback format="html">
+      <text><![CDATA[<p>Your answer is correct.</p>]]></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is partially correct.</p>]]></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is incorrect.</p>]]></text>
+    </incorrectfeedback>
+    <shownumcorrect/>
+    <answer fraction="100" format="html">
+      <text><![CDATA[<p>Se commitea el contenido staged, que puede quedar “atrasado” respecto al archivo actual.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Correcto: Git commitea el index, no el working tree directamente.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Se commitea siempre el último contenido del archivo.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Solo si vuelves a <code>add</code> o haces <code>git commit -a</code> (con matices).</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>No se puede commitear si el archivo cambió tras add.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Sí se puede; simplemente se commitea la versión staged.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Git mezcla automáticamente ambas versiones en un solo commit.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>No hace merge interno del index con working tree.</p>]]></text>
+      </feedback>
+    </answer>
+  </question>
+<question type="multichoice">
+    <name>
+      <text>Notebooks y Git: por qué hay diffs grandes</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<p>Un notebook (<code>.ipynb</code>) cambia mucho en Git aunque el código apenas cambie. ¿Cuál es la causa más directa?</p>]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text><![CDATA[<p>Un <code>.ipynb</code> es JSON y suele incluir outputs, execution counts y metadatos además del código.</p>]]></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.0000000</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <correctfeedback format="html">
+      <text><![CDATA[<p>Your answer is correct.</p>]]></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is partially correct.</p>]]></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is incorrect.</p>]]></text>
+    </incorrectfeedback>
+    <shownumcorrect/>
+    <answer fraction="100" format="html">
+      <text><![CDATA[<p>El archivo incluye outputs y contadores de ejecución que cambian al re-ejecutar celdas.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Correcto: esos campos cambian aunque el código sea igual.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Git no puede versionar JSON.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Git versiona texto; el problema es que el JSON contiene muchos campos variables.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>El notebook se “recompila” a binario en cada commit.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Git no recompila archivos al commitear.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>La extensión cambia automáticamente a <code>.py</code> tras ejecutar.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>La extensión sigue siendo <code>.ipynb</code>; lo que cambia es el contenido JSON.</p>]]></text>
+      </feedback>
+    </answer>
+  </question>
+<question type="multichoice">
+    <name>
+      <text>Notebooks: práctica para reducir ruido en Git</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<p>Quieres que los diffs de notebooks sean más limpios cuando colaboras. ¿Qué acción ayuda más (si el output no es esencial)?</p>]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text><![CDATA[<p>Eliminar outputs antes de commitear reduce cambios enormes en JSON y conflictos de merge.</p>]]></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.0000000</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <correctfeedback format="html">
+      <text><![CDATA[<p>Your answer is correct.</p>]]></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is partially correct.</p>]]></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is incorrect.</p>]]></text>
+    </incorrectfeedback>
+    <shownumcorrect/>
+    <answer fraction="100" format="html">
+      <text><![CDATA[<p>Limpiar/clear outputs antes de commitear.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Correcto: reduce “ruido” en diffs.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Renombrar el notebook a <code>.txt</code>.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Perderías ejecutabilidad y estructura del notebook.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Eliminar la clave <code>cells</code> del JSON.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Eso rompe el formato del notebook.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Subir el notebook como imagen para que Git no lo compare.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Eso elimina el código ejecutable y empeora colaboración.</p>]]></text>
+      </feedback>
+    </answer>
+  </question>
+<question type="multichoice">
+    <name>
+      <text>Gitignore: propósito</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<p>¿Para qué sirve un archivo <code>.gitignore</code>?</p>]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text><![CDATA[<p>Permite excluir artefactos generados, secretos y archivos locales del control de versiones.</p>]]></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.0000000</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <correctfeedback format="html">
+      <text><![CDATA[<p>Your answer is correct.</p>]]></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is partially correct.</p>]]></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is incorrect.</p>]]></text>
+    </incorrectfeedback>
+    <shownumcorrect/>
+    <answer fraction="100" format="html">
+      <text><![CDATA[<p>Para indicar a Git qué archivos no debe trackear (p. ej., <code>__pycache__/</code>, <code>.venv/</code>).</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Correcto: evita commitear archivos generados o sensibles.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Para ejecutar tests automáticamente en cada commit.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Eso lo haría CI o hooks; <code>.gitignore</code> no ejecuta nada.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Para almacenar el historial de commits.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>El historial está en <code>.git/</code>.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Para sincronizar automáticamente con GitHub sin push.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>La sincronización requiere push/pull.</p>]]></text>
+      </feedback>
+    </answer>
+  </question>
+<question type="multichoice">
+    <name>
+      <text>Git y __pycache__: decisión correcta</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<p>Después de ejecutar código Python, <code>__pycache__/</code> aparece como cambio sin trackear. ¿Qué acción es la más razonable?</p>]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text><![CDATA[<p>Son artefactos generados; lo habitual es ignorarlos en Git.</p>]]></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.0000000</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <correctfeedback format="html">
+      <text><![CDATA[<p>Your answer is correct.</p>]]></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is partially correct.</p>]]></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is incorrect.</p>]]></text>
+    </incorrectfeedback>
+    <shownumcorrect/>
+    <answer fraction="100" format="html">
+      <text><![CDATA[<p>Añadir <code>__pycache__/</code> a <code>.gitignore</code>.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Correcto: evita versionar artefactos generados.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Comitear <code>__pycache__/</code> para acelerar a otros.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Es dependiente de versión y se regenera; añade ruido.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Renombrarlo para que Git lo acepte.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Git lo acepta; el punto es no versionarlo.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Borrarlo antes de cada ejecución porque si existe Python falla.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Python no falla; lo usa como cache.</p>]]></text>
+      </feedback>
+    </answer>
+  </question>
+
+  <question type="multichoice">
+    <name>
+      <text>Git: commit message (propósito)</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<p>¿Cuál es el objetivo principal de un buen <em>commit message</em>?</p>]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text><![CDATA[<p>Un mensaje de commit facilita revisar, depurar y entender la intención del cambio en el historial.</p>]]></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.0000000</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <correctfeedback format="html">
+      <text><![CDATA[<p>Your answer is correct.</p>]]></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is partially correct.</p>]]></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is incorrect.</p>]]></text>
+    </incorrectfeedback>
+    <shownumcorrect/>
+    <answer fraction="100" format="html">
+      <text><![CDATA[<p>Documentar la intención y el contexto del cambio para el futuro.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Correcto: es trazabilidad y comunicación.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Guardar el contenido de los archivos (eso lo hace el mensaje).</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>El snapshot lo guarda Git; el mensaje es metadato.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Evitar conflictos de merge automáticamente.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>No evita conflictos; ayuda a entender cambios.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Forzar que el código pase tests.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Los tests los ejecuta CI/herramientas, no el mensaje.</p>]]></text>
+      </feedback>
+    </answer>
+  </question>
+
+  <question type="multichoice">
+    <name>
+      <text>Git: conflicto típico en notebooks</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<p>Dos personas editan el mismo <code>.ipynb</code> y al hacer merge aparece conflicto. ¿Qué parte del archivo suele ser causa común (además del código)?</p>]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text><![CDATA[<p>Los notebooks guardan outputs y contadores/metadata; eso cambia con facilidad y genera conflictos.</p>]]></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.0000000</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <correctfeedback format="html">
+      <text><![CDATA[<p>Your answer is correct.</p>]]></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is partially correct.</p>]]></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is incorrect.</p>]]></text>
+    </incorrectfeedback>
+    <shownumcorrect/>
+    <answer fraction="100" format="html">
+      <text><![CDATA[<p>Outputs y <em>execution counts</em> dentro del JSON.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Correcto: es una fuente frecuente de conflicto.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>La extensión del archivo cambia sola.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>No cambia automáticamente.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Git no soporta merges en JSON.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Git puede hacer merge de texto; el problema es la naturaleza ruidosa del contenido.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>El kernel de Jupyter “bloquea” Git.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>No existe ese bloqueo.</p>]]></text>
+      </feedback>
+    </answer>
+  </question>
+
+  <question type="multichoice">
+    <name>
+      <text>Git: qué significa “staged” (idea)</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<p>En Git, ¿qué describe mejor el estado <em>staged</em>?</p>]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text><![CDATA[<p>Staged significa que el contenido está en el index (área de preparación) y será incluido en el próximo commit.</p>]]></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.0000000</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <correctfeedback format="html">
+      <text><![CDATA[<p>Your answer is correct.</p>]]></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is partially correct.</p>]]></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is incorrect.</p>]]></text>
+    </incorrectfeedback>
+    <shownumcorrect/>
+    <answer fraction="100" format="html">
+      <text><![CDATA[<p>Que el cambio está en el index y se incluirá en el próximo commit.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Correcto.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Que el cambio ya está en el repositorio remoto.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Eso sería push al remoto.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Que el cambio ya no existe en el working tree.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>No implica borrado.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Que el cambio no puede deshacerse.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Git permite revert/reset dependiendo del caso.</p>]]></text>
+      </feedback>
+    </answer>
+  </question>
+  <question type="category">
+    <category>
+      <text>$course$/top/CSPy/Examen CSPy/Jupyter</text>
+    </category>
+    <info format="html">
+      <text></text>
+    </info>
+    <idnumber></idnumber>
+  </question>
+<question type="multichoice">
+    <name>
+      <text>Jupyter: orden de ejecución vs orden visual</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<p>En un notebook, ejecutas celdas fuera de orden. ¿Qué señal puede delatar que el estado del kernel no coincide con el orden visual de las celdas?</p>]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text><![CDATA[<p>Los execution counts (p. ej., <code>In [7]</code>) pueden estar desordenados respecto a la posición de las celdas.</p>]]></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.0000000</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <correctfeedback format="html">
+      <text><![CDATA[<p>Your answer is correct.</p>]]></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is partially correct.</p>]]></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is incorrect.</p>]]></text>
+    </incorrectfeedback>
+    <shownumcorrect/>
+    <answer fraction="100" format="html">
+      <text><![CDATA[<p>Los números de ejecución (<code>In [n]</code>) no siguen el orden de arriba a abajo.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Correcto: indica ejecución fuera de orden.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>El archivo cambia su extensión de <code>.ipynb</code> a <code>.py</code>.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>No ocurre automáticamente.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Git borra automáticamente los outputs.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Git no modifica archivos.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>VS Code deja de abrir el notebook.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>No es una señal típica.</p>]]></text>
+      </feedback>
+    </answer>
+  </question>
+<question type="multichoice">
+    <name>
+      <text>Jupyter: tipos de celdas</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<p>En un notebook, ¿qué diferencia esencial hay entre una celda <strong>Code</strong> y una celda <strong>Markdown</strong>?</p>]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text><![CDATA[<p>Code ejecuta Python en el kernel; Markdown se renderiza como texto formateado y no ejecuta código.</p>]]></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.0000000</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <correctfeedback format="html">
+      <text><![CDATA[<p>Your answer is correct.</p>]]></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is partially correct.</p>]]></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is incorrect.</p>]]></text>
+    </incorrectfeedback>
+    <shownumcorrect/>
+    <answer fraction="100" format="html">
+      <text><![CDATA[<p>Code ejecuta en el kernel y produce outputs; Markdown es narración formateada.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Correcto: son los dos tipos principales descritos.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Markdown se compila a bytecode; Code no.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>El notebook es JSON; no se describe así.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Markdown solo sirve para gráficos; Code solo para texto.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Es al revés: gráficos suelen venir de Code; Markdown es texto.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>No hay diferencia; ambos se ejecutan igual.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Markdown no se ejecuta como Python.</p>]]></text>
+      </feedback>
+    </answer>
+  </question>
+<question type="multichoice">
+    <name>
+      <text>Kernel: estado entre celdas</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<p>Ejecutas una celda que define una variable y luego otra celda la utiliza. ¿Qué componente conserva ese estado?</p>]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text><![CDATA[<p>El kernel mantiene el estado (memoria) de la sesión de ejecución del notebook.</p>]]></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.0000000</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <correctfeedback format="html">
+      <text><![CDATA[<p>Your answer is correct.</p>]]></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is partially correct.</p>]]></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is incorrect.</p>]]></text>
+    </incorrectfeedback>
+    <shownumcorrect/>
+    <answer fraction="100" format="html">
+      <text><![CDATA[<p>El kernel.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Correcto: el kernel conserva variables/estado entre celdas.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>El archivo <code>.ipynb</code>.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>El archivo guarda el source y outputs, pero el estado vivo está en el kernel.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Git.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Git es control de versiones, no ejecución.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>La PVM guarda variables aunque cierres el notebook.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Al cerrar/rehacer kernel, el estado se pierde.</p>]]></text>
+      </feedback>
+    </answer>
+  </question>
+<question type="multichoice">
+    <name>
+      <text>Restart kernel: consecuencia</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<p>Reinicias el kernel de un notebook y luego ejecutas una celda que usa una variable definida antes. ¿Qué esperas que ocurra?</p>]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text><![CDATA[<p>Reiniciar kernel borra el estado: hay que re-ejecutar las celdas que definen variables/funciones.</p>]]></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.0000000</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <correctfeedback format="html">
+      <text><![CDATA[<p>Your answer is correct.</p>]]></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is partially correct.</p>]]></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is incorrect.</p>]]></text>
+    </incorrectfeedback>
+    <shownumcorrect/>
+    <answer fraction="100" format="html">
+      <text><![CDATA[<p>Falla con un error (por ejemplo <code>NameError</code>) si no re-ejecutaste la celda que define la variable.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Correcto: el estado anterior ya no existe.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Funciona porque las variables se guardan en el <code>.ipynb</code>.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>El archivo no conserva el estado en memoria.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Git restaura automáticamente las variables.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>No tiene relación.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Solo falla si hay outputs grandes.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>El problema es el estado, no el tamaño del output.</p>]]></text>
+      </feedback>
+    </answer>
+  </question>
+<question type="multichoice">
+    <name>
+      <text>Jupyter: limpiar output vs reiniciar kernel</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<p>¿Cuál diferencia es correcta entre “Clear outputs” y “Restart kernel” en un notebook?</p>]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text><![CDATA[<p>Limpiar outputs afecta a lo visible en el documento; reiniciar kernel afecta al estado de ejecución (memoria).</p>]]></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.0000000</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <correctfeedback format="html">
+      <text><![CDATA[<p>Your answer is correct.</p>]]></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is partially correct.</p>]]></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is incorrect.</p>]]></text>
+    </incorrectfeedback>
+    <shownumcorrect/>
+    <answer fraction="100" format="html">
+      <text><![CDATA[<p>Clear outputs elimina resultados mostrados; Restart kernel borra el estado y reinicia la sesión.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Correcto: son acciones distintas (documento vs estado).</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Clear outputs borra variables; Restart kernel solo borra outputs.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Está invertido.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Ambas acciones son equivalentes.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>No lo son: afectan a cosas distintas.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Ambas son operaciones de Git.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>No tienen relación con Git.</p>]]></text>
+      </feedback>
+    </answer>
+  </question>
+
+  <question type="multichoice">
+    <name>
+      <text>Jupyter: estado oculto y reproducibilidad</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<p>Un notebook “funciona” en tu sesión, pero al reiniciar el kernel falla. ¿Qué causa lo explica mejor?</p>]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text><![CDATA[<p>Si se ejecutaron celdas fuera de orden o faltan dependencias, el notebook puede depender de estado no visible en el orden del documento.</p>]]></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.0000000</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <correctfeedback format="html">
+      <text><![CDATA[<p>Your answer is correct.</p>]]></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is partially correct.</p>]]></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is incorrect.</p>]]></text>
+    </incorrectfeedback>
+    <shownumcorrect/>
+    <answer fraction="100" format="html">
+      <text><![CDATA[<p>Dependía de variables/funciones definidas en celdas no re-ejecutadas tras reiniciar.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Correcto: reiniciar borra el estado.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Git eliminó variables del kernel.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Git no interactúa con el kernel.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>El formato <code>.ipynb</code> no permite definir variables.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Sí permite; la ejecución ocurre en el kernel.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>VS Code impide que el notebook se ejecute si hay Markdown.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>No es cierto.</p>]]></text>
+      </feedback>
+    </answer>
+  </question>
+
+  <question type="multichoice">
+    <name>
+      <text>Jupyter: checkpoint mental de dependencias</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<p>Para que un notebook sea más reproducible, ¿qué práctica ayuda más?</p>]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text><![CDATA[<p>Ordenar la ejecución lógica y evitar dependencias ocultas hace que reiniciar y ejecutar de arriba a abajo funcione.</p>]]></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.0000000</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <correctfeedback format="html">
+      <text><![CDATA[<p>Your answer is correct.</p>]]></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is partially correct.</p>]]></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is incorrect.</p>]]></text>
+    </incorrectfeedback>
+    <shownumcorrect/>
+    <answer fraction="100" format="html">
+      <text><![CDATA[<p>Hacer que el notebook pueda ejecutarse “de arriba a abajo” tras reiniciar kernel.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Correcto: reduce estado oculto.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Ejecutar siempre celdas aleatoriamente para detectar bugs.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Puede revelar problemas, pero no es una práctica base de reproducibilidad.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Convertir todo a una única celda gigante.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Empeora legibilidad y depuración.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Guardar outputs enormes en Git para “demostrar” resultados.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Suele añadir ruido y conflictos.</p>]]></text>
+      </feedback>
+    </answer>
+  </question>
+  <question type="category">
+    <category>
+      <text>$course$/top/CSPy/Examen CSPy/VS Code &amp; IDEs</text>
+    </category>
+    <info format="html">
+      <text></text>
+    </info>
+    <idnumber></idnumber>
+  </question>
+<question type="multichoice">
+    <name>
+      <text>Cohesión: identificar un módulo cohesivo</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<p>¿Cuál módulo tiene <strong>mayor cohesión</strong> (elementos estrechamente relacionados) en el ejemplo Bank?</p>]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text><![CDATA[<p>Alta cohesión implica que las funciones/clases del archivo contribuyen al mismo objetivo conceptual.</p>]]></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.0000000</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <correctfeedback format="html">
+      <text><![CDATA[<p>Your answer is correct.</p>]]></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is partially correct.</p>]]></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is incorrect.</p>]]></text>
+    </incorrectfeedback>
+    <shownumcorrect/>
+    <answer fraction="100" format="html">
+      <text><![CDATA[<p><code>bank_domain.py</code> contiene entidades/excepciones del dominio bancario y validaciones relacionadas.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Correcto: está centrado en el dominio.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Un archivo <code>utils.py</code> con funciones matemáticas, helpers UI, acceso a ficheros y parsing de fechas.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Mezcla concerns sin un objetivo claro.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Un archivo que contiene validación de IBAN y también estilos de botones de tkinter.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Validación y estilos UI no pertenecen al mismo concern.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Un archivo que mezcla estadísticas (media/mediana) con lógica de cuentas bancarias.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Son dominios distintos, cohesión baja.</p>]]></text>
+      </feedback>
+    </answer>
+  </question>
+<question type="multichoice">
+    <name>
+      <text>VS Code: User vs Workspace settings</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<p>Quieres compartir la configuración de un proyecto (por ejemplo ocultar <code>__pycache__</code>) con otras personas vía Git. ¿Dónde debe ir?</p>]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text><![CDATA[<p>Las workspace settings viven en <code>.vscode/settings.json</code> dentro del repo y se pueden versionar.</p>]]></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.0000000</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <correctfeedback format="html">
+      <text><![CDATA[<p>Your answer is correct.</p>]]></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is partially correct.</p>]]></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is incorrect.</p>]]></text>
+    </incorrectfeedback>
+    <shownumcorrect/>
+    <answer fraction="100" format="html">
+      <text><![CDATA[<p>En <code>.vscode/settings.json</code> (workspace settings).</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Correcto: se comparte con el repositorio.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>En user settings, porque así “se hereda” al clonar.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>User settings son locales del usuario y no viajan con el repo.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>En <code>__pycache__/</code>.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p><code>__pycache__</code> es bytecode cache, no configuración.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>En el mensaje de commit.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Un commit message no configura el editor.</p>]]></text>
+      </feedback>
+    </answer>
+  </question>
+<question type="multichoice">
+    <name>
+      <text>VS Code: terminal integrado (ventaja)</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<p>¿Qué ventaja aporta el terminal integrado de VS Code en un flujo de trabajo con Git y Python?</p>]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text><![CDATA[<p>Permite ejecutar comandos en el contexto del workspace (rutas, entorno) sin salir del editor, manteniendo feedback rápido.</p>]]></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.0000000</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <correctfeedback format="html">
+      <text><![CDATA[<p>Your answer is correct.</p>]]></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is partially correct.</p>]]></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is incorrect.</p>]]></text>
+    </incorrectfeedback>
+    <shownumcorrect/>
+    <answer fraction="100" format="html">
+      <text><![CDATA[<p>Ejecutar comandos con el contexto del proyecto sin cambiar de herramienta.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Correcto: mejora productividad y reduce cambios de contexto.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Hace que <code>python</code> exista aunque no esté instalado.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>El terminal no instala Python por arte de magia.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Reemplaza a GitHub, por lo que ya no hay remotos.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>El terminal es interfaz; no reemplaza servicios.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Evita que existan conflictos de merge.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Puede ayudar a detectarlos, pero no los elimina.</p>]]></text>
+      </feedback>
+    </answer>
+  </question>
+<question type="multichoice">
+    <name>
+      <text>VS Code: abrir carpeta vs archivo suelto</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<p>En VS Code, ¿por qué es preferible abrir la carpeta del proyecto (Open Folder) en vez de un archivo aislado?</p>]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text><![CDATA[<p>Un workspace permite a VS Code detectar Git, indexar búsqueda, aplicar settings del proyecto y dar contexto a herramientas.</p>]]></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.0000000</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <correctfeedback format="html">
+      <text><![CDATA[<p>Your answer is correct.</p>]]></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is partially correct.</p>]]></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is incorrect.</p>]]></text>
+    </incorrectfeedback>
+    <shownumcorrect/>
+    <answer fraction="100" format="html">
+      <text><![CDATA[<p>Porque así Git, búsqueda y tooling tienen contexto del proyecto.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Correcto: muchas features dependen del workspace.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Porque VS Code no ejecuta archivos si no abres carpeta.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Puede ejecutar archivos; el problema es el contexto de proyecto.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Porque abrir carpeta es obligatorio para escribir Python.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>No es obligatorio; es una práctica recomendada.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Porque solo así funciona Markdown.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>No está relacionado con Markdown.</p>]]></text>
+      </feedback>
+    </answer>
+  </question>
+<question type="multichoice">
+    <name>
+      <text>Workspace trust: criterio prudente</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<p>VS Code muestra un aviso de “Workspace Trust”. ¿Qué decisión es más prudente con carpetas descargadas de origen desconocido?</p>]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text><![CDATA[<p>La confianza habilita funcionalidades que pueden ejecutar o activar tareas automáticamente; conviene confiar solo en repos que controlas.</p>]]></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.0000000</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <correctfeedback format="html">
+      <text><![CDATA[<p>Your answer is correct.</p>]]></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is partially correct.</p>]]></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is incorrect.</p>]]></text>
+    </incorrectfeedback>
+    <shownumcorrect/>
+    <answer fraction="100" format="html">
+      <text><![CDATA[<p>Confiar solo si controlas el origen y confías en el contenido.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Correcto: reduce riesgo de ejecutar acciones no deseadas.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Confiar siempre: solo cambia la apariencia.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>No es solo apariencia; afecta a la ejecución de features.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>No confiar nunca: impide usar Git.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Git puede seguir funcionando; lo afectado son ciertas capacidades.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Confiar solo si hay notebooks.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>No es un criterio técnico válido.</p>]]></text>
+      </feedback>
+    </answer>
+  </question>
+<question type="multichoice">
+    <name>
+      <text>IDE: rasgo definitorio</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<p>¿Qué rasgo distingue mejor un IDE de un editor ligero?</p>]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text><![CDATA[<p>Un IDE integra herramientas de desarrollo (debugger, VCS, tests, gestión de proyecto) en una interfaz coherente.</p>]]></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.0000000</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <correctfeedback format="html">
+      <text><![CDATA[<p>Your answer is correct.</p>]]></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is partially correct.</p>]]></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is incorrect.</p>]]></text>
+    </incorrectfeedback>
+    <shownumcorrect/>
+    <answer fraction="100" format="html">
+      <text><![CDATA[<p>Integración de depuración, VCS, tests y navegación/refactor en el mismo entorno.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Correcto: es la diferencia funcional clave.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Resaltado de sintaxis.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Eso lo tienen también editores ligeros.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Estar escrito en un lenguaje concreto.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>No es un criterio funcional.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Solo soportar un lenguaje.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Muchos IDEs son multi-lenguaje.</p>]]></text>
+      </feedback>
+    </answer>
+  </question>
+<question type="multichoice">
+    <name>
+      <text>Gradual typing: idea</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<p>Python suele describirse como un lenguaje de <em>gradual typing</em>. ¿Qué significa esto en la práctica?</p>]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text><![CDATA[<p>Se pueden introducir type hints progresivamente: partes del programa pueden estar anotadas y otras no, y las herramientas ayudan sin que sea todo-or-nothing.</p>]]></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.0000000</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <correctfeedback format="html">
+      <text><![CDATA[<p>Your answer is correct.</p>]]></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is partially correct.</p>]]></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is incorrect.</p>]]></text>
+    </incorrectfeedback>
+    <shownumcorrect/>
+    <answer fraction="100" format="html">
+      <text><![CDATA[<p>Puedes anotar tipos de forma incremental; el análisis estático convive con código sin anotar.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Correcto: la adopción puede ser gradual.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>El runtime obliga a anotar todos los tipos antes de ejecutar.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>No es obligatorio por defecto.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Python decide el tipo de variables solo en compile time.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Python es dinámico en runtime.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Gradual typing significa que el lenguaje es “weak” por definición.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Son conceptos distintos.</p>]]></text>
+      </feedback>
+    </answer>
+  </question>
+<question type="multichoice">
+    <name>
+      <text>Herramientas de typing en VS Code (Pyright/Pylance)</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<p>En el flujo típico de VS Code, ¿qué aportan herramientas como Pyright/Pylance?</p>]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text><![CDATA[<p>Aportan análisis de tipos e IntelliSense: diagnósticos, inferencia y autocompletado sin ejecutar el programa.</p>]]></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.0000000</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <correctfeedback format="html">
+      <text><![CDATA[<p>Your answer is correct.</p>]]></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is partially correct.</p>]]></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is incorrect.</p>]]></text>
+    </incorrectfeedback>
+    <shownumcorrect/>
+    <answer fraction="100" format="html">
+      <text><![CDATA[<p>Análisis de tipos e IntelliSense (errores potenciales, inferencia, autocompletado).</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Correcto: es soporte IDE/análisis estático.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Un runtime alternativo para ejecutar Python más rápido.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>No son runtimes.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Un sistema de control de versiones.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>No tiene relación con Git.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Un conversor automático de notebooks a paquetes.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>No es su función principal.</p>]]></text>
+      </feedback>
+    </answer>
+  </question>
+<question type="multichoice">
+    <name>
+      <text>Errores: identificar un error lógico</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<p>¿Cuál escenario describe mejor un <strong>error lógico</strong> (logical error)?</p>]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text><![CDATA[<p>Un error lógico produce resultados incorrectos sin necesariamente lanzar excepciones.</p>]]></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.0000000</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <correctfeedback format="html">
+      <text><![CDATA[<p>Your answer is correct.</p>]]></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is partially correct.</p>]]></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is incorrect.</p>]]></text>
+    </incorrectfeedback>
+    <shownumcorrect/>
+    <answer fraction="100" format="html">
+      <text><![CDATA[<p>El programa calcula el área con una fórmula incorrecta, pero imprime un número sin fallar.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Correcto: funciona “técnicamente” pero la salida es incorrecta.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Falta un <code>:</code> al final de un <code>if</code> y el programa no arranca.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Eso es error de sintaxis.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Se divide entre cero y aparece una excepción.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Eso es un error de runtime.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Se importa un módulo inexistente y falla al ejecutar.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Eso es runtime (ImportError), no un error lógico.</p>]]></text>
+      </feedback>
+    </answer>
+  </question>
+<question type="multichoice">
+    <name>
+      <text>check_duplicates: idea con set</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<p>¿Por qué <code>len(set(data))</code> ayuda a estimar duplicados?</p>]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text><![CDATA[<p>Un set solo mantiene valores únicos; comparando con el total puedes inferir cuántos se repiten.</p>]]></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.0000000</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <correctfeedback format="html">
+      <text><![CDATA[<p>Your answer is correct.</p>]]></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is partially correct.</p>]]></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is incorrect.</p>]]></text>
+    </incorrectfeedback>
+    <shownumcorrect/>
+    <answer fraction="100" format="html">
+      <text><![CDATA[<p>Porque un set elimina duplicados y su tamaño indica cuántos valores únicos hay.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Correcto: esa es la propiedad clave del set.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Porque un set mantiene el orden y por eso detecta duplicados.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>La detección aquí es por unicidad, no por orden.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Porque un set permite elementos repetidos y los marca.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Los repetidos no se almacenan.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Porque un set fuerza type hints en runtime.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>No hay relación.</p>]]></text>
+      </feedback>
+    </answer>
+  </question>
+
+  <question type="multichoice">
+    <name>
+      <text>VS Code: settings precedence (idea)</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<p>Tienes un comportamiento distinto en VS Code entre proyectos. ¿Qué explicación encaja mejor con la distinción user vs workspace settings?</p>]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text><![CDATA[<p>Las settings del workspace pueden sobreescribir preferencias del usuario para ese proyecto concreto.</p>]]></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.0000000</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <correctfeedback format="html">
+      <text><![CDATA[<p>Your answer is correct.</p>]]></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is partially correct.</p>]]></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is incorrect.</p>]]></text>
+    </incorrectfeedback>
+    <shownumcorrect/>
+    <answer fraction="100" format="html">
+      <text><![CDATA[<p>El proyecto puede tener <code>.vscode/settings.json</code> que aplica solo a ese workspace.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Correcto: las settings pueden variar por repo.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>VS Code recompila Python distinto por carpeta.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>No tiene relación.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Git cambia automáticamente tu configuración personal.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Git no cambia settings del editor.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>La UI de VS Code ignora settings en Linux.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>No es cierto.</p>]]></text>
+      </feedback>
+    </answer>
+  </question>
+
+  <question type="multichoice">
+    <name>
+      <text>VS Code: por qué usar Git UI o terminal</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<p>En VS Code puedes usar la UI de Git o el terminal. ¿Qué ventaja clara aporta conocer ambos enfoques?</p>]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text><![CDATA[<p>La UI acelera tareas comunes; el terminal da acceso completo a comandos y opciones avanzadas.</p>]]></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.0000000</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <correctfeedback format="html">
+      <text><![CDATA[<p>Your answer is correct.</p>]]></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is partially correct.</p>]]></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is incorrect.</p>]]></text>
+    </incorrectfeedback>
+    <shownumcorrect/>
+    <answer fraction="100" format="html">
+      <text><![CDATA[<p>La UI simplifica tareas frecuentes y el terminal cubre casos avanzados/detalle fino.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Correcto: son complementarios.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>La UI reemplaza Git, por lo que ya no existen ramas.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Las ramas siguen existiendo; cambia la interfaz.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>El terminal evita cualquier error humano.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>También puede cometerse errores en terminal.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Usar ambos hace que los merges sean automáticos y perfectos.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>No existe esa garantía.</p>]]></text>
+      </feedback>
+    </answer>
+  </question>
+  <question type="category">
+    <category>
+      <text>$course$/top/CSPy/Examen CSPy/Python (Ejecución)</text>
+    </category>
+    <info format="html">
+      <text></text>
+    </info>
+    <idnumber></idnumber>
+  </question>
+<question type="multichoice">
+    <name>
+      <text>Compilador vs intérprete: diferencia</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<p>¿Cuál diferencia captura mejor la idea general “compilador” vs “intérprete”?</p>]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text><![CDATA[<p>Un compilador traduce a una representación ejecutable (por ejemplo bytecode o binario) antes de ejecutar; un intérprete ejecuta directamente una representación a partir del código/bytecode.</p>]]></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.0000000</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <correctfeedback format="html">
+      <text><![CDATA[<p>Your answer is correct.</p>]]></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is partially correct.</p>]]></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is incorrect.</p>]]></text>
+    </incorrectfeedback>
+    <shownumcorrect/>
+    <answer fraction="100" format="html">
+      <text><![CDATA[<p>Compilador: traduce previamente; intérprete: ejecuta (directa o virtualmente) la representación resultante.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Correcto: es la distinción conceptual presentada.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Compilador: solo para C; intérprete: solo para Python.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Ambos conceptos aplican a múltiples lenguajes.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Intérprete: siempre crea un <code>.exe</code> nativo.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Eso sería compilación a binario.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Compilador: necesita Git para funcionar.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>No tiene relación.</p>]]></text>
+      </feedback>
+    </answer>
+  </question>
+<question type="multichoice">
+    <name>
+      <text>Python: flujo bytecode y PVM</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<p>¿Qué flujo describe mejor la ejecución típica de un archivo <code>.py</code>?</p>]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text><![CDATA[<p>Python compila a bytecode (<code>.pyc</code>) y ejecuta ese bytecode en la Python Virtual Machine (PVM).</p>]]></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.0000000</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <correctfeedback format="html">
+      <text><![CDATA[<p>Your answer is correct.</p>]]></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is partially correct.</p>]]></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is incorrect.</p>]]></text>
+    </incorrectfeedback>
+    <shownumcorrect/>
+    <answer fraction="100" format="html">
+      <text><![CDATA[<p><code>.py</code> → bytecode (<code>.pyc</code>) → ejecución en PVM.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Correcto: es el flujo híbrido descrito.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p><code>.py</code> → <code>.exe</code> nativo → CPU.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Eso describe compilación a binario nativo, no el flujo normal de Python.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p><code>.py</code> → ejecución línea a línea sin compilación intermedia.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Hay compilación a bytecode antes de ejecutar.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p><code>.py</code> → Git → ejecución.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Git no ejecuta código.</p>]]></text>
+      </feedback>
+    </answer>
+  </question>
+<question type="multichoice">
+    <name>
+      <text>__pycache__: qué es</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<p>¿Qué representa la carpeta <code>__pycache__/</code> que aparece al ejecutar módulos?</p>]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text><![CDATA[<p>Contiene archivos <code>.pyc</code> (bytecode cache) que aceleran ejecuciones posteriores.</p>]]></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.0000000</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <correctfeedback format="html">
+      <text><![CDATA[<p>Your answer is correct.</p>]]></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is partially correct.</p>]]></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is incorrect.</p>]]></text>
+    </incorrectfeedback>
+    <shownumcorrect/>
+    <answer fraction="100" format="html">
+      <text><![CDATA[<p>Un cache de bytecode (<code>.pyc</code>) generado automáticamente por Python.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Correcto: es un artefacto generado, no código fuente.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>La configuración de VS Code para ocultar archivos.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>VS Code puede ocultarlo, pero no es su función.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Un directorio obligatorio que hay que commitear para que el programa funcione.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Se suele ignorar en Git; Python lo regenera.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>La carpeta donde Git guarda el historial.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Git guarda historial en <code>.git/</code>.</p>]]></text>
+      </feedback>
+    </answer>
+  </question>
+
+  <question type="multichoice">
+    <name>
+      <text>__pycache__: por qué no versionarlo</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<p>¿Por qué se recomienda ignorar <code>__pycache__/</code> en Git?</p>]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text><![CDATA[<p>Es un artefacto generado, dependiente de versión/entorno y fácilmente regenerable.</p>]]></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.0000000</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <correctfeedback format="html">
+      <text><![CDATA[<p>Your answer is correct.</p>]]></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is partially correct.</p>]]></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is incorrect.</p>]]></text>
+    </incorrectfeedback>
+    <shownumcorrect/>
+    <answer fraction="100" format="html">
+      <text><![CDATA[<p>Porque es generado automáticamente y se puede regenerar; añadirlo genera ruido.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Correcto.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Porque contiene secretos por defecto.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>No es el caso típico.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Porque Git no permite carpetas con guion bajo.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Git permite cualquier nombre.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Porque evita que Python compile a bytecode.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Ignorarlo en Git no cambia la compilación.</p>]]></text>
+      </feedback>
+    </answer>
+  </question>
+
+  <question type="multichoice">
+    <name>
+      <text>Errores: sintaxis vs runtime</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<p>¿Qué diferencia es correcta entre un <em>syntax error</em> y un <em>runtime error</em> en Python?</p>]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text><![CDATA[<p>El de sintaxis impide arrancar el programa; el de runtime ocurre al ejecutar una ruta concreta.</p>]]></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.0000000</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <correctfeedback format="html">
+      <text><![CDATA[<p>Your answer is correct.</p>]]></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is partially correct.</p>]]></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is incorrect.</p>]]></text>
+    </incorrectfeedback>
+    <shownumcorrect/>
+    <answer fraction="100" format="html">
+      <text><![CDATA[<p>Syntax error: el programa no se ejecuta; runtime error: falla durante la ejecución.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Correcto.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Runtime error: ocurre antes de ejecutar; syntax error: ocurre después.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Está invertido.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Syntax error: solo aparece en notebooks.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Puede aparecer en cualquier ejecución.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>No hay diferencia: ambos son errores lógicos.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Son categorías distintas.</p>]]></text>
+      </feedback>
+    </answer>
+  </question>
+  <question type="category">
+    <category>
+      <text>$course$/top/CSPy/Examen CSPy/Módulos &amp; Paquetes</text>
+    </category>
+    <info format="html">
+      <text></text>
+    </info>
+    <idnumber></idnumber>
+  </question>
+<question type="multichoice">
+    <name>
+      <text>Módulo vs paquete: definición</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<p>¿Cuál es la diferencia correcta entre <strong>módulo</strong> y <strong>paquete</strong> en Python?</p>]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text><![CDATA[<p>Un módulo es un archivo <code>.py</code>; un paquete es un directorio que agrupa módulos y puede contener <code>__init__.py</code>.</p>]]></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.0000000</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <correctfeedback format="html">
+      <text><![CDATA[<p>Your answer is correct.</p>]]></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is partially correct.</p>]]></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is incorrect.</p>]]></text>
+    </incorrectfeedback>
+    <shownumcorrect/>
+    <answer fraction="100" format="html">
+      <text><![CDATA[<p>Módulo: archivo <code>.py</code>. Paquete: directorio con módulos (y típicamente <code>__init__.py</code>).</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Correcto: coincide con la definición estándar.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Módulo: directorio. Paquete: archivo.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Está invertido.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Paquete: cualquier carpeta con README.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Un README no define importabilidad.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Paquete: solo puede contener un módulo.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Puede contener muchos módulos y subpaquetes.</p>]]></text>
+      </feedback>
+    </answer>
+  </question>
+<question type="multichoice">
+    <name>
+      <text>__init__.py: qué puede ocurrir al importar</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<p>Al importar un paquete, ¿qué efecto puede producir un <code>__init__.py</code> que contenga código ejecutable (por ejemplo un <code>print</code>)?</p>]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text><![CDATA[<p>El código en <code>__init__.py</code> se ejecuta cuando se importa el paquete.</p>]]></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.0000000</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <correctfeedback format="html">
+      <text><![CDATA[<p>Your answer is correct.</p>]]></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is partially correct.</p>]]></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is incorrect.</p>]]></text>
+    </incorrectfeedback>
+    <shownumcorrect/>
+    <answer fraction="100" format="html">
+      <text><![CDATA[<p>Ese código se ejecuta en el momento de la importación del paquete.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Correcto: import ejecuta el módulo/paquete.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Ese código solo se ejecuta al hacer <code>git push</code>.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Git no ejecuta Python.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Ese código se ejecuta solo si el paquete se abre en VS Code.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Depende de importar, no del editor.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Ese código nunca se ejecuta; <code>__init__.py</code> es solo metadata.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Puede ser vacío, pero si tiene código, se ejecuta.</p>]]></text>
+      </feedback>
+    </answer>
+  </question>
+<question type="multichoice">
+    <name>
+      <text>Import estándar vs wildcard: claridad</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<p>Quieres minimizar conflictos de nombres y hacer explícito el origen de cada función. ¿Qué estilo es el más adecuado?</p>]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text><![CDATA[<p><code>import module</code> obliga a usar <code>module.symbol</code> y mantiene claro el origen.</p>]]></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.0000000</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <correctfeedback format="html">
+      <text><![CDATA[<p>Your answer is correct.</p>]]></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is partially correct.</p>]]></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is incorrect.</p>]]></text>
+    </incorrectfeedback>
+    <shownumcorrect/>
+    <answer fraction="100" format="html">
+      <text><![CDATA[<p><code>import module_name</code> y usar <code>module_name.symbol</code>.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Correcto: maximiza claridad y reduce colisiones.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p><code>from module_name import *</code></p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Contamina el namespace y reduce trazabilidad del origen.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Copiar el código del módulo en tu script.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Viola DRY y empeora mantenimiento.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Renombrar todos los símbolos importados a nombres genéricos.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Puede ocultar el origen y dificultar lectura.</p>]]></text>
+      </feedback>
+    </answer>
+  </question>
+<question type="multichoice">
+    <name>
+      <text>Import relativo: significado de ..</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<p>En un paquete con subpaquetes, ¿qué significa <code>from ..stats.descriptive import mean</code> dentro de un subpaquete?</p>]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text><![CDATA[<p><code>..</code> indica “subir un nivel” al paquete padre para resolver el import relativo.</p>]]></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.0000000</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <correctfeedback format="html">
+      <text><![CDATA[<p>Your answer is correct.</p>]]></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is partially correct.</p>]]></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is incorrect.</p>]]></text>
+    </incorrectfeedback>
+    <shownumcorrect/>
+    <answer fraction="100" format="html">
+      <text><![CDATA[<p>Sube un nivel al paquete padre y luego busca <code>stats.descriptive</code>.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Correcto: es la semántica del import relativo.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Importa el módulo dos veces para acelerar.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>No tiene relación con rendimiento.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Descarga el módulo desde Internet.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>No ocurre en imports estándar.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Solo funciona en notebooks.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Funciona en el sistema de paquetes Python.</p>]]></text>
+      </feedback>
+    </answer>
+  </question>
+<question type="multichoice">
+    <name>
+      <text>__all__: para qué sirve</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<p>¿Cuál es el propósito principal de <code>__all__</code> en un paquete?</p>]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text><![CDATA[<p>Define qué símbolos se consideran parte de la API pública cuando se usa <code>from package import *</code>.</p>]]></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.0000000</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <correctfeedback format="html">
+      <text><![CDATA[<p>Your answer is correct.</p>]]></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is partially correct.</p>]]></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is incorrect.</p>]]></text>
+    </incorrectfeedback>
+    <shownumcorrect/>
+    <answer fraction="100" format="html">
+      <text><![CDATA[<p>Controlar qué nombres exporta el paquete en imports wildcard y documentar su API pública.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Correcto: limita la exportación en wildcard.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Evitar que el paquete se inicialice.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>La inicialización ocurre igualmente al importar.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Optimizar memoria del paquete.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>No es un mecanismo de optimización.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Hacer que el paquete sea un namespace package sin <code>__init__.py</code>.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>No está relacionado.</p>]]></text>
+      </feedback>
+    </answer>
+  </question>
+<question type="multichoice">
+    <name>
+      <text>__main__ guard: efecto al importar</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<p>Un archivo contiene <code>if __name__ == "__main__": ...</code>. ¿Qué ocurre si importas ese archivo desde otro script?</p>]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text><![CDATA[<p>Al importar, el código dentro del guard no se ejecuta (porque <code>__name__</code> no es <code>__main__</code>).</p>]]></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.0000000</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <correctfeedback format="html">
+      <text><![CDATA[<p>Your answer is correct.</p>]]></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is partially correct.</p>]]></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is incorrect.</p>]]></text>
+    </incorrectfeedback>
+    <shownumcorrect/>
+    <answer fraction="100" format="html">
+      <text><![CDATA[<p>El bloque dentro del guard no se ejecuta al importar; solo al ejecutar el archivo directamente.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Correcto: permite reutilizar el archivo como módulo sin ejecutar el “main”.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Se ejecuta siempre al importar.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>La condición evita esa ejecución.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Solo se ejecuta si hay notebooks en el repo.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>No está relacionado.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Depende de si hiciste <code>git pull</code> ese día.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Git no cambia la semántica de <code>__name__</code>.</p>]]></text>
+      </feedback>
+    </answer>
+  </question>
+<question type="multichoice">
+    <name>
+      <text>Import: alias para evitar colisiones</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<p>Dos módulos distintos exportan una función <code>mean</code>. Quieres importar ambos sin colisiones. ¿Qué opción es la más clara?</p>]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text><![CDATA[<p>Usar import de módulo completo o alias hace explícito el origen de cada símbolo.</p>]]></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.0000000</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <correctfeedback format="html">
+      <text><![CDATA[<p>Your answer is correct.</p>]]></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is partially correct.</p>]]></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is incorrect.</p>]]></text>
+    </incorrectfeedback>
+    <shownumcorrect/>
+    <answer fraction="100" format="html">
+      <text><![CDATA[<p><code>import module_a as a</code> y <code>import module_b as b</code>, luego <code>a.mean</code> y <code>b.mean</code>.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Correcto: evita colisiones y preserva trazabilidad.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p><code>from module_a import mean</code> y <code>from module_b import mean</code> (sin alias).</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>La segunda importación sobrescribe el nombre <code>mean</code>.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p><code>from module_a import *</code> y <code>from module_b import *</code>.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Maximiza colisiones y hace el código opaco.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Copiar ambas implementaciones y renombrarlas manualmente dentro del archivo.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Es duplicación y dificulta mantenimiento.</p>]]></text>
+      </feedback>
+    </answer>
+  </question>
+
+  <question type="multichoice">
+    <name>
+      <text>Imports: coste de side effects en __init__.py</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<p>Un paquete ejecuta un <code>print</code> en <code>__init__.py</code>. ¿Cuál es el problema práctico más probable?</p>]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text><![CDATA[<p>Los side effects en import rompen “pureza” del import: ensucian salida, dificultan tests y sorprenden al usuario.</p>]]></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.0000000</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <correctfeedback format="html">
+      <text><![CDATA[<p>Your answer is correct.</p>]]></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is partially correct.</p>]]></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is incorrect.</p>]]></text>
+    </incorrectfeedback>
+    <shownumcorrect/>
+    <answer fraction="100" format="html">
+      <text><![CDATA[<p>Genera efectos colaterales al importar (ruido en salida, tests frágiles).</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Correcto: import debería ser lo más “silencioso” posible.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Hace que Git ignore el paquete.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Git no ejecuta imports.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Evita colisiones de nombres automáticamente.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>No tiene ese efecto.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Garantiza que el paquete sea más rápido.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>El print suele empeorar, no mejorar.</p>]]></text>
+      </feedback>
+    </answer>
+  </question>
+
+  <question type="multichoice">
+    <name>
+      <text>__all__: relación con import *</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<p>¿Qué comportamiento afecta directamente <code>__all__</code>?</p>]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text><![CDATA[<p><code>__all__</code> controla qué se exporta en <code>from package import *</code>; no impide imports explícitos.</p>]]></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.0000000</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <correctfeedback format="html">
+      <text><![CDATA[<p>Your answer is correct.</p>]]></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is partially correct.</p>]]></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is incorrect.</p>]]></text>
+    </incorrectfeedback>
+    <shownumcorrect/>
+    <answer fraction="100" format="html">
+      <text><![CDATA[<p>Qué nombres se importan con <code>from package import *</code>.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Correcto: esa es su función.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Que <code>import package</code> falle si falta un símbolo.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>No funciona así.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Que Python genere <code>__pycache__</code>.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>No tiene relación.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Que VS Code confíe automáticamente el workspace.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>No tiene relación.</p>]]></text>
+      </feedback>
+    </answer>
+  </question>
+
+  <question type="multichoice">
+    <name>
+      <text>Import relativo: cuándo suele fallar</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<p>¿En qué situación es más probable que un import relativo como <code>from ..stats.descriptive import mean</code> falle?</p>]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text><![CDATA[<p>Los imports relativos dependen del contexto de paquete; ejecutando un archivo “sueltamente” se rompe el contexto de paquete.</p>]]></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.0000000</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <correctfeedback format="html">
+      <text><![CDATA[<p>Your answer is correct.</p>]]></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is partially correct.</p>]]></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is incorrect.</p>]]></text>
+    </incorrectfeedback>
+    <shownumcorrect/>
+    <answer fraction="100" format="html">
+      <text><![CDATA[<p>Cuando ejecutas un módulo dentro del paquete “como script” sin el contexto de paquete.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Correcto: el contexto de paquete importa.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Cuando el archivo está en GitHub.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>GitHub no afecta a imports.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Cuando hay outputs en el notebook.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>No tiene relación.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Cuando el proyecto tiene <code>.vscode/settings.json</code>.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>No tiene relación.</p>]]></text>
+      </feedback>
+    </answer>
+  </question>
+  <question type="category">
+    <category>
+      <text>$course$/top/CSPy/Examen CSPy/Typing</text>
+    </category>
+    <info format="html">
+      <text></text>
+    </info>
+    <idnumber></idnumber>
+  </question>
+<question type="multichoice">
+    <name>
+      <text>Typing: dynamic vs static (dónde se comprueba)</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<p>¿Qué afirmación describe correctamente <em>dynamic typing</em> frente a <em>static typing</em>?</p>]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text><![CDATA[<p>Dynamic typing asocia tipos a valores y los comprueba en runtime; static typing intenta verificar antes de ejecutar.</p>]]></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.0000000</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <correctfeedback format="html">
+      <text><![CDATA[<p>Your answer is correct.</p>]]></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is partially correct.</p>]]></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is incorrect.</p>]]></text>
+    </incorrectfeedback>
+    <shownumcorrect/>
+    <answer fraction="100" format="html">
+      <text><![CDATA[<p>Dynamic typing: tipos ligados a valores y comprobación en runtime.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Correcto: es la idea central.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Dynamic typing: tipos fijos a variables y comprobación solo en compile time.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Eso describe (aprox.) static typing.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Static typing: nunca hay errores en runtime.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Puede haber errores en runtime por múltiples razones.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Static typing: el tipo de una expresión se decide tras ejecutar el programa.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Eso se asocia a comprobación dinámica.</p>]]></text>
+      </feedback>
+    </answer>
+  </question>
+<question type="multichoice">
+    <name>
+      <text>Typing: strong vs weak (coercion)</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<p>¿Qué rasgo caracteriza mejor un sistema de tipos “weak” en el sentido discutido?</p>]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text><![CDATA[<p>Los sistemas más “weak” suelen permitir coerciones implícitas que hacen que operaciones con tipos distintos “pasen” con conversiones automáticas.</p>]]></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.0000000</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <correctfeedback format="html">
+      <text><![CDATA[<p>Your answer is correct.</p>]]></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is partially correct.</p>]]></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is incorrect.</p>]]></text>
+    </incorrectfeedback>
+    <shownumcorrect/>
+    <answer fraction="100" format="html">
+      <text><![CDATA[<p>Permite coerciones implícitas con facilidad.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Correcto: este es el rasgo típico.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Exige anotar tipos en todas las variables.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Eso es sobre static typing, no sobre weak/strong en coerción.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Prohíbe cualquier conversión entre tipos.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Eso sería más cercano a strong typing estricto.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Impide usar excepciones.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>No tiene relación.</p>]]></text>
+      </feedback>
+    </answer>
+  </question>
+<question type="multichoice">
+    <name>
+      <text>Duck typing: compatibilidad por comportamiento</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<p>Una función necesita un objeto que tenga método <code>read()</code>. En Python, ¿qué enfoque encaja con <em>duck typing</em>?</p>]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text><![CDATA[<p>Duck typing significa “si se comporta como lo que necesito, me sirve”, sin exigir una clase nominal específica.</p>]]></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.0000000</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <correctfeedback format="html">
+      <text><![CDATA[<p>Your answer is correct.</p>]]></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is partially correct.</p>]]></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is incorrect.</p>]]></text>
+    </incorrectfeedback>
+    <shownumcorrect/>
+    <answer fraction="100" format="html">
+      <text><![CDATA[<p>Aceptar cualquier objeto que implemente <code>read()</code>, independientemente de su clase.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Correcto: el “contrato” es el comportamiento.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Aceptar solo instancias de una clase concreta.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Eso es más cercano a nominal typing.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Convertir el objeto a <code>str</code> siempre.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>No garantiza que exista un “read” semánticamente correcto.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Requerir que el objeto tenga atributo <code>__class__</code>.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Todos los objetos lo tienen; no define duck typing.</p>]]></text>
+      </feedback>
+    </answer>
+  </question>
+<question type="multichoice">
+    <name>
+      <text>EAFP vs LBYL: patrón idiomático</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<p>Quieres acceder a una clave de un diccionario y gestionar el caso en que no exista. ¿Qué patrón es EAFP?</p>]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text><![CDATA[<p>EAFP: intentar la operación y capturar la excepción.</p>]]></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.0000000</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <correctfeedback format="html">
+      <text><![CDATA[<p>Your answer is correct.</p>]]></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is partially correct.</p>]]></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is incorrect.</p>]]></text>
+    </incorrectfeedback>
+    <shownumcorrect/>
+    <answer fraction="100" format="html">
+      <text><![CDATA[<p>Usar <code>try/except KeyError</code> alrededor del acceso.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Correcto: intentas y recuperas si falla.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Comprobar <code>if key in d</code> antes de acceder siempre.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Eso es LBYL.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Usar type hints para evitar KeyError.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Type hints no evitan excepciones en runtime.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Usar <code>git fetch</code> antes de acceder.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>No tiene relación.</p>]]></text>
+      </feedback>
+    </answer>
+  </question>
+<question type="multichoice">
+    <name>
+      <text>TypedDict: uso típico</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<p>Quieres describir el “schema” de un diccionario con claves fijas para mejorar el chequeo estático. ¿Qué construcción encaja?</p>]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text><![CDATA[<p><code>TypedDict</code> describe diccionarios con estructura conocida para herramientas de tipo.</p>]]></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.0000000</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <correctfeedback format="html">
+      <text><![CDATA[<p>Your answer is correct.</p>]]></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is partially correct.</p>]]></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is incorrect.</p>]]></text>
+    </incorrectfeedback>
+    <shownumcorrect/>
+    <answer fraction="100" format="html">
+      <text><![CDATA[<p>Usar <code>TypedDict</code> para declarar claves y tipos esperados.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Correcto: describe la forma del dict para type checking.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Usar <code>Any</code> en todo.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Eso reduce señal y no describe el schema.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Usar <code>__init__.py</code> para definir el diccionario.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>No está relacionado con typing.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Usar <code>gitignore</code> para fijar las claves.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>No tiene relación.</p>]]></text>
+      </feedback>
+    </answer>
+  </question>
+<question type="multichoice">
+    <name>
+      <text>Any: impacto en chequeo</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<p>En un proyecto con type hints, ¿qué implica usar <code>Any</code> de forma generalizada?</p>]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text><![CDATA[<p><code>Any</code> relaja el análisis: muchas operaciones se aceptan sin comprobación, lo que reduce capacidad de detectar errores.</p>]]></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.0000000</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <correctfeedback format="html">
+      <text><![CDATA[<p>Your answer is correct.</p>]]></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is partially correct.</p>]]></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is incorrect.</p>]]></text>
+    </incorrectfeedback>
+    <shownumcorrect/>
+    <answer fraction="100" format="html">
+      <text><![CDATA[<p>Reduce la precisión del type checker: se pierden comprobaciones útiles.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Correcto: <code>Any</code> es una “válvula de escape”.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Hace el código más rápido siempre.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>No es un mecanismo de optimización.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Obliga a Python a ser estático en runtime.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Es lo contrario: relaja el análisis.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Impide usar Pyright/Pylance.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Se puede usar; simplemente aporta menos valor.</p>]]></text>
+      </feedback>
+    </answer>
+  </question>
+
+  <question type="multichoice">
+    <name>
+      <text>Typing: “gradual” y trade-offs de Any</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<p>En un proyecto de gradual typing, ¿cuál es un riesgo real de introducir <code>Any</code> “para que pase el checker”?</p>]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text><![CDATA[<p><code>Any</code> puede “apagar” el análisis en cascada y ocultar incompatibilidades, reduciendo el valor del chequeo.</p>]]></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.0000000</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <correctfeedback format="html">
+      <text><![CDATA[<p>Your answer is correct.</p>]]></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is partially correct.</p>]]></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is incorrect.</p>]]></text>
+    </incorrectfeedback>
+    <shownumcorrect/>
+    <answer fraction="100" format="html">
+      <text><![CDATA[<p>Perder capacidad de detección: operaciones inseguras pasan sin avisos.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Correcto: reduce la señal del checker.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Convertir el programa en estático en runtime.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>No ocurre.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Impedir que el código se importe como módulo.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>No afecta imports.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Forzar que el bytecode se guarde en Git.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>No tiene relación.</p>]]></text>
+      </feedback>
+    </answer>
+  </question>
+
+  <question type="multichoice">
+    <name>
+      <text>Typing: LBYL vs EAFP (elección)</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<p>¿Cuál frase describe mejor el estilo EAFP en Python?</p>]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text><![CDATA[<p>EAFP: intentas la operación y capturas la excepción si ocurre; LBYL: compruebas antes.</p>]]></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.0000000</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <correctfeedback format="html">
+      <text><![CDATA[<p>Your answer is correct.</p>]]></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is partially correct.</p>]]></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is incorrect.</p>]]></text>
+    </incorrectfeedback>
+    <shownumcorrect/>
+    <answer fraction="100" format="html">
+      <text><![CDATA[<p>“Intentar la operación y manejar excepciones si falla”.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Correcto.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>“Comprobar todo antes y nunca usar exceptions”.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Eso es más LBYL (y poco pythonic).</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>“Usar typing para eliminar errores en runtime”.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Typing no elimina runtime errors por sí solo.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>“Evitar funciones y usar solo scripts”.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>No tiene relación.</p>]]></text>
+      </feedback>
+    </answer>
+  </question>
+  <question type="category">
+    <category>
+      <text>$course$/top/CSPy/Examen CSPy/Validación de Datos</text>
+    </category>
+    <info format="html">
+      <text></text>
+    </info>
+    <idnumber></idnumber>
+  </question>
+<question type="multichoice">
+    <name>
+      <text>check_missing: criterio de missing</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<p>En un validador simple, un valor se considera missing solo si es <code>None</code>. ¿Cuál afirmación es consistente con ese criterio?</p>]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text><![CDATA[<p>Si el criterio es <code>x is None</code>, entonces 0 o "" no cuentan como missing.</p>]]></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.0000000</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <correctfeedback format="html">
+      <text><![CDATA[<p>Your answer is correct.</p>]]></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is partially correct.</p>]]></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is incorrect.</p>]]></text>
+    </incorrectfeedback>
+    <shownumcorrect/>
+    <answer fraction="100" format="html">
+      <text><![CDATA[<p>Solo los <code>None</code> cuentan como missing; 0 no se considera missing.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Correcto: se basa en identidad con <code>None</code>.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Todo valor falsy (0, "", []) cuenta como missing.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Eso sería otro criterio distinto.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Los missing son solo <code>NaN</code> de pandas.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Aquí el criterio es <code>None</code>, no <code>NaN</code>.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Un string vacío siempre cuenta como missing.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>No con el criterio <code>is None</code>.</p>]]></text>
+      </feedback>
+    </answer>
+  </question>
+<question type="multichoice">
+    <name>
+      <text>Outliers (z-score): caso de desviación estándar cero</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<p>En detección de outliers por z-score, ¿qué caso requiere cuidado para evitar un fallo numérico?</p>]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text><![CDATA[<p>Si la desviación estándar es 0, dividir por ella causa división por cero; hay que manejarlo.</p>]]></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.0000000</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <correctfeedback format="html">
+      <text><![CDATA[<p>Your answer is correct.</p>]]></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is partially correct.</p>]]></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is incorrect.</p>]]></text>
+    </incorrectfeedback>
+    <shownumcorrect/>
+    <answer fraction="100" format="html">
+      <text><![CDATA[<p>Cuando la desviación estándar es 0 (todos los valores iguales).</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Correcto: hay riesgo de división por cero.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Cuando hay valores negativos.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Los negativos no rompen el z-score.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Cuando la media es 0.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Media 0 no implica división por cero.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Cuando el dataset está ordenado.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Ordenar no afecta al cálculo.</p>]]></text>
+      </feedback>
+    </answer>
+  </question>
+<question type="multichoice">
+    <name>
+      <text>fill_missing: estrategia inválida</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<p>Una función <code>fill_missing</code> admite estrategias <code>mean</code>, <code>median</code> y <code>zero</code>. ¿Qué debe ocurrir si se pasa una estrategia desconocida?</p>]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text><![CDATA[<p>Un comportamiento robusto es fallar explícitamente (por ejemplo con <code>ValueError</code>) para evitar resultados silenciosamente incorrectos.</p>]]></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.0000000</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <correctfeedback format="html">
+      <text><![CDATA[<p>Your answer is correct.</p>]]></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is partially correct.</p>]]></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is incorrect.</p>]]></text>
+    </incorrectfeedback>
+    <shownumcorrect/>
+    <answer fraction="100" format="html">
+      <text><![CDATA[<p>Lanzar una excepción (por ejemplo <code>ValueError</code>) indicando que la estrategia es desconocida.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Correcto: evita errores silenciosos.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Elegir <code>zero</code> automáticamente.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Eso puede ocultar un bug de configuración.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Dejar los missing como <code>None</code> y devolver la lista igual.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Si la intención era imputar, ese comportamiento no cumple el contrato.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Borrar el dataset para “proteger” la calidad.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Es una respuesta desproporcionada y no estándar.</p>]]></text>
+      </feedback>
+    </answer>
+  </question>
+
+  <question type="multichoice">
+    <name>
+      <text>check_outliers: threshold por defecto</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<p>La función <code>check_outliers</code> usa z-score. Si no pasas <code>threshold</code>, ¿qué ocurre?</p>]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text><![CDATA[<p>Si <code>threshold</code> es <code>None</code>, se usa el valor por defecto definido como constante del módulo.</p>]]></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.0000000</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <correctfeedback format="html">
+      <text><![CDATA[<p>Your answer is correct.</p>]]></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is partially correct.</p>]]></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is incorrect.</p>]]></text>
+    </incorrectfeedback>
+    <shownumcorrect/>
+    <answer fraction="100" format="html">
+      <text><![CDATA[<p>Usa <code>DEFAULT_OUTLIER_THRESHOLD</code> como umbral por defecto.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Correcto: está en el módulo.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Falla con <code>TypeError</code> porque threshold es obligatorio.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>No: es opcional.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Usa siempre 0, así que nunca hay outliers.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>No: el default es 3.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Elige el threshold automáticamente con IQR.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>No hay IQR en esa función.</p>]]></text>
+      </feedback>
+    </answer>
+  </question>
+
+  <question type="multichoice">
+    <name>
+      <text>validate_numeric_range: estructura de retorno</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<p>¿Qué indica el campo <code>valid</code> en el diccionario devuelto por <code>validate_numeric_range</code>?</p>]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text><![CDATA[<p><code>valid</code> es verdadero si no hay violaciones; las violaciones se detallan con índice, valor y razón.</p>]]></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.0000000</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <correctfeedback format="html">
+      <text><![CDATA[<p>Your answer is correct.</p>]]></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is partially correct.</p>]]></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is incorrect.</p>]]></text>
+    </incorrectfeedback>
+    <shownumcorrect/>
+    <answer fraction="100" format="html">
+      <text><![CDATA[<p>Que no se detectaron valores fuera del rango especificado.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Correcto: <code>valid</code> implica 0 violaciones.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Que la lista contiene solo valores enteros.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>No comprueba tipos, solo rango.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Que Git puede comitear el dataset.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>No tiene relación.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Que la desviación estándar es distinta de 0.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>No es lo que valida.</p>]]></text>
+      </feedback>
+    </answer>
+  </question>
+
+  <question type="multichoice">
+    <name>
+      <text>check_duplicates: definición operacional</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<p>En <code>check_duplicates</code>, ¿qué se considera un “duplicado” en una lista <code>data</code>?</p>]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text><![CDATA[<p>Se usa <code>set(data)</code>; la diferencia de tamaños indica cuántos elementos están repetidos.</p>]]></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.0000000</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <correctfeedback format="html">
+      <text><![CDATA[<p>Your answer is correct.</p>]]></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is partially correct.</p>]]></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is incorrect.</p>]]></text>
+    </incorrectfeedback>
+    <shownumcorrect/>
+    <answer fraction="100" format="html">
+      <text><![CDATA[<p>Que existan valores repetidos (mismo valor en más de una posición).</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Correcto.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Que haya valores negativos.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>No tiene relación.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Que la lista esté desordenada.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>No es lo que mide.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Que existan <code>None</code>.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Eso lo mide <code>check_missing</code>.</p>]]></text>
+      </feedback>
+    </answer>
+  </question>
+  <question type="category">
+    <category>
+      <text>$course$/top/CSPy/Examen CSPy/Miscelánea</text>
+    </category>
+    <info format="html">
+      <text></text>
+    </info>
+    <idnumber></idnumber>
+  </question>
+<question type="multichoice">
+    <name>
+      <text>Type hints: efecto real</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<p>En Python, ¿qué efecto tiene añadir <em>type hints</em> en una función?</p>]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text><![CDATA[<p>Los type hints sirven para documentación y herramientas de análisis; no fuerzan tipos en runtime por defecto.</p>]]></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.0000000</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <correctfeedback format="html">
+      <text><![CDATA[<p>Your answer is correct.</p>]]></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is partially correct.</p>]]></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is incorrect.</p>]]></text>
+    </incorrectfeedback>
+    <shownumcorrect/>
+    <answer fraction="100" format="html">
+      <text><![CDATA[<p>Mejoran análisis estático/autocompletado, pero el runtime no impide por defecto pasar valores de otro tipo.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Correcto: es el papel típico de los type hints.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Impiden en runtime pasar valores de otro tipo porque Python lanza error automáticamente.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Eso no ocurre por defecto en Python estándar.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Convierten el programa en compilado a <code>.exe</code>.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>No tiene relación.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Evitan la necesidad de tests.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Los type hints no sustituyen pruebas.</p>]]></text>
+      </feedback>
+    </answer>
+  </question>
+<question type="multichoice">
+    <name>
+      <text>Aliasing en data analysis</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<p>¿Cuál conjunto de alias sigue la convención más común en data analysis?</p>]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text><![CDATA[<p>Convención: <code>numpy as np</code>, <code>pandas as pd</code>, <code>matplotlib.pyplot as plt</code>.</p>]]></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.0000000</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <correctfeedback format="html">
+      <text><![CDATA[<p>Your answer is correct.</p>]]></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is partially correct.</p>]]></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is incorrect.</p>]]></text>
+    </incorrectfeedback>
+    <shownumcorrect/>
+    <answer fraction="100" format="html">
+      <text><![CDATA[<p><code>import numpy as np</code>, <code>import pandas as pd</code>, <code>import matplotlib.pyplot as plt</code></p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Correcto: convención ampliamente usada.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p><code>from numpy import *</code>, <code>from pandas import *</code>, <code>from matplotlib import *</code></p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Aumenta conflictos y reduce claridad.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p><code>import np</code>, <code>import pd</code>, <code>import plt</code></p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Esos no son nombres de paquetes reales.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p><code>import numpy as pandas</code></p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Alias engañoso: confunde el origen.</p>]]></text>
+      </feedback>
+    </answer>
+  </question>
+<question type="multichoice">
+    <name>
+      <text>Anatomía de un script: orden recomendado</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<p>Para legibilidad y mantenibilidad, ¿qué orden es más razonable en un script Python típico?</p>]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text><![CDATA[<p>Un orden habitual: imports → constantes → definiciones (funciones/clases) → bloque principal (<code>if __name__ == "__main__"</code>).</p>]]></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.0000000</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <correctfeedback format="html">
+      <text><![CDATA[<p>Your answer is correct.</p>]]></text>
+    </correctfeedback>
+    <partiallycorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is partially correct.</p>]]></text>
+    </partiallycorrectfeedback>
+    <incorrectfeedback format="html">
+      <text><![CDATA[<p>Your answer is incorrect.</p>]]></text>
+    </incorrectfeedback>
+    <shownumcorrect/>
+    <answer fraction="100" format="html">
+      <text><![CDATA[<p>Imports → constantes → definiciones → bloque principal.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Correcto: facilita lectura y evita dependencias ocultas.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Bloque principal → imports → definiciones → constantes.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Imports al final es un antipatrón para scripts.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Definiciones → bloque principal → imports.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>Imports deberían ir al principio.</p>]]></text>
+      </feedback>
+    </answer>
+    <answer fraction="-50" format="html">
+      <text><![CDATA[<p>Constantes → bloque principal → imports → definiciones.</p>]]></text>
+      <feedback format="html">
+        <text><![CDATA[<p>El main debe ir al final para lectura y ejecución.</p>]]></text>
+      </feedback>
+    </answer>
+  </question>
+</quiz>
