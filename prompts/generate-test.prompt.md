@@ -169,9 +169,12 @@ When writing each distractor's `<feedback>`, justify unambiguously why it is fal
 - Output: valid XML block, no conversational text
 - All visible text in `<![CDATA[ ... ]]>`
 - Required tags:
-  - `<penalty>0.0000000</penalty>`
-  - Correct: `fraction="100"`
-  - Incorrect: `fraction="-50"`
+  - `<penalty>0.0000000</penalty>` — adaptive-mode field; always 0 for standard single-attempt exams
+  - Correct: `fraction="100"` → student scores +100% of the question grade
+  - Incorrect: `fraction="-50"` → student scores −50% (half the value of a right answer)
+
+> **Scoring note**: the½-penalty scheme is implemented via the answer `fraction` attributes, not via `<penalty>`. The `<penalty>` tag only affects Moodle’s adaptive/interactive multi-try mode and must remain `0.0000000` for standard exams.
+
 - Include in `generalfeedback` the source: `<pre>FUENTES_JSON: {"sources":[{"path":"file.md","anchor":"Section X"}]}</pre>`
 </xml_specs>
 

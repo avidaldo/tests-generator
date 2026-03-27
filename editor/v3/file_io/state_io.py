@@ -80,7 +80,7 @@ def load_state(filepath: Path) -> list[Question]:
             answers=answers,
             status=status,
             default_grade=q_data.get("default_grade", "1.0000000"),
-            penalty=q_data.get("penalty", "0.5000000"),
+            penalty=q_data.get("penalty", "0.0000000"),  # adaptive-mode field; 0 for standard single-attempt exams
             single=q_data.get("single", "true"),
             shuffle_answers=q_data.get("shuffle_answers", "true"),
             answer_numbering=q_data.get("answer_numbering", "abc"),

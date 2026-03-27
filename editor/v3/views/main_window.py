@@ -345,14 +345,25 @@ class MainWindow(QMainWindow):
                 QMessageBox.critical(self, "Error", f"Error al cargar: {e}")
     
     def _export_xml(self):
+        lista_questions = [q for q in self._model.questions if q.status == QuestionStatus.LISTA]
+        if not lista_questions:
+            QMessageBox.information(
+                self,
+                "Sin preguntas listas",
+                "No hay preguntas marcadas como \"Lista\".\n\nRevisa las preguntas y márcalas como Lista antes de exportar.",
+            )
+            return
+
         file, _ = QFileDialog.getSaveFileName(
-            self, "Exportar XML", "", "XML Files (*.xml)"
+            self, f"Exportar XML ({len(lista_questions)} preguntas Lista)", "", "XML Files (*.xml)"
         )
         if file:
             try:
-                xml_content = generate_xml(self._model.questions)
+                xml_content = generate_xml(lista_questions)
                 Path(file).write_text(xml_content, encoding="utf-8")
-                self._status_bar.showMessage(f"Exportado a {file}", 3000)
+                self._status_bar.showMessage(
+                    f"Exportadas {len(lista_questions)} preguntas Lista → {file}", 4000
+                )
             except Exception as e:
                 QMessageBox.critical(self, "Error", f"Error al exportar: {e}")
     
