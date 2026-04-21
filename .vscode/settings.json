@@ -2,6 +2,8 @@
   "chat.promptFilesLocations": {
     "prompts": true
   },
+  "chat.useNestedAgentsMdFiles": true,
+  "chat.includeReferencedInstructions": true,
   "[markdown]": {
     "editor.wordWrap": "bounded",
     "editor.wordWrapColumn": 120,

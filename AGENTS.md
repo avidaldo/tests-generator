@@ -13,7 +13,7 @@ This repository contains tools and prompts for generating, editing, and analyzin
 | `.github/` | VS Code-specific compatibility files and workflows | [`AGENTS.md`](AGENTS.md) |
 | `editor/` | PyQt-based Moodle XML quiz editor | [`editor/AGENTS.md`](editor/AGENTS.md) |
 | `results/` | Exam result analysis notebooks | [`results/AGENTS.md`](results/AGENTS.md) |
-| `docs/` | Domain knowledge and design documentation | — |
+| `docs/` | Domain knowledge and design documentation; see [`docs/agentic_enforcement_layers.md`](docs/agentic_enforcement_layers.md) for the enforcement layer pattern | — |
 | `resources/` | Utility scripts (XML conversion, merging) | — |
 | `samples/` | Example Moodle XML files | — |
 
@@ -43,10 +43,20 @@ The monolithic `generate-test.prompt.md` is planned for decomposition into a pip
 
 ## VS Code Customization Layout
 
-- Keep `prompts/*.prompt.md` as the canonical prompt files for this repository.
-- Use `.vscode/settings.json` to make VS Code discover prompt files from `prompts/`.
-- Use `.github/copilot-instructions.md` and `.github/instructions/*.instructions.md` only as VS Code-specific adapters.
-- Keep `AGENTS.md` files as the canonical cross-agent instruction surface.
+- Keep `AGENTS.md` files as the canonical cross-agent instruction surface. Root and subfolder `AGENTS.md` files are both loaded by VS Code (`chat.useNestedAgentsMdFiles`).
+- Keep `prompts/*.prompt.md` as the canonical prompt files; discovered via `chat.promptFilesLocations` in `.vscode/settings.json`.
+- Use `.github/instructions/*.instructions.md` for file-type-scoped rules; current files and their `applyTo` targets:
+  - `editor.instructions.md` → `editor/**`
+  - `results.instructions.md` → `results/**`
+  - `prompt-authoring.instructions.md` → `**/*.prompt.md`
+  - `python.instructions.md` → `**/*.py`
+  - `notebooks.instructions.md` → `**/*.ipynb`
+  - `markdown.instructions.md` → `**/*.md`
+- Markdown links in `.instructions.md` files to canonical sources are resolved automatically (`chat.includeReferencedInstructions`).
+- Use `.github/hooks/*.json` + scripts for deterministic agent-time enforcement (PostToolUse, PreToolUse); current hooks:
+  - `strip-notebook-outputs.json` → strips `.ipynb` outputs after any agent file write
+- Use `.github/skills/<name>/SKILL.md` for portable, on-demand multi-step workflows; current skills:
+  - `notebook-hygiene` → installs the full four-layer notebook output enforcement stack
 
 ---
 
@@ -58,6 +68,7 @@ The monolithic `generate-test.prompt.md` is planned for decomposition into a pip
 - **Self-Criticism:** Be always critical with your own answers, and point out possible limitations or errors.
 - **Instruction Criticism:** Be also critical with my instructions. Don't hesitate to point out possible mistakes or improvements.
 - **Paramount Rigour:** Rigour is paramount. It's important that all explanations are technically correct.
+- **Minimal Changes:** Keep changes minimal and focused on the active task.
 
 ## Jupyter Notebooks Guidelines
 
