@@ -29,6 +29,11 @@ Jupyter notebooks for analyzing exam outcomes: difficulty indices, score distrib
 
 This repository contains analysis of student exam results. **Raw outputs must never be committed.** A GitHub Actions CI check will reject any push or PR containing notebook cell outputs.
 
+The project uses a two-layer defense:
+
+1. Local filtering with `nbstripout` to strip outputs before commit.
+2. Server-side CI verification to block outputs that still reach a push or PR.
+
 To auto-strip outputs locally on every commit:
 
 ```bash

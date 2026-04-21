@@ -14,7 +14,7 @@ This file is the canonical, tool-agnostic instruction surface for the `results/`
 
 - All notebooks in this folder MUST have their outputs stripped before commit.
 - The repository uses `nbstripout` as a git filter (configured in `.gitattributes`). Verify it is active with: `nbstripout --status`.
-- A GitHub Actions workflow (`.github/workflows/check-notebooks.yml`) **blocks pushes and PRs** that contain notebook outputs. This is the server-side safety net.
+- A GitHub Actions workflow (`.github/workflows/check-notebooks.yml`) **blocks pushes and PRs** that contain notebook outputs. This is the server-side safety net that complements local `nbstripout` filtering.
 - If you create or modify a notebook, ensure no cell outputs containing student data survive into version control.
 - The `data/` subdirectory is gitignored entirely. Never remove it from `.gitignore`.
 

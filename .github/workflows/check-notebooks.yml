@@ -1,3 +1,6 @@
+# Enforce notebook output hygiene to reduce student data exposure risk.
+# This CI check is the server-side safety net and complements local nbstripout filtering.
+# Policy references: AGENTS.md (Critical Rules) and results/AGENTS.md (Notebook Hygiene).
 name: Notebook output check
 
 on:
@@ -28,7 +31,8 @@ jobs:
           done
           if [ $status -ne 0 ]; then
             echo ""
-            echo "::error::Notebooks with cell outputs detected. Run 'nbstripout *.ipynb' before committing."
-            echo "To auto-strip on every commit: nbstripout --install --attributes .gitattributes"
+            echo "::error::Notebooks with cell outputs detected (privacy risk). See results/AGENTS.md and README.md."
+            echo "Quick fix: run 'nbstripout *.ipynb' before re-pushing."
+            echo "Recommended setup: nbstripout --install --attributes .gitattributes"
             exit 1
           fi
