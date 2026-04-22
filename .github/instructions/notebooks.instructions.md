@@ -6,7 +6,7 @@ applyTo: "**/*.ipynb"
 
 Canonical notebook hygiene and privacy policy live in [results/AGENTS.md](../../results/AGENTS.md).
 
-**Privacy (critical):** Never commit cell outputs — they may contain student data. Run `nbstripout *.ipynb` before pushing. CI will block the PR if outputs are present.
+**Privacy (critical):** Never commit cell outputs — they may contain student data. Preferred setup: run `nbstripout --install --attributes .gitattributes` once after cloning, verify with `nbstripout --status`, and treat CI as the final safety net if outputs still reach a push or PR.
 
 Authoring conventions:
 

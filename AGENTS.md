@@ -7,7 +7,7 @@ This repository contains tools and prompts for generating, editing, and analyzin
 ## Repository Structure
 
 | Path | Purpose | Instructions |
-|------|---------|--------------|
+| ---- | ------- | ------------ |
 | `prompts/` | Canonical prompt files (`.prompt.md`) and prompt design/decomposition notes | [`prompts/AGENTS.md`](prompts/AGENTS.md) |
 | `.github/instructions/` | VS Code file-scoped instruction adapters (`.instructions.md`) | [`AGENTS.md`](AGENTS.md) |
 | `.github/` | VS Code-specific compatibility files and workflows | [`AGENTS.md`](AGENTS.md) |
@@ -20,7 +20,7 @@ This repository contains tools and prompts for generating, editing, and analyzin
 ## Language Convention
 
 - **Development language:** English — all code, documentation, instructions, agent prompts, and filenames are written in English.
-- **Test output language:** Generated exams are in **Castellano** (Spanish) by default, with technical terms in English in parentheses. This is specified in the `## Output Language` section of `prompts/generate-test.prompt.md`.
+- **Test output language:** Generated exams are in **Castellano** (Spanish) by default, with technical terms in English in parentheses. This is specified in the `## Output Language` sections of `prompts/generate-questions.prompt.md` and `prompts/generate-test.prompt.md`.
 - **Sample files:** `samples/` XMLs contain Spanish content as examples of expected output — their content is intentionally Spanish.
 - **Result notebooks:** Analysis notebooks (`results/`) are in English. Column names from the raw Spanish CSV export are kept as-is in code.
 
@@ -33,13 +33,22 @@ This repository contains tools and prompts for generating, editing, and analyzin
 ## Prompt Files
 
 | File | Description |
-|------|-------------|
-| `prompts/generate-test.prompt.md` | Core exam generation prompt |
+| ---- | ----------- |
+| `prompts/inventory.prompt.md` | Active prompt: source file inventory and concept extraction |
+| `prompts/generate-questions.prompt.md` | Active prompt: one-subcategory question generation in editor-native JSON |
+| `prompts/generate-test.prompt.md` | Deprecated monolithic prompt retained for reference |
 | `prompts/metaprompting.prompt.md` | Prompt design guidelines — invoke when creating/reviewing any prompt |
 
-## Planned: Prompt Decomposition
+## Prompt Pipeline Status
 
-The monolithic `generate-test.prompt.md` is planned for decomposition into a pipeline of specialized agents. Full design analysis, format options, and action items are documented in [`prompts/AGENTS.md`](prompts/AGENTS.md).
+The repository now uses a decomposed prompt pipeline. Treat `inventory.prompt.md` and `generate-questions.prompt.md` as the active generation workflow, and treat `generate-test.prompt.md` as legacy reference material only. Full workflow details, rationale, and file responsibilities are documented in [`prompts/AGENTS.md`](prompts/AGENTS.md).
+
+## Practical Commands
+
+- Sync Python dependencies with `uv sync`.
+- Run the editor with `uv run python editor/v3/main.py`.
+- Export reviewed JSON state to Moodle XML with `python resources/json_to_moodle_xml.py <input.json> <output.xml>`.
+- Verify the notebook output filter is active with `nbstripout --status`.
 
 ## VS Code Customization Layout
 
