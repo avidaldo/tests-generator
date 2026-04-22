@@ -1,0 +1,11 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "type": "command",
+        "command": "python3 .github/hooks/prompt_doc_drift_check.py",
+        "timeout": 10
+      }
+    ]
+  }
+}

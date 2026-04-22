@@ -6,9 +6,11 @@ AI-assisted generation, editing, and analysis of Moodle XML quiz exams.
 
 ### Test Generation (`prompts/`)
 
-Prompt-based system for generating multiple-choice exam questions in Moodle XML format from course materials. Focuses on conceptual understanding over syntax recall, with adversarial validation of distractors.
+Prompt-based system for generating multiple-choice exam questions from course materials. The active workflow is decomposed into an inventory stage and a one-subcategory generation stage, producing editor-native JSON for human review before Moodle XML export. It focuses on conceptual understanding over syntax recall, with adversarial validation of distractors.
 
-See: [`prompts/generate-test.prompt.md`](prompts/generate-test.prompt.md)
+Active workflow: [`prompts/inventory.prompt.md`](prompts/inventory.prompt.md) and [`prompts/generate-questions.prompt.md`](prompts/generate-questions.prompt.md)
+
+Legacy reference: [`prompts/generate-test.prompt.md`](prompts/generate-test.prompt.md)
 
 ### Quiz Editor (`editor/`)
 

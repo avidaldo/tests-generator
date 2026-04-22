@@ -54,6 +54,8 @@ The repository now uses a decomposed prompt pipeline. Treat `inventory.prompt.md
 
 - Keep `AGENTS.md` files as the canonical cross-agent instruction surface. Root and subfolder `AGENTS.md` files are both loaded by VS Code (`chat.useNestedAgentsMdFiles`).
 - Keep `prompts/*.prompt.md` as the canonical prompt files; discovered via `chat.promptFilesLocations` in `.vscode/settings.json`.
+- Use `.github/agents/*.agent.md` for workflow-specific agents; current agents:
+  - `prompt-workflow` → orchestrates the active inventory → generation → human review → XML export flow
 - Use `.github/instructions/*.instructions.md` for file-type-scoped rules; current files and their `applyTo` targets:
   - `editor.instructions.md` → `editor/**`
   - `results.instructions.md` → `results/**`
@@ -61,11 +63,15 @@ The repository now uses a decomposed prompt pipeline. Treat `inventory.prompt.md
   - `python.instructions.md` → `**/*.py`
   - `notebooks.instructions.md` → `**/*.ipynb`
   - `markdown.instructions.md` → `**/*.md`
+  - `documentation-sync.instructions.md` → prompt/customization files plus `README.md`, `AGENTS.md`, `prompts/AGENTS.md`, `.github/copilot-instructions.md`
 - Markdown links in `.instructions.md` files to canonical sources are resolved automatically (`chat.includeReferencedInstructions`).
 - Use `.github/hooks/*.json` + scripts for deterministic agent-time enforcement (PostToolUse, PreToolUse); current hooks:
   - `strip-notebook-outputs.json` → strips `.ipynb` outputs after any agent file write
+  - `prompt-doc-drift-check.json` → warns when prompt/customization changes may need documentation-sync updates
 - Use `.github/skills/<name>/SKILL.md` for portable, on-demand multi-step workflows; current skills:
   - `notebook-hygiene` → installs the full four-layer notebook output enforcement stack
+  - `prompt-pipeline` → runs the active inventory → generation → human review → XML export workflow
+  - `editor-export` → exports reviewed editor JSON state to Moodle XML with explicit status control
 
 ---
 
