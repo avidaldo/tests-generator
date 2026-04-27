@@ -33,6 +33,7 @@ def save_state(questions: list[Question], filepath: Path) -> None:
             "partially_correct_feedback": q.partially_correct_feedback,
             "incorrect_feedback": q.incorrect_feedback,
             "source_file": q.source_file,
+            "source_ref": q.source_file,  # alias: concept-ID reference used by newer prompt versions
             "answers": [
                 {
                     "text": a.text,
@@ -87,7 +88,7 @@ def load_state(filepath: Path) -> list[Question]:
             correct_feedback=q_data.get("correct_feedback", "<p>Correcto.</p>"),
             partially_correct_feedback=q_data.get("partially_correct_feedback", "<p>Parcialmente correcto.</p>"),
             incorrect_feedback=q_data.get("incorrect_feedback", "<p>Incorrecto.</p>"),
-            source_file=q_data.get("source_file", ""),
+            source_file=q_data.get("source_ref", q_data.get("source_file", "")),  # prefer source_ref (concept IDs) over legacy source_file
         )
         questions.append(question)
     

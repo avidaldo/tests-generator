@@ -6,11 +6,11 @@ AI-assisted generation, editing, and analysis of Moodle XML quiz exams.
 
 ### Test Generation (`prompts/`)
 
-Prompt-based system for generating multiple-choice exam questions from course materials. The active workflow is decomposed into an inventory stage and a one-subcategory generation stage, producing editor-native JSON for human review before Moodle XML export. It focuses on conceptual understanding over syntax recall, with adversarial validation of distractors.
+Prompt-based system for generating multiple-choice exam questions from course materials. The workflow reads source files (`.md`, `.ipynb`, `.py`) from any repository, produces rich content summaries, merges them into self-contained subcategory files, and then generates questions one subcategory at a time in editor-native JSON. Human review in the editor is mandatory before Moodle XML export.
 
-Active workflow: [`prompts/inventory.prompt.md`](prompts/inventory.prompt.md) and [`prompts/generate-questions.prompt.md`](prompts/generate-questions.prompt.md)
+Active workflow: [`prompts/summarize-sources.prompt.md`](prompts/summarize-sources.prompt.md) → [`prompts/merge-summaries.prompt.md`](prompts/merge-summaries.prompt.md) → [`prompts/generate-questions.prompt.md`](prompts/generate-questions.prompt.md)
 
-Legacy reference: [`prompts/generate-test.prompt.md`](prompts/generate-test.prompt.md)
+See [`prompts/AGENTS.md`](prompts/AGENTS.md) for the full pipeline diagram, design rationale, and deprecated prompts.
 
 ### Quiz Editor (`editor/`)
 
@@ -24,6 +24,70 @@ Jupyter notebooks for analyzing exam outcomes: difficulty indices, score distrib
 
 > **Warning:** Raw student data (`results/data/`) is **gitignored** and must
 > never be committed. Notebooks must be committed **without outputs**.
+
+## Usage: Generating Exam Questions
+
+### Prerequisites
+
+- An AI coding assistant with prompt file support (VS Code + Copilot, or equivalent)
+- Course materials in one or more repositories (`.md`, `.ipynb`, `.py` files)
+- This repository cloned locally
+
+### Step 1: Summarise source materials (one per repo)
+
+Open `prompts/summarize-sources.prompt.md` as a prompt. Provide:
+
+- **Path(s) to course materials** — can be directories or files in external repos outside this workspace:
+
+  ```
+  Summarise the following course materials:
+  - /path/to/ml-course/notebooks/01-preprocessing/
+  - /path/to/ml-course/notebooks/02-evaluation/
+  - /path/to/ml-theory/docs/bias-variance.md
+  ```
+
+- **Subject Profile overrides** (optional) — if not stated in the message, the agent will ask.
+
+The agent produces a rich content summary preserving all explanations, processes, cases, and examples. **Save it as a `.md` file** (e.g. `summary-ml-preprocessing.md`).
+
+> **Tip — multiple repos**: Run once per repo or topic area. Each run gets a clean context window. You'll have one summary file per repo.
+
+> **Tip — large repos**: If the source material is very large (>100 pages), split by topic area.
+
+### Step 2: Merge summaries into subcategory files
+
+Open `prompts/merge-summaries.prompt.md` as a prompt. Provide all summary files from Step 1 and the Moodle category root path (e.g. `$course$/top/MachineLearning`).
+
+The agent proposes a subcategory taxonomy — review and adjust, then it produces **one `.md` file per subcategory**. Each file is self-contained and includes a "Related context" section enabling cross-subcategory questions.
+
+### Step 3: Generate questions (one subcategory at a time)
+
+Open `prompts/generate-questions.prompt.md` as a prompt. Provide one subcategory `.md` file from Step 2.
+
+The agent generates questions from the file's full content, including scenario-based and cross-subcategory relationship questions. Output is a JSON file — save it (e.g. `ml-normalisation.json`).
+
+> **One subcategory per invocation** — each gets a fresh context window, no drift.
+
+### Step 4: Human review in the editor
+
+```bash
+uv run python editor/v3/main.py
+```
+
+Open the JSON file (`Ctrl+O`). Review each question:
+- **Pendiente** → not yet reviewed
+- **Revisar** → needs changes
+- **Lista** → approved for export
+
+### Step 5: Export to Moodle XML
+
+```bash
+python resources/json_to_moodle_xml.py ml-normalisation.json ml-normalisation.xml
+```
+
+Only questions marked `lista` are exported. Import the XML into Moodle.
+
+
 
 ## Setup
 
@@ -53,11 +117,14 @@ pip install PyQt6 lxml
 
 ## Documentation
 
-- [Adversarial Filters & Distractor Design](docs/adversarial_logic_filters.md)
+- [Adversarial Filters & Prompting Techniques](docs/adversarial_logic_filters.md)
+- [Distractor Design & Psychometric Techniques](docs/distractor_design.md)
+- [Summary Document Format](docs/summary_format.md)
+- [Agentic Enforcement Layers](docs/agentic_enforcement_layers.md)
 - [Editor Architecture](editor/AGENTS.md)
 - [Results Privacy Policy](results/AGENTS.md)
-- [Prompt Design And Decomposition Notes](prompts/AGENTS.md)
+- [Prompt Pipeline Design](prompts/AGENTS.md)
 
 ## AI-Assisted Development
 
-This repository uses GitHub Copilot as a development tool. See [`AGENTS.md`](AGENTS.md) for cross-agent instructions, [`prompts/metaprompting.prompt.md`](prompts/metaprompting.prompt.md) for prompt design standards, and [`.vscode/settings.json`](.vscode/settings.json) for the workspace-level VS Code prompt discovery adapter.
+This repository uses AI coding assistants as development tools. See [`AGENTS.md`](AGENTS.md) for cross-agent instructions, [`.github/instructions/prompt-authoring.instructions.md`](.github/instructions/prompt-authoring.instructions.md) for prompt design standards (applied automatically when editing prompt or instruction files), and [`.vscode/settings.json`](.vscode/settings.json) for the workspace-level VS Code prompt discovery adapter.

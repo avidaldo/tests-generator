@@ -1,6 +1,5 @@
 # Advanced Prompting Techniques: Adversarial Filters and Structural Design
 
-
 ## 1. Adversarial Filters
 
 The **Adversarial Filter** is a structural self-correction technique that forces the model to act as its own "critic" or "judge" during generation, using its reasoning capabilities to validate the quality of its own output before finalising it.

@@ -1,8 +1,8 @@
 ---
 description: >
   Generate multiple-choice exam questions for ONE subcategory in editor-native
-  JSON format. Run after the inventory prompt, one subcategory at a time.
-  Input: one inventory row + the source files listed for that subcategory.
+  JSON format. Run after the merge step, one subcategory file at a time.
+  Input: a self-contained subcategory file produced by merge-summaries.prompt.md.
   Output: a JSON file ready to open directly in the quiz editor (Ctrl+O).
 ---
 
@@ -10,31 +10,41 @@ description: >
 
 You are an exam architect operating at Master's level (EQF Level 7), specialised in psychometric design. Your goal is to create questions that discriminate between surface-level memorisation and deep conceptual understanding.
 
-Before generating, consult [Adversarial Filters And Distractor Design](../docs/adversarial_logic_filters.md) §1 and §6 and apply its constraints.
+Before generating, consult [Adversarial Filters And Distractor Design](../docs/adversarial_logic_filters.md) §1 and §6, and [Distractor Design & Psychometric Techniques](../docs/distractor_design.md) for strategies and anti-bias rules.
 
 ---
 
-## Required Inputs
+## Subject Profile
 
-The user must provide all of the following before you begin:
+Read the **Subject Profile** from the subcategory file header (the `Question focus` and `Output language` fields). If the file does not include these fields, use the defaults below. The user can override any parameter at invocation time.
 
-1. **Inventory row**: One row from the inventory table (file path, density, key concepts, suggested subcategory).
-2. **Source files**: The listed files for this subcategory. Read them now.
-3. **Category root path**: The full Moodle prefix, e.g. `$course$/top/MachineLearning`. If not provided, ask before generating.
-
-**Scope**: Generate questions only from the source files provided. Do not mix in knowledge from other files.
-
----
-
-## Output Language
-
-Generated questions and all answer/feedback text are in **Castellano** (Spanish). Technical terms appear in English in parentheses per educational convention: e.g. *sobreajuste (overfitting)*.
-
-Code identifiers, file names, and library names remain in English.
+| Parameter | Default | Options |
+|-----------|---------|---------|
+| **Output language** | Castellano (Spanish). Technical terms in English in parentheses. | Any language — state it when invoking. Code identifiers, file names, and library names always remain in English. |
+| **Question focus** | `conceptual-only` | `conceptual-only` · `syntax-included`. Must match the setting used during summarisation. |
 
 ---
 
-## CARDINAL RULE: 100% CONCEPTUAL FOCUS
+## Required Input
+
+The user provides **one subcategory file** — a self-contained Markdown document produced by `merge-summaries.prompt.md`. This file contains:
+
+- The **category path** (full Moodle prefix, e.g. `$course$/top/MachineLearning/Preprocessing/Normalización`)
+- **Concepts** with numbered references (e.g. `[NORM-01]`), definitions, and source tracking
+- **Relationships and distinctions** between concepts within this subcategory
+- **Common misconceptions** found in the source material
+- **Examples and scenarios** with concrete details
+- **Related context** — brief summaries of concepts from other subcategories that enable cross-subcategory questions
+
+All the information needed to generate questions is in this file. No additional files or inputs are required (unless the user wants to override Subject Profile parameters).
+
+**Scope**: Generate questions only from the content present in the subcategory file. Do not add external knowledge beyond what the file contains. The "Related context" section is valid material for questions — use it to create questions that test understanding of relationships between this subcategory's concepts and related concepts from other subcategories.
+
+---
+
+## Question Focus Rules
+
+### When `conceptual-only` (default)
 
 <conceptual_focus>
 Generate only questions about conceptual understanding. Questions answerable by consulting documentation or an IDE are useless for evaluating real knowledge.
@@ -59,6 +69,10 @@ Generate only questions about conceptual understanding. Questions answerable by 
 ❌ Invalid: *"¿Qué parámetro de MinMaxScaler permite cambiar el rango de salida?"*
 </conceptual_focus>
 
+### When `syntax-included`
+
+Generate questions about code constructs, API usage, syntax patterns, and implementation details **in addition to** all conceptual questions. Both types are exhaustive — `syntax-included` adds code-level questions, it does not replace conceptual ones.
+
 ---
 
 ## Design Principles
@@ -73,13 +87,6 @@ Generate only questions about conceptual understanding. Questions answerable by 
 - Questions must be self-contained: include all necessary context in the stem; never reference "the notes", "the notebook", or "class materials"
 - Ask directly — avoid preambles that serve as hints for other questions
 - Exhaustive coverage of all solid concepts in the source files
-
-**Anti-bias (mandatory):**
-- Homogeneous option length: the correct answer must not stand out by being systematically longer or shorter
-- All distractors must appear reasonable to someone who has partial knowledge
-- Each incorrect option must be **manifestly false**, not merely "less complete" or debatable
-- Only one option is rigorously correct; the others are unambiguously false
-- Avoid patterns of 3 similar options + 1 absurd one (structural bias)
 </design_principles>
 
 ---
@@ -91,7 +98,7 @@ Work through this algorithm for each concept before moving to the next.
 
 ### Phase 0: Content Deconstruction
 
-For each concept in the inventory row, identify exploitable angles before writing any question:
+For each concept in the summary (identified by its concept ID), identify exploitable angles before writing any question:
 
 1. Precise definition — what it IS
 2. What it is NOT (common wrong definition or confusion)
@@ -105,12 +112,7 @@ For each concept in the inventory row, identify exploitable angles before writin
 
 Design scenarios that require connecting multiple concepts. Questions may be long if context is needed to establish a non-trivial scenario.
 
-**Distractor strategies (use variety across questions):**
-- *Procedural false positive*: correct answer described with an incorrect method
-- *Causal confusion*: inverts the cause-effect relationship
-- *Intuitive attractor*: "common sense" that is technically false
-- *Concept blend*: confuses two related but distinct terms
-- *Semantic inversion*: changes a single conceptual axis of the correct answer
+Apply distractor strategies from [docs/distractor_design.md](../docs/distractor_design.md). Use variety across questions — do not rely on a single strategy.
 
 ### Phase 2: Adversarial Feedback Validation
 
@@ -140,7 +142,7 @@ Output a single valid JSON object matching the schema below. No prose before or 
       "general_feedback": "<p>Explicación didáctica completa de la respuesta correcta y por qué los errores son comunes.</p>",
       "category_path": "$course$/top/Categoria/Subcategoria",
       "status": "pendiente",
-      "source_file": "ruta/relativa/al/archivo_fuente.md",
+      "source_ref": "NORM-01, NORM-03",
       "answers": [
         {
           "text": "<p>Opción correcta</p>",
@@ -174,10 +176,10 @@ Output a single valid JSON object matching the schema below. No prose before or 
 | `id` | Sequential code: `SUBCAT_Q001`, `SUBCAT_Q002`, ... Use an abbreviation of the subcategory name. |
 | `name` | Human-readable: `"Q001: Concepto principal de la pregunta"` |
 | `question_text` | HTML. Wrap code in `<code>` or `<pre>`. Keep clean HTML — no inline styles. |
-| `general_feedback` | HTML. Full didactic explanation. No source path required (handled by `source_file`). |
+| `general_feedback` | HTML. Full didactic explanation. |
 | `category_path` | Full Moodle path: `$course$/top/CategoryRoot/Subcategory` |
 | `status` | Always `"pendiente"` |
-| `source_file` | Relative path to the source file this question is grounded in |
+| `source_ref` | One or more **concept IDs** from the summary document (e.g. `"NORM-01"` or `"NORM-01, CV-03"`). These trace the question back to the summary's concept entries, which in turn map to original source files. |
 | `answers` | Exactly 7 items: 1 with `fraction: "100"`, 6 with `fraction: "-50"` |
 | `answers[].feedback` | Required for every option. Adversarial validation depends on this. |
 
@@ -196,6 +198,6 @@ This is the *answer-level* penalty and is the only scoring mechanism used in sta
 ## Output Constraints
 
 - Maximum **20 questions per output** to stay within a safe generation window.
-- If a subcategory has more than 20 questions, output the first 20 and state how many remain.
+- If a subcategory has more concepts than can produce ~20 questions, split the subcategory into smaller sub-subcategories in the summary and generate each separately.
 - The JSON must be valid and parseable — no trailing commas, no comments in the final output (the schema example above uses `//` only for illustration).
 - Shuffle the correct answer into a non-predictable position across questions. Do not always place it first or last.
