@@ -20,7 +20,7 @@ Before starting, confirm the following parameters with the user. If the user has
 
 | Parameter | Default | Options |
 |-----------|---------|---------|
-| **Output language** | Castellano (Spanish). Technical terms in English in parentheses. | Any language — the user states it when invoking. Code identifiers, file names, and library names always remain in English. |
+| **Output language** | Castellano (Spanish). Technical terms in English in parentheses. | Any language — the user states it when invoking. Code identifiers, file names, and library names always remain in English. | <!-- TODO: I don't think it's useful here in any case to change the language of the previous handoffs. In fact, now that I think about it, probably the possible change of language should be an option only in the last step (generate-questions, and the default should be the same as the original note. It's true I'm not using that default, but it seems more coherent for reusing this project; in any case, we can always ask the user to confirm that.) -->
 | **Question focus** | `conceptual-only` | `conceptual-only` · `syntax-included`. Must match the setting used during summarisation. |
 | **Category root** | *(ask the user)* | The Moodle category root path, e.g. `$course$/top/MachineLearning`. |
 
@@ -51,6 +51,10 @@ Read all summaries and produce a proposed subcategory list. For each subcategory
 | 2 | Regularización | ~6 | repo-a/03-models.md, repo-b/regularization.ipynb |
 | 3 | Validación Cruzada | ~5 | repo-a/04-evaluation.md |
 | ... | | | |
+
+<!-- TODO: we keep weighting a subcategory by it's concepts, but I would like to do it by how many questions can we extract. I know we don't know that since we are in a previous step so, how can we do it? I'm concern that some concepts are prone to more questions than others, since they have more relationships with other and/or affect different processes and subcases.
+
+For instance, it will be nice to create different questions about real world machine learning scenarios to identify the kind of problem to deal with (classification, regression, no supervised, anomaly detection, a hybrid of clustering and classification...). The notebooks explain those concepts but don't define lot os scenarios, so some creativity is required here. However, I could manually create a doc with example scenarios to add to the input notes, but that's not ideal even... perhaps a new agent or skill that looks for creating example scenarios for the concepts previously identified?  -->
 
 **Total concepts:** ~45
 **Cross-cutting concepts:** overfitting (appears in Regularización, Validación Cruzada, Bias-Variance)

@@ -14,7 +14,7 @@ See [`prompts/AGENTS.md`](prompts/AGENTS.md) for the full pipeline diagram, desi
 
 ### Quiz Editor (`editor/`)
 
-Desktop application (PyQt) for viewing and editing Moodle XML question banks. Supports undo/redo, drag-and-drop reordering, and category management.
+Desktop application (PyQt) for viewing and editing Moodle XML question banks. Generated questions are created with 6 distractors each, since the distractor design strategy is to generate more than needed and then review. The editor allows reviewing, editing, and categorizing questions before export. It supports undo/redo, drag-and-drop reordering, and category management.
 
 See: [`editor/v3/README.md`](editor/v3/README.md)
 
@@ -45,6 +45,8 @@ Open `prompts/summarize-sources.prompt.md` as a prompt. Provide:
   - /path/to/ml-course/notebooks/02-evaluation/
   - /path/to/ml-theory/docs/bias-variance.md
   ```
+<!-- TODO: Is this an example of the prompt the user should use for that process? in that case, shouldn't it explicitly show how to call the predefined prompt ("/sumarize-sources")? -->
+<!-- TODO: Shouldn't a subagent be used for each material, to avoid overloading the context and paralelize? wouldn't that be better for performance and scalability? -->
 
 - **Subject Profile overrides** (optional) — if not stated in the message, the agent will ask.
 

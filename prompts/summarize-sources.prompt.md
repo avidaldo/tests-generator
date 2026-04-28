@@ -24,6 +24,7 @@ Before starting, confirm the following parameters with the user. If the user has
 | Parameter | Default | Options |
 |-----------|---------|---------|
 | **Output language** | Castellano (Spanish). Technical terms in English in parentheses. | Any language — the user states it when invoking. Code identifiers, file names, and library names always remain in English. |
+<!-- TODO: The language change should only be done when creating the questions. In this step, let's just keep the notes language -->
 | **Question focus** | `conceptual-only` | `conceptual-only` · `syntax-included` |
 
 - **`conceptual-only`** (default): Preserve all explanatory content. For code: read code cells to understand *which concepts they demonstrate* and *what the results illustrate*, but do not extract syntax, API calls, or implementation details as testable content.
@@ -129,6 +130,7 @@ A section listing relationships, distinctions, and dependencies between concepts
 - **Preserve richness.** If you are unsure whether a passage is relevant, include it. The merge step will discard what isn't needed.
 - Do not hallucinate content. Everything in the summary must come from the source files.
 - Do not reference or read `docs/adversarial_logic_filters.md` or `docs/distractor_design.md` — those are for the generation agent.
+<!-- TODO: is it possible that the agent does that if not explicitly said that it shoudn't? Is not that a problem for the context control? the idea should be to ensure that the agent only uses the information provided in the prompt and the source files, and does not introduce any external knowledge or assumptions, doesn't it? -->
 - If a file cannot be read or does not exist, mark it ❌ in the inventory and add a note.
 - The output is designed to be **saved as a `.md` file** and used as input for the merge step. It must be self-contained.
 - **One summary per repository or coherent topic area.** When processing multiple repos, produce separate summary files.

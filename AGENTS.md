@@ -1,5 +1,14 @@
 # Moodle Tests — Agent Instructions
 
+<!-- TODO: What's the best way to keep all cu -->
+
+## General Instructions
+
+- Be critical. Don't praise the user. Point out issues, mistakes, and problems in their messages and actions. Provide analysis of pros and cons of different options. If the user asks for advice, provide it with detailed reasoning.
+- Be proactive. If you identify a problem or an opportunity for improvement, suggest it to the user. Don't wait for the user to ask for help or advice.
+- Write in a direct, dense style. Avoid fluff, filler, and unnecessary politeness. Be clear and concise.
+- When asked to produce content, focus on quality over quantity. It's better to produce a few high-quality items than many low-quality ones.
+
 ## Project Overview
 
 This repository contains tools and prompts for generating, editing, and analyzing Moodle XML quiz exams using AI assistance.

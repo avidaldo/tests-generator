@@ -1,5 +1,6 @@
 # Moodle Quiz Editor v3
 
+<!-- TODO: v3 is the currently maintained version. v1 and v2 are kept in the 'deprecated' directory for didactic purposes. This version is expected to be continued without further big migrations so it should be moved to the main directory, with a recheck of the structure and a clear documentation, including the integration with the previous workflow.-->
 Desktop editor for Moodle XML quiz files using PyQt6.
 
 ## Features
@@ -28,6 +29,6 @@ uv run python moodle-tests/editor/v3/main.py
 | `Delete` | Delete question |
 ```
 
-todo: 
+todo:
 - Exportar solo las "Listas"
 - "Lista pero fácil"
