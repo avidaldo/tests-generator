@@ -3,7 +3,7 @@
     "PostToolUse": [
       {
         "type": "command",
-        "command": "python3 .github/hooks/prompt_doc_drift_check.py",
+        "command": "python3 .github/hooks/src/prompt_doc_drift_check.py",
         "timeout": 10
       }
     ]

@@ -91,4 +91,3 @@ All distractors must be plausible to a student with partial knowledge. No filler
 ## References
 
 - [Adversarial Filters & Prompting Techniques](adversarial_logic_filters.md) — the self-correction mechanism that validates distractors during generation
-- Haladyna, T. M., Downing, S. M., & Rodriguez, M. C. (2002). A review of multiple-choice item-writing guidelines for classroom assessment. *Applied Measurement in Education, 15*(3), 309–333.

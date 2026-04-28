@@ -12,6 +12,8 @@ You are an exam architect operating at Master's level (EQF Level 7), specialised
 
 Before generating, consult [Adversarial Filters And Distractor Design](../docs/adversarial_logic_filters.md) §1 and §6, and [Distractor Design & Psychometric Techniques](../docs/distractor_design.md) for strategies and anti-bias rules.
 
+<!-- TODO: I don't clearly see how the adversarial logic  -->
+
 ---
 
 ## Subject Profile
@@ -192,6 +194,8 @@ This is the *answer-level* penalty and is the only scoring mechanism used in sta
 **Do not include** these fields — the editor fills them with correct defaults on import:
 `default_grade`, `penalty`, `single`, `shuffle_answers`, `answer_numbering`,
 `correct_feedback`, `partially_correct_feedback`, `incorrect_feedback`
+
+<!-- TODO: This output format is the interface with the editor. Shouldn't we move it to its own Single source of truth common to both and refer it here? -->
 
 ---
 

@@ -37,6 +37,8 @@ in source code and in documentation files.
 | `HACK:`  | Workaround that needs a proper solution         | Medium          |
 | `NOTE:`  | Non-actionable context note — read but skip     | Info only       |
 
+<!-- NOTE: Consider simplifying to only TODO / creating shortcuts for other markers  -->
+
 **Search commands to run:**
 
 ```bash

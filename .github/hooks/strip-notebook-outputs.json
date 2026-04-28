@@ -3,7 +3,7 @@
     "PostToolUse": [
       {
         "type": "command",
-        "command": "python3 .github/hooks/strip_notebook_outputs.py",
+        "command": "python3 .github/hooks/src/strip_notebook_outputs.py",
         "timeout": 30
       }
     ]

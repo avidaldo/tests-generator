@@ -1,0 +1,50 @@
+{
+  "_comment": [
+    "Requires: jq  (brew install jq / apt install jq)"
+  ],
+  "hooks": {
+
+    "SubagentStart": [
+      {
+        "_comment": "Fires when the todo-planner subagent starts. Injects git context and TODO inventory.",
+        "matcher": "todo-planner",
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".github/hooks/src/inject-planner-context.sh",
+            "timeout": 30
+          }
+        ]
+      }
+    ],
+
+    "SubagentStop": [
+      {
+        "_comment": "Fires when the todo-planner subagent stops. Removes the session flag file.",
+        "matcher": "todo-planner",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "INPUT=$(cat); SESSION_ID=$(echo \"$INPUT\" | jq -r '.session_id // empty'); rm -f \"/tmp/claude_planner_${SESSION_ID}\"",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+
+    "PreToolUse": [
+      {
+        "_comment": "Blocks source file writes during a todo-planner session. No-op for all other agents.",
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".github/hooks/src/protect-sources.sh",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  }
+  
+}

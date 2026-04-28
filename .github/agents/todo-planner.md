@@ -7,7 +7,7 @@ description: >
   docs/implementation_plan.md. Invoke this agent before writing any code when
   you want to understand the full scope of pending work, prioritize it, and
   produce a reviewed plan. This agent does NOT modify source files.
-model: claude-opus-4-5
+model: claude-opus-4-6
 tools:
   - Read
   - Write
@@ -88,6 +88,8 @@ echo "=== Stale TODOs (unchanged for >30 days) ===" && \
 ```
 
 This context goes into the plan header and helps identify stale markers.
+
+<!-- NOTE: reading commit state seems unnecesary and contradictory with the desired behaviour: context should come from a single source of truth, defined by implementation state first, TODOs and documentation -->
 
 ### Step 3 — Execute the discovery and analysis phases
 
