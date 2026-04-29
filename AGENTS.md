@@ -38,8 +38,7 @@ This repository contains tools and prompts for generating, editing, and analyzin
 ## Language Convention
 
 - **Development language:** English — all code, documentation, instructions, agent prompts, and filenames are written in English.
-- **Test output language:** Generated exams are in **Castellano** (Spanish) by default, with technical terms in English in parentheses. This is configurable via the **Subject Profile** in both prompt files — the user can override the output language at invocation time.
-<!-- TODO: Even when I'll generate them in spanish, I think is more coherent for reusability of this repo that the default is generating questions in the same language. Anyway, that will be defined by the instructions of that step, so is it needed here? -->
+- **Test output language:** Set at question-generation time via the **Output language** parameter in the `generate-questions.prompt.md` Subject Profile. Default is **Castellano** (Spanish) with technical terms in English in parentheses. Summarisation and merge stages preserve the source material's language.
 - **Sample files:** `samples/` XMLs contain Spanish content as examples of expected output — their content is intentionally Spanish.
 - **Result notebooks:** Analysis notebooks (`results/`) are in English. Column names from the raw Spanish CSV export are kept as-is in code.
 

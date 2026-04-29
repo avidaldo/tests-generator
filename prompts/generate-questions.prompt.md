@@ -19,6 +19,8 @@ Before generating, consult [Adversarial Filters And Distractor Design](../docs/a
 
 Read the **Subject Profile** from the subcategory file header (the `Question focus` and `Output language` fields). If the file does not include these fields, use the defaults below. The user can override any parameter at invocation time.
 
+> **Note**: Output language is set only at this stage. Earlier pipeline stages (summarisation and merge) preserve the source material's language. Set it here to match your target exam language.
+
 | Parameter | Default | Options |
 |-----------|---------|---------|
 | **Output language** | Castellano (Spanish). Technical terms in English in parentheses. | Any language — state it when invoking. Code identifiers, file names, and library names always remain in English. |

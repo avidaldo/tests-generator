@@ -61,12 +61,14 @@ Each stage is run manually by the user. Stages 1 and 3 are parallelizable (indep
 
 ### Subject Profile
 
-All three prompts accept a **Subject Profile** — two parameters the user can override at invocation time:
+All three prompts accept a **Subject Profile** — parameters the user can override at invocation time:
 
-| Parameter | Default | Options |
-|-----------|---------|---------|
-| **Output language** | Castellano (Spanish), technical terms in English in parentheses | Any language |
-| **Question focus** | `conceptual-only` | `conceptual-only` · `syntax-included` |
+| Parameter | Prompts | Default | Options |
+|-----------|---------|---------|---------|
+| **Question focus** | All three | `conceptual-only` | `conceptual-only` · `syntax-included` |
+| **Output language** | `generate-questions` only | Castellano (Spanish), technical terms in English in parentheses | Any language |
+
+Output language is set only at the question-generation stage (`generate-questions.prompt.md`). Summarisation and merge stages preserve the source material's language.
 
 Each prompt asks the user to confirm these settings if they weren't stated in the invocation message.
 

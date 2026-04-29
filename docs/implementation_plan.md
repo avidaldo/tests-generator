@@ -1,6 +1,6 @@
 # Implementation Plan
 
-> Updated: 2026-04-29 (refresh 8)
+> Updated: 2026-04-29 (refresh 9)
 > Branch: decomposed
 > Status: active
 
@@ -31,9 +31,6 @@
 
 | ID | Status | Type | Summary | Source | Depends on |
 | --- | --- | --- | --- | --- | --- |
-| P11 | planned | action | Remove language column from `summarize-sources` and `merge-summaries` Subject Profiles; remove/rephrase language default from `AGENTS.md` | Q2 resolution | none |
-| P12 | planned | action | Replace specific `docs/` prohibition in `summarize-sources` with a general external-knowledge rule | `prompts/summarize-sources.prompt.md:132` | none |
-| P13 | planned | action | Update README Step 1 example to show explicit `#prompt:` invocation before materials list | `README.md:48` | none |
 | P14 | planned | decision | Build a fan-out skill that spawns `summarize-sources` as one subagent per material path | `README.md:49` | none |
 | P18 | planned | debt | Document why hook scripts are used over markdown instructions in `customization_architecture.md`; remove the TODO | `docs/customization_architecture.md:102` | none |
 | P19 | planned | action | Build a `customization-audit` skill that fetches VS Code customization docs and reports gaps in this repo's customization files | `.github/instructions/customization-authoring.instructions.md:18` | none |
@@ -43,7 +40,7 @@
 
 ## Next Sequence
 
-1. P11, P12, P13 — prompt-stage cleanups (no dependencies).
+1. P14 (decision), P18, P19, P4, P8, P9 — lower priority; no urgent dependencies.
 2. Continue one item at a time.
 
 
@@ -296,6 +293,9 @@
 
 ## Recently Completed
 
+- P13 — 2026-04-29. Updated README Step 1 code block to show `#prompt:prompts/summarize-sources.prompt.md` invocation; removed resolved TODO comment.
+- P12 — 2026-04-29. Replaced specific `docs/adversarial_logic_filters.md` prohibition in `summarize-sources` Rules with a general external-knowledge rule; removed TODO comment.
+- P11 — 2026-04-29. Removed Output language row from `summarize-sources` and `merge-summaries` Subject Profiles; added note to `generate-questions` that it is the sole language-setting stage; rephrased `AGENTS.md` language convention to reflect stage-scoped language; updated `prompts/AGENTS.md` Subject Profile table.
 - P16 — 2026-04-29. Created `docs/editor_json_schema.md` as the canonical schema; replaced inline field table in prompt with reference + condensed rules; updated `editor/AGENTS.md`, `prompts/AGENTS.md`, and `AGENTS.md`.
 - P15 — 2026-04-29. Removed dangling incomplete TODO from `generate-questions.prompt.md`.
 - P17 — 2026-04-29. Removed `disable-model-invocation: false` noise from `todo-analysis` SKILL.md frontmatter.

@@ -20,7 +20,6 @@ Before starting, confirm the following parameters with the user. If the user has
 
 | Parameter | Default | Options |
 |-----------|---------|---------|
-| **Output language** | Castellano (Spanish). Technical terms in English in parentheses. | Any language — the user states it when invoking. Code identifiers, file names, and library names always remain in English. | <!-- TODO: I don't think it's useful here in any case to change the language of the previous handoffs. In fact, now that I think about it, probably the possible change of language should be an option only in the last step (generate-questions, and the default should be the same as the original note. It's true I'm not using that default, but it seems more coherent for reusing this project; in any case, we can always ask the user to confirm that.) -->
 | **Question focus** | `conceptual-only` | `conceptual-only` · `syntax-included`. Must match the setting used during summarisation. |
 | **Category root** | *(ask the user)* | The Moodle category root path, e.g. `$course$/top/MachineLearning`. |
 

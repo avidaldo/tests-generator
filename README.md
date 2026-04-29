@@ -40,12 +40,13 @@ Open `prompts/summarize-sources.prompt.md` as a prompt. Provide:
 - **Path(s) to course materials** — can be directories or files in external repos outside this workspace:
 
   ```text
+  #prompt:prompts/summarize-sources.prompt.md
+
   Summarise the following course materials:
   - /path/to/ml-course/notebooks/01-preprocessing/
   - /path/to/ml-course/notebooks/02-evaluation/
   - /path/to/ml-theory/docs/bias-variance.md
   ```
-<!-- TODO: Is this an example of the prompt the user should use for that process? in that case, shouldn't it explicitly show how to call the predefined prompt ("/sumarize-sources")? -->
 <!-- TODO: Shouldn't a subagent be used for each material, to avoid overloading the context and paralelize? wouldn't that be better for performance and scalability? -->
 
 - **Subject Profile overrides** (optional) — if not stated in the message, the agent will ask.
