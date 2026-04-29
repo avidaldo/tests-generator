@@ -1,6 +1,6 @@
 # Implementation Plan
 
-> Updated: 2026-04-29 (refresh 5)
+> Updated: 2026-04-29 (refresh 6)
 > Branch: decomposed
 > Status: active
 
@@ -31,23 +31,17 @@
 
 | ID | Status | Type | Summary | Source | Depends on |
 | --- | --- | --- | --- | --- | --- |
-| P6 | completed | action | Promote editor v3 to the main `editor/` path; update all run-command references | `editor/v3/README.md:3` | none |
 | P11 | planned | action | Remove language column from `summarize-sources` and `merge-summaries` Subject Profiles; remove/rephrase language default from `AGENTS.md` | Q2 resolution | none |
 | P12 | planned | action | Replace specific `docs/` prohibition in `summarize-sources` with a general external-knowledge rule | `prompts/summarize-sources.prompt.md:132` | none |
 | P13 | planned | action | Update README Step 1 example to show explicit `#prompt:` invocation before materials list | `README.md:48` | none |
 | P14 | planned | decision | Build a fan-out skill that spawns `summarize-sources` as one subagent per material path | `README.md:49` | none |
-| P15 | completed | debt | Remove dangling incomplete TODO at `generate-questions.prompt.md:15` | `prompts/generate-questions.prompt.md:15` | none |
-| P16 | planned | action | Create `docs/editor_json_schema.md` as the canonical schema; update prompt output block and editor AGENTS.md to reference it | `prompts/generate-questions.prompt.md:198` | P6 |
-| P17 | completed | debt | Remove `disable-model-invocation: false` from `todo-analysis` SKILL.md frontmatter | `.github/skills/todo-analysis/SKILL.md:7` | none |
+| P16 | planned | action | Create `docs/editor_json_schema.md` as the canonical schema; update prompt output block and editor AGENTS.md to reference it | `prompts/generate-questions.prompt.md:198` | none |
 | P18 | planned | debt | Document why hook scripts are used over markdown instructions in `customization_architecture.md`; remove the TODO | `docs/customization_architecture.md:102` | none |
 | P19 | planned | action | Build a `customization-audit` skill that fetches VS Code customization docs and reports gaps in this repo's customization files | `.github/instructions/customization-authoring.instructions.md:18` | none |
 | P4 | planned | decision | Review the prompt pipeline TODO cluster as a separate design pass | `README.md:48-49`, prompt TODOs | none |
 | P8 | planned | debt | Improve the `todo-analysis` SKILL.md enrichment step to explicitly encourage broader architecture analysis | `.github/skills/todo-analysis/SKILL.md:46` | none |
 | P9 | planned | debt | Decide whether to add file-based debug logging to the context-injection hook (`todo_planner_context.py`) | `.github/hooks/src/todo_planner_context.py:123` | none |
-| P10 | planned | action | Implement difficulty sub-categorization for editor export ("Lista pero fácil") | `editor/README.md` | P6 |
-| P20 | completed | action | Delete `resources/convert_xml_to_md.py` (P5 decided this; file was never actually removed) | `resources/convert_xml_to_md.py:1` | none |
-| P21 | completed | debt | Remove the inline YAML comment from `todo-planner.agent.md` handoff prompt (Q11 resolved, answer already in docs) | `.github/agents/todo-planner.agent.md:14` | none |
-| P22 | completed | debt | Remove stale Q7-resolved TODO comment from `todo-analysis/SKILL.md:16` | `.github/skills/todo-analysis/SKILL.md:16` | none |
+| P10 | planned | action | Implement difficulty sub-categorization for editor export ("Lista pero fácil") | `editor/README.md` | none |
 
 ## Next Sequence
 
@@ -109,59 +103,6 @@
 
 - `AGENTS.md` (skills inventory)
 - `.github/instructions/customization-authoring.instructions.md` (remove the TODO)
-
-### P6 — Promote editor v3 to the main `editor/` path
-
-**Type**: action
-**Source TODOs**:
-
-- `editor/v3/README.md:3`
-
-**Current understanding**:
-
-- v3 is the only maintained editor. v1 and v2 are in `deprecated/` for didactic history. The `v3/` subdirectory label is vestigial.
-- The run command everywhere (`uv run python editor/v3/main.py`) is awkward. All relative imports inside `editor/v3/` are already package-relative so they will not break on move.
-
-**Decision or change to make**:
-
-- Move `editor/v3/*` to `editor/` (i.e. `editor/v3/main.py` → `editor/main.py`, etc.).
-- Remove the now-empty `editor/v3/` directory.
-- Update all run-command references: `README.md`, `AGENTS.md`, `editor/AGENTS.md`, `editor/SPECS_v3.md`, any hook scripts.
-- Merge or replace `editor/v3/README.md` content into a new `editor/README.md`.
-
-**Docs to sync after implementation**:
-
-- `README.md`
-- `AGENTS.md`
-- `editor/AGENTS.md`
-- `editor/SPECS_v3.md`
-
-**Prerequisite for**: P10, P16
-
-### Q6 — `disable-model-invocation` frontmatter field semantics
-
-**Source**: `.github/skills/todo-analysis/SKILL.md:7`
-
-### P17 — Remove `disable-model-invocation` from `todo-analysis` SKILL.md
-
-**Type**: debt
-**Source TODOs**:
-
-- `.github/skills/todo-analysis/SKILL.md:7` — `disable-model-invocation: false # TODO: In which cases the agent would invoke the model?`
-
-**Current understanding**:
-
-- `disable-model-invocation` is a valid SKILL.md frontmatter field. `false` (default) means the skill can be auto-invoked with full model reasoning; `true` would restrict to manual-only invocation.
-- For a planning skill that writes a file, model invocation is always needed. `false` is the correct value — and also the default, so the explicit declaration adds no information.
-- The TODO comment attached to it shows the field was not understood when added.
-
-**Decision or change to make**:
-
-- Remove the `disable-model-invocation: false` line and its TODO comment from the SKILL.md frontmatter.
-
-**Docs to sync after implementation**:
-
-- none
 
 ### P8 — Improve `todo-analysis` SKILL.md enrichment step for architecture analysis
 
@@ -225,72 +166,6 @@
 **Docs to sync after implementation**:
 
 - none
-
-### P20 — Delete `resources/convert_xml_to_md.py`
-
-**Type**: action
-**Source TODOs**:
-
-- `resources/convert_xml_to_md.py:1` — planning TODO; Q1 resolved and P5 recorded the decision but the file was never removed
-
-**Current understanding**:
-
-- P5 completed on 2026-04-29 recorded the *decision* to delete the file (it has no documented pipeline role and `summarize-sources` does not reference it). The file still exists with its original TODO comment.
-- This is a gap between a completed decision item and the missing implementation step.
-
-**Decision or change to make**:
-
-- Delete `resources/convert_xml_to_md.py`.
-
-**Docs to sync after implementation**:
-
-- `AGENTS.md` (resources table — check if script is listed; remove if so)
-- `README.md` (check if referenced)
-
----
-
-### P21 — Remove stale handoff-prompt comment from `todo-planner.agent.md`
-
-**Type**: debt
-**Source**:
-
-- `.github/agents/todo-planner.agent.md:14` — inline YAML comment `# Do I need this prompt? should I edit it in any case? is not defined already in the sdd-implementer agent file?`
-
-**Current understanding**:
-
-- Q11 was resolved immediately: the handoff prompt is intentional — it seeds specific next-step context into the new chat state and complements (does not replace) the target agent's own instructions. This decision is already recorded in `docs/customization_architecture.md`.
-- The comment was never cleaned up when the decision was recorded.
-
-**Decision or change to make**:
-
-- Remove the trailing YAML comment from the `prompt:` line in the `todo-planner.agent.md` handoffs frontmatter.
-
-**Docs to sync after implementation**:
-
-- none
-
----
-
-### P22 — Remove stale Q7-resolved TODO comment from `todo-analysis/SKILL.md`
-
-**Type**: debt
-**Source**:
-
-- `.github/skills/todo-analysis/SKILL.md:16` — `<!-- TODO: but refering to the doc is not loading that doc in context? wouldn't be more operational to just not quoting it? -->`
-
-**Current understanding**:
-
-- Q7 resolved on 2026-04-29: Markdown links in SKILL.md do not auto-load external files; keep the link for human navigation value. The question is answered — no action on the link itself. The TODO comment was never removed after resolution.
-
-**Decision or change to make**:
-
-- Remove the TODO comment at line 16. Keep the Markdown link on the adjacent line unchanged.
-
-**Docs to sync after implementation**:
-
-- none
-
----
 
 ### P10 — Implement difficulty sub-categorization for editor export ("Lista pero fácil")
 
@@ -415,25 +290,6 @@
 - `README.md`
 - `prompts/AGENTS.md`
 - `AGENTS.md` (skill inventory)
-
-### P15 — Remove dangling TODO at `generate-questions.prompt.md:15`
-
-**Type**: debt
-**Source TODOs**:
-
-- `prompts/generate-questions.prompt.md:15` — `<!-- TODO: I don't clearly see how the adversarial logic -->` (cut off, never completed)
-
-**Current understanding**:
-
-- The adversarial filter mechanism is already wired: the doc reference (`docs/adversarial_logic_filters.md §1 and §6`) combined with mandatory `answers[].feedback` on every option enforces the self-validation step. The TODO was an incomplete thought, not an unresolved problem.
-
-**Decision or change to make**:
-
-- Delete the TODO comment. No other change needed.
-
-**Docs to sync after implementation**:
-
-- none
 
 ### P16 — Create `docs/editor_json_schema.md` as the canonical editor JSON schema
 
