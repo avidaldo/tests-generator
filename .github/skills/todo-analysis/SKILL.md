@@ -3,12 +3,15 @@ name: todo-analysis
 description: >
   Analyze repository TODOs, separate clarification questions from action items, and maintain a lightweight docs/implementation_plan.md for the repo's SDD/living-documentation workflow. Use when triaging pending work before coding or when refreshing the plan after new discoveries.
 argument-hint: "[scope: optional path or topic]"
-user-invocable: true
+user-invocable: false
+disable-model-invocation: true
 ---
 
 # TODO Analysis
 
 This skill is the canonical planning workflow for this repository.
+
+It is loaded by `todo-planner` and is not intended as a direct public entry point.
 
 Canonical rationale for the workflow lives in [docs/customization_architecture.md](../../../docs/customization_architecture.md). Keep this skill operational: it should tell the agent what to do, not restate the full design rationale.
 

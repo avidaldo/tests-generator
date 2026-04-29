@@ -41,7 +41,6 @@
 1. P14, P19, P4, P9 — no urgent dependencies; P9 requires a decision before coding.
 2. Continue one item at a time.
 
-
 ## Item Details
 
 ### P4 - Review the prompt pipeline TODO cluster as a separate design pass
@@ -141,9 +140,10 @@
 - `prompts/AGENTS.md`
 - `AGENTS.md` (skill inventory)
 
-
 ## Recently Completed
 
+- P24 — 2026-04-29. Clarified the prompt-launcher semantics in the two SDD launcher prompts and made `implement-plan-item` explicitly single-item-only.
+- P23 — 2026-04-29. Added prompt-first launcher entry points for planning and implementation, hid overlapping agent/skill UI surfaces, replaced the planner handoff with the implementation prompt, and rewrote the customization docs around the new public-vs-internal structure.
 - P18 — 2026-04-29. Added hook-script-vs-markdown-instructions rationale section to `customization_architecture.md`; removed TODO comment. (Completed silently; plan updated retroactively in refresh 10.)
 - P8 — 2026-04-29. Removed stale TODO comment from `todo-analysis/SKILL.md` Step 3; cross-cutting scan section was already present.
 - P13 — 2026-04-29. Updated README Step 1 code block to show `#prompt:prompts/summarize-sources.prompt.md` invocation; removed resolved TODO comment.
@@ -166,6 +166,10 @@
 
 ## Recently Resolved
 
+- 2026-04-29 - The launcher prompts still declare `agent: agent` because they run in the built-in runtime and then invoke the hidden custom agents programmatically. That wording is now explicit in the prompt bodies and architecture doc.
+- 2026-04-29 - `implement-plan-item.prompt.md` is explicitly limited to exactly one approved item per run; no batch "implement all remaining work" launcher was added.
+- 2026-04-29 - Public VS Code entry points for the SDD loop are prompt files only; `todo-planner`, `sdd-implementer`, and `todo-analysis` remain as hidden runtime layers behind those launchers.
+- 2026-04-29 - The planner no longer surfaces an agent handoff button. In the prompt-first architecture it finishes by telling the user to run `implement-plan-item.prompt.md`, because hidden agents are not valid handoff targets in the current VS Code setup.
 - Q11 — Resolved 2026-04-29. The explicit handoff prompt in `todo-planner.agent.md` is intentional: it seeds specific next-step context into the new chat state and complements the `sdd-implementer` instructions (does not replace them). Decision already recorded in `customization_architecture.md`. Cleanup: remove the stale YAML comment → P21.
 - Q10 — Resolved 2026-04-29. Build the `customization-audit` skill → P19. Trigger: on-demand (VS Code major release or customization regression).
 - Q9 — Resolved 2026-04-29. Yield-based weighting is speculative before a generation pass reveals whether concept-poor areas are a real problem. Bundled inside P4; scenario-generation layer becomes a new P item only if P4 confirms the gap.

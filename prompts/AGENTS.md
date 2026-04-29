@@ -2,10 +2,12 @@
 
 ## Current State
 
-This folder contains the canonical prompt files for the repository. VS Code is configured to discover prompt files from this folder.
+This folder contains the canonical user-facing prompt files for the repository. VS Code is configured to discover prompt files from this folder.
 
 | File | Status | Description |
-|------|--------|-------------|
+| ---- | ------ | ----------- |
+| `refresh-plan.prompt.md` | **Active — Workflow Launcher** | Public slash-command entry for the guarded planning workflow; invokes `todo-planner` programmatically |
+| `implement-plan-item.prompt.md` | **Active — Workflow Launcher** | Public slash-command entry for plan-driven implementation; invokes `sdd-implementer` programmatically |
 | `summarize-sources.prompt.md` | **Active — Stage 1** | Rich content extraction from source files; one per repo or topic area |
 | `merge-summaries.prompt.md` | **Active — Stage 2** | Organizes raw summaries into subcategory files with cross-cutting context |
 | `generate-questions.prompt.md` | **Active — Stage 3** | Question generation in JSON format; one subcategory file per invocation |
@@ -14,9 +16,19 @@ This folder contains the canonical prompt files for the repository. VS Code is c
 
 > **Note:** `metaprompting.prompt.md` was merged into `.github/instructions/prompt-authoring.instructions.md` — it was behavioural guidance, not a workflow prompt.
 
+### Workflow Launchers
+
+The two maintenance prompts are intentionally thin launchers:
+
+- `refresh-plan.prompt.md` is the public entry point for the SDD planning loop. It invokes the hidden `todo-planner` agent programmatically, preserving planner-only hooks without exposing the agent as a primary UI surface.
+- `implement-plan-item.prompt.md` is the public entry point for plan-driven implementation. It invokes the hidden `sdd-implementer` agent programmatically.
+- The planning prompt ends by telling the user to run `/implement-plan-item`; it does not rely on an agent handoff button.
+
+They live in the same folder as the quiz-generation prompts because `prompts/` is already the workspace prompt-discovery surface. No second prompt root is needed.
+
 ### Pipeline Overview
 
-```
+```text
 User provides repos (list of paths)
         │
         ▼  ── one invocation per repo (parallelizable) ──
@@ -54,7 +66,10 @@ Moodle import
 
 Each stage is run manually by the user. Stages 1 and 3 are parallelizable (independent invocations); Stage 2 is a single merge pass.
 
+The workflow launchers above are separate from this quiz-generation pipeline. They maintain the repository itself rather than generating quiz artifacts.
+
 **Intermediate format**: JSON conforming to [`docs/editor_json_schema.md`](../docs/editor_json_schema.md) — the canonical schema shared between the prompt output and the editor import (`editor/file_io/state_io.py`).
+
 - Direct editor import — no conversion step
 - Adversarial filter preserved via required `feedback` fields per distractor
 - ~30 lines/question vs. ~60–80 for XML → roughly 2× throughput improvement
@@ -64,7 +79,7 @@ Each stage is run manually by the user. Stages 1 and 3 are parallelizable (indep
 All three prompts accept a **Subject Profile** — parameters the user can override at invocation time:
 
 | Parameter | Prompts | Default | Options |
-|-----------|---------|---------|---------|
+| --------- | ------- | ------- | ------- |
 | **Question focus** | All three | `conceptual-only` | `conceptual-only` · `syntax-included` |
 | **Output language** | `generate-questions` only | Castellano (Spanish), technical terms in English in parentheses | Any language |
 
@@ -85,7 +100,7 @@ This allows the question generator to create relationship questions (e.g. *"¿C�
 
 Questions use **concept references** (e.g. `NORM-01` = concept #1 in the Normalización subcategory) in the `source_ref` field instead of raw file paths. Concept IDs are assigned in Stage 2 (merge), where the taxonomy is fixed.
 
-```
+```text
 Question JSON          Subcategory file          Raw summaries          Source files
 ─────────────          ────────────────          ─────────────          ────────────
 source_ref: "NORM-01"  →  [NORM-01] defined in   →  summary-repo-a.md   →  02-preprocessing.ipynb
@@ -99,7 +114,7 @@ The human reviewer traces back via the subcategory file and raw summaries.
 Stage 1 handles three file types. Extraction depth depends on **question focus**:
 
 | Type | `conceptual-only` (default) | `syntax-included` |
-|------|----------------------------|---------------------|
+| ---- | --------------------------- | ----------------- |
 | `.md` | Full text | Full text |
 | `.ipynb` | Markdown cells + code cells read for concept context (not syntax) | Both markdown and code cells fully processed |
 | `.py` | Docstrings, comments, conceptual patterns demonstrated by code | Code structure, function signatures, implementation patterns |
@@ -109,7 +124,7 @@ Stage 1 handles three file types. Extraction depth depends on **question focus**
 Psychometric design knowledge is maintained in `docs/` and auto-attached via instructions:
 
 | Document | Content | Auto-attached via |
-|----------|---------|-------------------|
+| -------- | ------- | ----------------- |
 | [docs/adversarial_logic_filters.md](../docs/adversarial_logic_filters.md) | Adversarial filter mechanism, CoT strategy, prompting meta-techniques | Referenced in generation prompt |
 | [docs/distractor_design.md](../docs/distractor_design.md) | Distractor strategies, anti-bias rules, scenario triangulation, psychometric item quality | `.github/instructions/question-design.instructions.md` |
 
@@ -130,7 +145,7 @@ Psychometric design knowledge is maintained in `docs/` and auto-attached via ins
 The original monolithic `generate-test.prompt.md` performed reading, organisation, and generation in a single agent turn. This caused: context exhaustion, output bloat (XML verbosity), and coupled failures. The 3-stage pipeline isolates each concern:
 
 | Stage | Concern | Context pressure |
-|-------|---------|-----------------|
+| ----- | ------- | ---------------- |
 | Summarise (per repo) | Content extraction | One repo's files |
 | Merge | Taxonomy + cross-cutting context | All summaries (small: no source files) |
 | Generate (per subcategory) | Question design + adversarial validation | One subcategory file |
@@ -138,6 +153,7 @@ The original monolithic `generate-test.prompt.md` performed reading, organisatio
 ### Why Rich Summaries, Not Concept Lists
 
 An earlier design extracted only concept names and definitions. This lost:
+
 - **Processes**: step-by-step algorithms and procedures
 - **Cases and analogies**: real-world examples that motivate scenario-based questions
 - **Comparisons and decision criteria**: when to use X vs. Y, and why
@@ -148,6 +164,7 @@ The current design preserves full content from source files, stripping only code
 ### Why a Merge Step
 
 Without a merge, the same subcategory (e.g. "normalisation") appears independently in multiple repo summaries, with no cross-repo connections. The merge step:
+
 1. Identifies the unified taxonomy across all repos
 2. Deduplicates overlapping content (using the most complete formulation)
 3. Creates "Related context" sections so each subcategory file is self-contained for generation
@@ -156,6 +173,7 @@ Without a merge, the same subcategory (e.g. "normalisation") appears independent
 ### Why Self-Contained Subcategory Files
 
 The question generator receives one file and produces one JSON. This means:
+
 - Each generation invocation gets a **fresh context window** — no drift
 - No cross-file dependencies at generation time
 - Stages 1 and 3 are trivially parallelizable (independent invocations)
@@ -164,6 +182,7 @@ The question generator receives one file and produces one JSON. This means:
 ### Why Concept IDs Are Assigned at Stage 2
 
 Concept IDs are stable references for `source_ref` in question JSON. They need to be assigned after the taxonomy is fixed (Stage 2), not during extraction (Stage 1), because:
+
 - The same concept may appear in multiple raw summaries under different names
 - The subcategory a concept belongs to determines its ID prefix
 - IDs assigned before merging would need renaming and conflict resolution
@@ -181,7 +200,7 @@ Direct editor import (zero conversion), adversarial filter preserved via require
 ## Files
 
 | File | Description |
-|------|-------------|
+| ---- | ----------- |
 | `prompts/summarize-sources.prompt.md` | Stage 1: rich content extraction from source files |
 | `prompts/merge-summaries.prompt.md` | Stage 2: taxonomy organization, deduplication, cross-cutting context |
 | `prompts/generate-questions.prompt.md` | Stage 3: question generation from subcategory files |

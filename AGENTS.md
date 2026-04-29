@@ -13,8 +13,8 @@
 
 - `TODO:` is the default inline capture marker. Prefer low-friction capture over elaborate inline taxonomies.
 - `docs/implementation_plan.md` is the curated active plan. Question-style TODOs must be moved there as Clarification Queue entries before implementation starts.
-- Use the `todo-planner` custom agent to refresh the plan and surface unresolved questions before larger changes.
-- Use the `sdd-implementer` custom agent or the standard coding agent only after the relevant plan item is approved.
+- Use [`prompts/refresh-plan.prompt.md`](prompts/refresh-plan.prompt.md) to refresh the plan and surface unresolved questions before larger changes.
+- Use [`prompts/implement-plan-item.prompt.md`](prompts/implement-plan-item.prompt.md) after the relevant plan item is approved.
 - When a change affects architecture, workflow, or agent behavior, update the relevant docs and instruction files in the same change.
 - Canonical rationale for this split lives in [docs/customization_architecture.md](docs/customization_architecture.md).
 
@@ -26,7 +26,7 @@ This repository contains tools and prompts for generating, editing, and analyzin
 
 | Path | Purpose | Instructions |
 | ---- | ------- | ------------ |
-| `prompts/` | Canonical prompt files (`.prompt.md`) and prompt design/decomposition notes | [`prompts/AGENTS.md`](prompts/AGENTS.md) |
+| `prompts/` | Canonical user-facing prompt files (`.prompt.md`) for workflow launchers and quiz generation | [`prompts/AGENTS.md`](prompts/AGENTS.md) |
 | `.github/instructions/` | VS Code file-scoped instruction adapters (`.instructions.md`) | [`AGENTS.md`](AGENTS.md) |
 | `.github/` | VS Code-specific compatibility files and workflows | [`AGENTS.md`](AGENTS.md) |
 | `editor/` | PyQt-based Moodle XML quiz editor | [`editor/AGENTS.md`](editor/AGENTS.md) |
@@ -66,14 +66,15 @@ Each step is run manually. See the [Usage guide in README.md](README.md#usage-ge
 ## Planning Workflow
 
 - Capture open work locally with `TODO:` markers.
-- Refresh `docs/implementation_plan.md` with the `todo-planner` custom agent before coding when the task touches multiple files, unresolved design questions, or existing TODOs.
+- Refresh `docs/implementation_plan.md` with [`prompts/refresh-plan.prompt.md`](prompts/refresh-plan.prompt.md) before coding when the task touches multiple files, unresolved design questions, or existing TODOs.
 - Resolve Clarification Queue items with the user before implementation.
-- Implement one approved item at a time, then sync the plan and any affected docs or instructions before finishing.
+- Implement one approved item at a time with [`prompts/implement-plan-item.prompt.md`](prompts/implement-plan-item.prompt.md), then sync the plan and any affected docs or instructions before finishing.
 
 ## VS Code Customization Layout
 
 - Keep `AGENTS.md` files as the canonical cross-agent instruction surface. Root and subfolder `AGENTS.md` files are both loaded by VS Code (`chat.useNestedAgentsMdFiles`).
-- Keep `prompts/*.prompt.md` as the canonical prompt files; discovered via `chat.promptFilesLocations` in `.vscode/settings.json`.
+- Keep `prompts/*.prompt.md` as the canonical user-facing workflow entry points; discovered via `chat.promptFilesLocations` in `.vscode/settings.json`.
+- Current workflow launchers in `prompts/`: `refresh-plan.prompt.md` and `implement-plan-item.prompt.md` for repo maintenance, plus the quiz-generation pipeline prompts documented in `prompts/AGENTS.md`.
 - `chat.useCustomAgentHooks` is enabled in `.vscode/settings.json` so planner-only guard rails can live with the custom agent that needs them.
 - Use `.github/instructions/*.instructions.md` for file-type-scoped rules; current files and their `applyTo` targets:
   - `customization-authoring.instructions.md` → `.github/instructions/*.instructions.md`, `.github/agents/*.agent.md`, `.github/skills/**/SKILL.md`
@@ -89,14 +90,14 @@ Each step is run manually. See the [Usage guide in README.md](README.md#usage-ge
   - `xml-moodle.instructions.md` → `**/*.xml`
 - Markdown links in `.instructions.md` files to canonical sources are resolved automatically (`chat.includeReferencedInstructions`).
 - Use `.github/agents/*.agent.md` for custom agents; current agents:
-  - `todo-planner` → planning-only agent for TODO triage, clarification, and `docs/implementation_plan.md` refresh
-  - `sdd-implementer` → implementation agent for one approved plan item at a time, with doc sync before finish
+  - `todo-planner` → hidden runtime planning agent invoked by `refresh-plan.prompt.md`; owns clarification workflow and planner-only hooks
+  - `sdd-implementer` → hidden runtime implementation agent invoked by `implement-plan-item.prompt.md`; implements one approved plan item at a time and syncs docs
 - Use agent-scoped hooks in `.github/agents/*.agent.md` when a guard rail should apply only to one agent; the planner guard rails live there by design.
 - Use `.github/hooks/*.json` + scripts for repo-wide deterministic agent-time enforcement (PostToolUse, PreToolUse); current hooks:
   - `strip-notebook-outputs.json` → strips `.ipynb` outputs after any agent file write
   - `prompt-doc-drift-check.json` → warns when prompt/customization changes may need documentation-sync updates
   - `living-docs-drift-check.json` → warns when source edits have no matching plan or documentation updates
 - Use `.github/skills/<name>/SKILL.md` for portable, on-demand multi-step workflows; current skills:
-  - `todo-analysis` → triages TODOs into a lightweight implementation plan with a clarification queue
+  - `todo-analysis` → hidden planning workflow module loaded by `todo-planner`; triages TODOs into a lightweight implementation plan with a clarification queue
   - `notebook-hygiene` → installs the full four-layer notebook output enforcement stack
   - `editor-export` → exports reviewed editor JSON state to Moodle XML with explicit status control

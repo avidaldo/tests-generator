@@ -137,7 +137,9 @@ This repository uses AI coding assistants as development tools. See [`AGENTS.md`
 The development workflow is intentionally simple:
 
 1. Capture local doubts or pending work as `TODO:` comments.
-2. Refresh [`docs/implementation_plan.md`](docs/implementation_plan.md) with the `todo-planner` custom agent.
+2. Refresh [`docs/implementation_plan.md`](docs/implementation_plan.md) with [`prompts/refresh-plan.prompt.md`](prompts/refresh-plan.prompt.md).
 3. Resolve Clarification Queue items before coding.
-4. Implement one approved item at a time with `sdd-implementer` or the standard coding agent.
+4. Implement one approved item at a time with [`prompts/implement-plan-item.prompt.md`](prompts/implement-plan-item.prompt.md).
 5. Update the plan and the relevant docs or instructions in the same change.
+
+The underlying `todo-planner`, `sdd-implementer`, and `todo-analysis` customizations still exist, but they are runtime layers behind the prompt launchers rather than the primary UI entry points.

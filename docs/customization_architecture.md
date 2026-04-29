@@ -34,10 +34,10 @@ None of these surfaces replaces the others.
 | --- | --- | --- |
 | Always-on instructions | Repo policy, routing, and behavior constraints | These rules should be present automatically in agent context |
 | File instructions | File-type and module-specific rules | They are conditional and should not burn context everywhere |
-| Skill | Reusable planning workflow (`todo-analysis`) | The workflow is task-specific, portable, and should be callable on demand |
-| Custom agents | Planning persona and implementation persona | Persona, handoff, and agent-scoped hook behavior belong with agents |
+| Skill | Internal planning workflow module (`todo-analysis`) | The planning procedure stays reusable and portable without becoming a competing public entry point |
+| Custom agents | Hidden planning and implementation runtime shells | Persona, scoped hooks, and programmatic execution boundaries belong with agents even when prompts are the public UI |
 | Hooks | Deterministic reminders and guard rails | Hooks should enforce or remind, not perform judgment-heavy authoring |
-| Prompts | Quiz-generation pipeline tasks | These are single reusable workflows for domain tasks, not always-on behavior |
+| Prompts | Public workflow entry points | Prompts are the slash-menu discovery surface for both the SDD loop and the quiz-generation pipeline |
 
 ## Marker Policy
 
@@ -62,11 +62,21 @@ This keeps the workflow honest:
 ## Recommended Loop
 
 1. Capture new doubts or ideas as `TODO:` comments close to the code or document they affect.
-2. Run the `todo-planner` custom agent to read the current plan, scan TODOs, and refresh `docs/implementation_plan.md`.
+2. Run `refresh-plan.prompt.md` to enter the guarded planning workflow and refresh `docs/implementation_plan.md`.
 3. Resolve Clarification Queue items with the user before coding.
 4. Choose one approved plan item.
-5. Implement it with `sdd-implementer` or the standard coding agent.
+5. Run `implement-plan-item.prompt.md` to enter the implementation workflow for one approved item.
 6. Update `docs/implementation_plan.md` and sync the relevant docs and instructions in the same change.
+
+## Entry Point Tiers
+
+VS Code now has a deliberate three-tier model for this repo:
+
+1. **Prompts are the public entry points.** The recommended slash commands are `refresh-plan.prompt.md` and `implement-plan-item.prompt.md` for repo maintenance, plus the quiz-generation prompts in `prompts/`.
+2. **Agents are hidden runtime shells.** `todo-planner` and `sdd-implementer` still own persona and hook scope, but they are invoked programmatically from the prompt launchers instead of acting as the primary UI surface.
+3. **Skills are hidden workflow modules.** `todo-analysis` still owns the planning procedure text, but it is loaded by `todo-planner` instead of competing as a separate public command.
+
+This keeps the user-facing surface small without collapsing the underlying enforcement boundaries.
 
 ## Docs Versus Instructions
 
@@ -79,7 +89,7 @@ Practical rule:
 - If the content explains why a design exists, it belongs in `docs/`.
 - If the content says how the agent should behave, route, or prioritize while working, it belongs in `AGENTS.md` or an instruction file.
 - If the content is a reusable multi-step workflow, it belongs in a skill.
-- If the content depends on a persona, handoff, or hook scope, it belongs in a custom agent.
+- If the content depends on a persona or hook scope, it belongs in a custom agent.
 
 ## Hook Policy
 
@@ -109,19 +119,25 @@ For purely static rules, a markdown instruction in the agent file is simpler and
 
 ## Why These Primitive Choices
 
-- `todo-analysis` is a skill, not a prompt, because it is a reusable multi-step workflow that can be invoked directly or loaded by another agent.
-- `todo-planner` is a custom agent, not just part of the skill, because it needs a planning persona, a handoff to the implementer, and planner-only hooks.
+- `refresh-plan.prompt.md` and `implement-plan-item.prompt.md` are prompts because they are thin, user-facing launchers. They optimize slash-menu discovery and should stay minimal.
+- `todo-analysis` remains a skill because it is still the canonical planning procedure text, even though it is no longer a public entry point in VS Code.
+- `todo-planner` is a custom agent because it needs a planning persona and planner-only hooks.
 - `sdd-implementer` is a custom agent because implementation behavior is persistent and should start from the plan every time, not from a one-off prompt.
-- The planner handoff keeps an explicit prompt even though `sdd-implementer` already has instructions. The handoff prompt carries the specific next-step context into the new chat state; it complements the target agent instructions instead of replacing them.
+- The prompt launchers use the built-in `agent` runtime to invoke the hidden custom agents programmatically. This is why their frontmatter still says `agent: agent` even though their bodies name `todo-planner` or `sdd-implementer`.
+- Planning now ends by telling the user to run `implement-plan-item.prompt.md` rather than surfacing an agent handoff button. That avoids re-exposing the hidden implementation agent as a public step.
+- `implement-plan-item.prompt.md` is intentionally a one-item workflow. The implementation plan is an ordered queue with checkpoints, not blanket approval to consume the full backlog in one run.
+- The launcher prompts stay in `prompts/` because that is already the workspace prompt-discovery surface. Creating a second prompt root would add routing complexity without reducing ambiguity.
 - The living-docs reminder is a workspace hook JSON because it should apply repo-wide after relevant source edits.
 
 ## Current Mapping
 
 | Surface | Current file(s) | Responsibility |
 | --- | --- | --- |
-| Planning workflow | `.github/skills/todo-analysis/SKILL.md` | Triages TODOs into a lightweight implementation plan |
-| Planning persona | `.github/agents/todo-planner.agent.md` | Planning-only agent with plan refresh and implementation handoff |
-| Implementation persona | `.github/agents/sdd-implementer.agent.md` | Implements one approved item at a time and syncs docs |
+| Planning launcher | `prompts/refresh-plan.prompt.md` | Public slash-command entry for the guarded planning workflow |
+| Implementation launcher | `prompts/implement-plan-item.prompt.md` | Public slash-command entry for plan-driven implementation |
+| Planning workflow | `.github/skills/todo-analysis/SKILL.md` | Hidden planning procedure module loaded by `todo-planner` |
+| Planning persona | `.github/agents/todo-planner.agent.md` | Hidden planning agent with plan refresh and planner-only hooks |
+| Implementation persona | `.github/agents/sdd-implementer.agent.md` | Hidden implementation agent that executes one approved item at a time |
 | Planner guard rails | `.github/hooks/src/todo_planner_context.py`, `.github/hooks/src/todo_planner_write_guard.py` | Agent-scoped context injection and write restriction for planner sessions |
 | Prompt/customization drift reminder | `.github/hooks/prompt-doc-drift-check.json`, `.github/hooks/src/prompt_doc_drift_check.py` | Reminds when prompt/customization changes are not reflected in the root docs |
 | Living-docs reminder | `.github/hooks/living-docs-drift-check.json`, `.github/hooks/src/living_docs_drift_check.py` | Reminds when source edits have no matching plan or documentation updates |
@@ -130,6 +146,7 @@ For purely static rules, a markdown instruction in the agent file is simpler and
 
 - `TODO:` is the canonical inline marker.
 - Question-style TODOs are first-class planning inputs, not implementation items.
-- The reusable planning workflow lives in the `todo-analysis` skill.
-- Persona, handoff, and planner-only guard rails live in custom agents.
+- Public VS Code entry points for the SDD loop live in prompt files.
+- The reusable planning workflow lives in the hidden `todo-analysis` skill.
+- Persona and planner-only guard rails live in hidden custom agents.
 - Hooks provide deterministic reminders and constraints only; they do not author docs.
