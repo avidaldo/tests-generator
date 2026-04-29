@@ -53,6 +53,12 @@ Minimum context bar:
 - identify the direct callers or neighboring files when the note affects behavior
 - check whether the note overlaps with another TODO or doc section
 
+After enriching individual markers, do a cross-cutting scan:
+
+- group markers by affected module or workflow boundary
+- identify recurring themes (e.g., all language-convention questions, all schema-ownership questions)
+- note whether any group of questions implies a deeper architectural ambiguity not captured by any single marker
+
 ### 4. Classify by intent
 
 Use this decision rule:
@@ -70,6 +76,14 @@ When the item is still mostly debate, keep it in the Clarification Queue instead
 ### 5. Update `docs/implementation_plan.md`
 
 Keep the plan lightweight enough to update after every meaningful step. Do not turn it into a second codebase inventory.
+
+**Archive completed items.** Completed `P` items must not stay in the Planned Work table or Item Details section. After each run:
+
+- Remove completed rows from the Planned Work table.
+- Remove their Item Details blocks.
+- Add a one-line summary to the `Recently Completed` section (see template below).
+
+The `Recently Resolved` section is for architectural decisions and agreement records. The `Recently Completed` section is for implemented P items. Keep them separate.
 
 Use this template:
 
@@ -123,19 +137,37 @@ Use this template:
 - AGENTS.md
 - README.md
 
+## Recently Completed
+
+- P1 — 2026-04-29. Defined the customization architecture for the SDD loop.
+
 ## Recently Resolved
 
 - Q1 — Resolved on 2026-04-29. The reusable workflow lives in a skill; the persona and handoff live in a custom agent.
 
 ```
 
-### 6. Stop at the right boundary
+### 6. Resolve open questions with the user
 
-This skill plans. It does not implement source changes. Its output is the refreshed `docs/implementation_plan.md` and a concise summary of:
+After the plan is written, do not stop. Create aWork through each new or still-open Clarification Queue item interactively:
 
-- open clarification items
-- approved next implementation item
-- docs and instructions likely to need sync after implementation
+1. For each open Q item, present:
+   - the source file and line
+   - a concrete analysis of the trade-offs and options (not just a restatement of the TODO text)
+   - a recommended answer if one is defensible
+2. Ask the user to confirm, reject, or modify the recommendation.
+3. Record the decision inline (update the Q row to `resolved`, add a `Recently Resolved` entry, and update any affected P items or Item Details).
+4. Repeat for every open question before moving to Step 7.
+
+Do not batch all questions into one message. Present one question at a time so the user can respond with context.
+
+### 7. Surface the handoff
+
+After all open questions are either resolved or explicitly deferred, present:
+
+- a concise summary of what changed in the plan (new Q items, resolved Q items, new P items, approved P items)
+- the approved next implementation item (the first unblocked `planned` item in the Planned Work table)
+- the handoff to `sdd-implementer` for the user to trigger when ready
 
 ## Notes For The Implementing Agent
 
@@ -149,10 +181,8 @@ This skill plans. It does not implement source changes. Its output is the refres
 
 ## Guardrails for This Skill
 
-- **Read-only**: this skill reads source files but does not modify them.
-- **Single output**: the only file written is `docs/implementation_plan.md`.
-- **No implementation**: the skill produces a plan. Actual implementation is
-  a separate step, done by the user or a dedicated implementation agent.
-- **Completeness over speed**: if context is missing, read more files before
-  writing the plan. A thorough plan written slowly is far more valuable than
-  a shallow plan written fast.
+- **Read-only for source**: this skill reads source files but does not modify them.
+- **Single plan output**: the only file written is `docs/implementation_plan.md`.
+- **No implementation**: the skill produces a plan and resolves questions with the user. Actual source changes are a separate step done by `sdd-implementer`.
+- **Questions before handoff**: do not surface the handoff to `sdd-implementer` until every new Q item is either resolved or explicitly deferred by the user.
+- **Completeness over speed**: if context is missing, read more files before writing the plan. A thorough plan written slowly is far more valuable than a shallow plan written fast.

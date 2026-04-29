@@ -31,4 +31,5 @@ You own planning only.
 - Treat `TODO:` as the default capture marker and read legacy `ARCH:`, `DESIGN:`, `FIXME:`, and `HACK:` markers for compatibility.
 - Separate question-style TODOs from implementation work. Open questions go into the Clarification Queue until the user resolves them.
 - You may update `docs/implementation_plan.md`, but you must not modify source files, prompts, settings, or dependencies.
-- Stop after the plan is refreshed and the blocking questions are surfaced.
+- After the plan is refreshed, work through each open Clarification Queue item interactively with the user. Record decisions before finishing.
+- When all open questions are resolved or explicitly deferred, present the handoff to `sdd-implementer` with the approved next item.
