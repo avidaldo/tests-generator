@@ -56,7 +56,7 @@ Data classes for quiz content.
 
 - `QuestionStatus(Enum)`: `PENDIENTE`, `REVISAR`, `LISTA`
 - `Answer(dataclass)`: Single answer option (`text`, `fraction`, `feedback`, `format`). Property: `is_correct`.
-- `Question(dataclass)`: Full question with answers, category, status. Static: `generate_id()`. Properties: `category_name`, `correct_count`, `wrong_count`.
+- `Question(dataclass)`: Full question with answers, category, status, and `is_easy` flag (difficulty). Static: `generate_id()`. Properties: `category_name`, `correct_count`, `wrong_count`.
 - `Category(dataclass)`: Category path and info. Property: `name`.
 
 ### `models/quiz_model.py`
@@ -77,7 +77,7 @@ Imports from: `models.question`
 
 Qt undo commands for edit operations.
 
-- `DeleteQuestionCommand`, `ToggleStatusCommand`, `SetStatusCommand`, `EditQuestionFieldCommand`, `DeleteAnswerCommand`, `EditAnswerCommand`
+- `DeleteQuestionCommand`, `ToggleStatusCommand`, `SetStatusCommand`, `EditQuestionFieldCommand`, `DeleteAnswerCommand`, `EditAnswerCommand`, `ToggleEasyCommand`
 - All extend `QUndoCommand` with `redo()`/`undo()`.
 
 Imports from: `models.question`, `models.quiz_model`
@@ -115,7 +115,7 @@ Imports from: `models.question`
 
 Top-level window with toolbar, question list, filter sidebar, detail panel.
 
-- `StatusFilterProxyModel(QSortFilterProxyModel)`: Filters by status and category.
+- `StatusFilterProxyModel(QSortFilterProxyModel)`: Filters by status, category, and easy-only mode.
 - `MainWindow(QMainWindow)`: Owns all UI, orchestrates model ↔ views.
 
 Imports from: `models.*`, `views.question_detail`, `file_io.*`

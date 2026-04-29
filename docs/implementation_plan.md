@@ -1,6 +1,6 @@
 # Implementation Plan
 
-> Updated: 2026-04-29 (refresh 7)
+> Updated: 2026-04-29 (refresh 8)
 > Branch: decomposed
 > Status: active
 
@@ -40,13 +40,11 @@
 | P4 | planned | decision | Review the prompt pipeline TODO cluster as a separate design pass | `README.md:48-49`, prompt TODOs | none |
 | P8 | planned | debt | Improve the `todo-analysis` SKILL.md enrichment step to explicitly encourage broader architecture analysis | `.github/skills/todo-analysis/SKILL.md:46` | none |
 | P9 | planned | debt | Decide whether to add file-based debug logging to the context-injection hook (`todo_planner_context.py`) | `.github/hooks/src/todo_planner_context.py:123` | none |
-| P10 | planned | action | Implement difficulty sub-categorization for editor export ("Lista pero fácil") | `editor/README.md` | none |
 
 ## Next Sequence
 
-1. P10 — Implement difficulty sub-categorization for editor export.
-2. P11, P12, P13 — prompt-stage cleanups (no dependencies).
-3. Continue one item at a time.
+1. P11, P12, P13 — prompt-stage cleanups (no dependencies).
+2. Continue one item at a time.
 
 
 ## Item Details
@@ -167,28 +165,19 @@
 
 ### P10 — Implement difficulty sub-categorization for editor export ("Lista pero fácil")
 
-**Type**: action
-**Source TODOs**:
+**Status**: completed (2026-04-29, refresh 8)
 
-- `editor/v3/README.md:33-34` — informal `todo:` listing "Exportar solo las 'Listas'" (already implemented) and "'Lista pero fácil'" (not implemented)
+**Implementation**:
 
-**Current understanding**:
-
-- The editor currently has three question statuses: `PENDIENTE`, `REVISAR`, `LISTA`. Export already filters to `LISTA` only.
-- "Lista pero fácil" implies a secondary attribute — either a difficulty level field, a tag/label, or a sub-status. The current `Question` model has no difficulty field.
-- This is a new feature request for the editor data model and export logic.
-
-**Decision or change to make**:
-
-- Resolve Q5 first (v3 path migration) to avoid implementing against a path that will change.
-- Then decide where difficulty lives: a new `difficulty: Enum` field on `Question`, a free-text tag, or a separate status value (e.g., `LISTA_FACIL`).
-- Update the data model, the UI, and the XML writer accordingly.
-
-**Docs to sync after implementation**:
-
-- `editor/README.md`
-- `editor/AGENTS.md`
-- `editor/SPECS_v3.md`
+- Added `is_easy: bool = False` to `Question` dataclass.
+- Updated `state_io.py` to serialize/deserialize `is_easy` (default `False` on load for backward compatibility).
+- Added `ToggleEasyCommand` to `undo_commands.py`.
+- Added "★ Fácil" toggle button to the question detail panel header; status label reflects easy state for LISTA questions.
+- Added "★ Lista fácil" filter button to the sidebar filter group; `StatusFilterProxyModel` extended with `set_easy_only()`.
+- Added "Exportar XML (solo fáciles)..." menu action to export LISTA+easy questions.
+- Added `--easy-only` flag to `resources/json_to_moodle_xml.py`.
+- Added `is_easy` field to `docs/editor_json_schema.md`.
+- Updated `editor/AGENTS.md`, `editor/README.md`.
 
 ### P11 — Remove language setting from early prompt stages
 

@@ -11,11 +11,15 @@ Usage:
     json_to_moodle_xml.py <input.json> <output.xml>
     json_to_moodle_xml.py <input.json> <output.xml> --status lista revisar
     json_to_moodle_xml.py <input.json> <output.xml> --all-statuses
+    json_to_moodle_xml.py <input.json> <output.xml> --easy-only
     json_to_moodle_xml.py <input.json> . --verbose
 
 Examples:
     # Export only approved questions (default)
     json_to_moodle_xml.py session.json exam.xml
+
+    # Export only easy approved questions
+    json_to_moodle_xml.py session.json easy_exam.xml --easy-only
 
     # Export approved + under-review questions
     json_to_moodle_xml.py session.json exam.xml --status lista revisar
@@ -165,6 +169,11 @@ By default only 'lista' questions are exported. Use --all-statuses to override.
         action="store_true",
         help="Export all questions regardless of status.",
     )
+    parser.add_argument(
+        "--easy-only",
+        action="store_true",
+        help="Export only questions with is_easy=true (implies --status lista).",
+    )
     parser.add_argument("-v", "--verbose", action="store_true", help="Print export summary.")
     return parser.parse_args()
 
@@ -194,10 +203,14 @@ def main() -> None:
 
     questions = [q for q in all_questions if q.get("status", "pendiente") in selected_statuses]
 
+    if args.easy_only:
+        questions = [q for q in questions if q.get("is_easy", False)]
+
     if not questions:
         status_label = ", ".join(sorted(selected_statuses))
+        easy_label = " + easy_only" if args.easy_only else ""
         print(
-            f"No questions with status [{status_label}] found in {input_path.name}. "
+            f"No questions with status [{status_label}]{easy_label} found in {input_path.name}. "
             f"Total questions in file: {len(all_questions)}.",
             file=sys.stderr,
         )
@@ -217,7 +230,11 @@ def main() -> None:
 
         status_summary = ", ".join(f"{s}: {n}" for s, n in sorted(by_status.items()))
         print(f"Input : {input_path.name} ({len(all_questions)} total — {status_summary})")
-        print(f"Filter: {', '.join(sorted(selected_statuses))}")
+        easy_count = sum(1 for q in all_questions if q.get("is_easy", False) and q.get("status") == "lista")
+        if args.easy_only:
+            print(f"Filter: {', '.join(sorted(selected_statuses))} + easy_only ({easy_count} easy-lista in file)")
+        else:
+            print(f"Filter: {', '.join(sorted(selected_statuses))}")
         print(f"Output: {output_path} ({len(questions)} questions)")
     else:
         print(f"Exported {len(questions)} question(s) → {output_path}")

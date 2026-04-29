@@ -42,6 +42,7 @@
 | `general_feedback` | string | yes | HTML. Full didactic explanation of the correct answer and why distractors are wrong. Shown to the student after the attempt. |
 | `category_path` | string | yes | Full Moodle category path: `$course$/top/CategoryRoot/Subcategory`. |
 | `status` | string | yes | Review state. One of `"pendiente"` · `"revisar"` · `"lista"`. Generated questions always start as `"pendiente"`. |
+| `is_easy` | boolean | no | Difficulty flag. `true` marks the question as easy. Only meaningful on `"lista"` questions; used for difficulty-filtered exports. Defaults to `false` if omitted. |
 | `source_ref` | string | yes | One or more concept IDs from the Stage 2 subcategory file (e.g. `"NORM-01"` or `"NORM-01, CV-03"`). Traces each question back to its source concept and, from there, to the original material. |
 | `answers` | array | yes | Exactly 7 answer objects: 1 correct + 6 distractors. See [Answer Object](#answer-object). |
 

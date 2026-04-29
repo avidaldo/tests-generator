@@ -23,7 +23,7 @@ class Answer:
     fraction: str  # "100" for correct, negative for incorrect
     feedback: str = ""
     format: str = "html"
-    
+
     @property
     def is_correct(self) -> bool:
         try:
@@ -42,7 +42,7 @@ class Question:
     category_path: str
     answers: list[Answer] = field(default_factory=list)
     status: QuestionStatus = QuestionStatus.PENDIENTE
-    
+
     # Moodle-specific fields
     default_grade: str = "1.0000000"
     penalty: str = "0.5000000"
@@ -53,20 +53,21 @@ class Question:
     partially_correct_feedback: str = "<p>Parcialmente correcto.</p>"
     incorrect_feedback: str = "<p>Incorrecto.</p>"
     source_file: str = ""
-    
+    is_easy: bool = False
+
     @staticmethod
     def generate_id() -> str:
         return str(uuid.uuid4())[:8]
-    
+
     @property
     def category_name(self) -> str:
         parts = self.category_path.split("/")
         return parts[-1] if parts else "Sin categoría"
-    
+
     @property
     def correct_count(self) -> int:
         return sum(1 for a in self.answers if a.is_correct)
-    
+
     @property
     def wrong_count(self) -> int:
         return len(self.answers) - self.correct_count
@@ -77,7 +78,7 @@ class Category:
     """Represents a Moodle category."""
     path: str
     info: str = ""
-    
+
     @property
     def name(self) -> str:
         parts = self.path.split("/")

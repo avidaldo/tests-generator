@@ -15,7 +15,7 @@ def save_state(questions: list[Question], filepath: Path) -> None:
         "version": "1.0",
         "questions": []
     }
-    
+
     for q in questions:
         q_data = {
             "id": q.id,
@@ -34,6 +34,7 @@ def save_state(questions: list[Question], filepath: Path) -> None:
             "incorrect_feedback": q.incorrect_feedback,
             "source_file": q.source_file,
             "source_ref": q.source_file,  # alias: concept-ID reference used by newer prompt versions
+            "is_easy": q.is_easy,
             "answers": [
                 {
                     "text": a.text,
@@ -45,14 +46,14 @@ def save_state(questions: list[Question], filepath: Path) -> None:
             ]
         }
         data["questions"].append(q_data)
-    
+
     filepath.write_text(json.dumps(data, indent=2, ensure_ascii=False), encoding="utf-8")
 
 
 def load_state(filepath: Path) -> list[Question]:
     """Load state from a JSON file."""
     data = json.loads(filepath.read_text(encoding="utf-8"))
-    
+
     questions = []
     for q_data in data.get("questions", []):
         answers = [
@@ -64,14 +65,14 @@ def load_state(filepath: Path) -> list[Question]:
             )
             for a in q_data.get("answers", [])
         ]
-        
+
         # Map status string to enum
         status_str = q_data.get("status", "pendiente")
         try:
             status = QuestionStatus(status_str)
         except ValueError:
             status = QuestionStatus.PENDIENTE
-        
+
         question = Question(
             id=q_data["id"],
             name=q_data["name"],
@@ -89,7 +90,8 @@ def load_state(filepath: Path) -> list[Question]:
             partially_correct_feedback=q_data.get("partially_correct_feedback", "<p>Parcialmente correcto.</p>"),
             incorrect_feedback=q_data.get("incorrect_feedback", "<p>Incorrecto.</p>"),
             source_file=q_data.get("source_ref", q_data.get("source_file", "")),  # prefer source_ref (concept IDs) over legacy source_file
+            is_easy=bool(q_data.get("is_easy", False)),
         )
         questions.append(question)
-    
+
     return questions
