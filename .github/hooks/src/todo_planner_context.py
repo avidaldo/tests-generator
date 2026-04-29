@@ -1,7 +1,10 @@
 #!/usr/bin/env python3
-"""SessionStart hook for the todo-planner custom agent."""
+"""SessionStart hook for the todo-planner custom agent.
 
-# TODO: Add detailed comments on how this script works
+Configured in `.github/agents/todo-planner.agent.md` as an agent-scoped hook so
+it only runs for planner sessions. It injects a small planning snapshot instead
+of relying on a workspace-wide hook.
+"""
 
 from __future__ import annotations
 
@@ -38,6 +41,7 @@ def _is_text_file(path: Path) -> bool:
 
 
 def _marker_counts() -> dict[str, int]:
+    # Give the planner a small queue-size signal without rescanning interactively first.
     counts = {marker: 0 for marker in MARKERS}
 
     for path in REPO_ROOT.rglob("*"):
@@ -95,6 +99,7 @@ def main() -> None:
         pass
 
     counts = _marker_counts()
+    # Keep injected context compact: branch, marker counts, and a short plan preview.
     context = "\n".join([
         "Planning mode is active.",
         f"Branch: {_git_branch()}",
@@ -114,6 +119,8 @@ def main() -> None:
             "additionalContext": context,
         }
     }))
+
+    # TODO: for a better understanding of the hook, could we log the context in a file for debugging purposes?
 
 
 if __name__ == "__main__":

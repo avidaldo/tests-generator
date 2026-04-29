@@ -1,7 +1,10 @@
 #!/usr/bin/env python3
-"""PreToolUse hook that restricts todo-planner writes to docs/implementation_plan.md."""
+"""PreToolUse hook that restricts todo-planner writes to docs/implementation_plan.md.
 
-# TODO: but shouldn't the us of this script be defined in a json? I cannot find it
+Configured in `.github/agents/todo-planner.agent.md` as an agent-scoped hook.
+It is intentionally not registered in a workspace `.github/hooks/*.json` file
+because the guard rail should apply only while the planner agent is active.
+"""
 
 from __future__ import annotations
 
@@ -69,6 +72,7 @@ def main() -> None:
     if not candidate_paths:
         sys.exit(0)
 
+    # Deny any planner write outside the implementation plan surface.
     disallowed = sorted(path for path in candidate_paths if not _is_allowed(path))
     if not disallowed:
         sys.exit(0)

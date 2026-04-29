@@ -10,17 +10,23 @@ This design was aligned against the current VS Code customization docs reviewed 
 
 | Surface | Role | Update cadence |
 | --- | --- | --- |
-| `TODO:` comments | Raw capture for ideas, doubts, bugs, and debt | Fast, local, low-friction <!-- TODO: what does these three words mean here? The TODOs need careful planning, some will imply architectural decisions --> |
+| `TODO:` comments | Raw capture for ideas, doubts, bugs, and debt | Captured near the affected file with minimal ceremony; triaged later |
 | `docs/implementation_plan.md` | Curated active plan and clarification queue | Before and after implementation |
 | `docs/*.md` | Stable human-facing rationale and design decisions | When decisions settle |
 | `AGENTS.md` and `*.instructions.md` | Agent behavior, routing, and always-on policy | When the agent should behave differently |
 
 None of these surfaces replaces the others.
 
-- TODOs are intentionally noisy and cheap <!-- TODO: cheap? -->.
+- TODOs are intentionally provisional and lightweight.
 - The implementation plan is curated and current.
 - Documentation explains why the system is shaped the way it is.
 - Instructions tell agents how to behave when they operate inside that system.
+
+## Terminology
+
+- A `primitive` is a VS Code customization type such as an instruction file, prompt, skill, custom agent, hook, or MCP server.
+- A `customization` is one concrete repo artifact that uses a primitive, for example `.github/skills/todo-analysis/SKILL.md` or `.github/hooks/living-docs-drift-check.json`.
+- A `surface` is a place where behavior or truth is stored and discovered, such as `docs/implementation_plan.md`, `AGENTS.md`, or the `.github/hooks/` folder.
 
 ## Primitive Allocation
 
@@ -39,7 +45,7 @@ None of these surfaces replaces the others.
 
 That is a reasonable choice. It keeps capture friction low, works with a single editor shortcut, and avoids false precision while you are still thinking. The cost is that priority and intent are no longer encoded inline. The mitigation is deliberate planning: the planner classifies markers later by intent and impact.
 
-The repo still reads `ARCH:`, `DESIGN:`, `FIXME:`, and `HACK:` when they already exist, but they are compatibility hints, not the preferred authoring model.
+The repo still reads `ARCH:`, `DESIGN:`, `FIXME:`, and `HACK:` when they already exist. They are treated as equivalent planning inputs for compatibility, but `TODO:` is the preferred marker for new notes.
 
 ## Question-Style TODOs
 
@@ -85,7 +91,23 @@ Hooks are appropriate here only for deterministic work:
 
 Hooks are not the right place to author living documentation automatically. Updating plans and docs requires judgment about what changed, what matters, and which rationale is now canonical. That belongs in the agent workflow, not in shell automation.
 
-<!-- TODO: Detail how the hooks in this project work, and why are designed that way (why is useful to use python scripts, how is the interface between them and the agent...) -->
+## Hook Mechanics In This Repo
+
+Workspace-wide hooks live in `.github/hooks/*.json`. They are appropriate when the behavior should apply across the repository regardless of which agent is active. The notebook-output hook and the living-docs reminder fit that pattern.
+
+Planner guard rails do not live in a workspace hook JSON. They are declared in `.github/agents/todo-planner.agent.md` under the agent's `hooks` frontmatter so they only run while `todo-planner` is active. That is why `todo_planner_context.py` and `todo_planner_write_guard.py` have no matching `.json` file.
+
+The hook scripts communicate with the agent runtime through JSON on stdin and stdout.
+
+<!-- TODO: why scripts in hooks are useful instead of just using markdown instructions directly in the agent?  -->
+
+## Why These Primitive Choices
+
+- `todo-analysis` is a skill, not a prompt, because it is a reusable multi-step workflow that can be invoked directly or loaded by another agent.
+- `todo-planner` is a custom agent, not just part of the skill, because it needs a planning persona, a handoff to the implementer, and planner-only hooks.
+- `sdd-implementer` is a custom agent because implementation behavior is persistent and should start from the plan every time, not from a one-off prompt.
+- The planner handoff keeps an explicit prompt even though `sdd-implementer` already has instructions. The handoff prompt carries the specific next-step context into the new chat state; it complements the target agent instructions instead of replacing them.
+- The living-docs reminder is a workspace hook JSON because it should apply repo-wide after relevant source edits.
 
 ## Current Mapping
 
@@ -97,10 +119,6 @@ Hooks are not the right place to author living documentation automatically. Upda
 | Planner guard rails | `.github/hooks/src/todo_planner_context.py`, `.github/hooks/src/todo_planner_write_guard.py` | Agent-scoped context injection and write restriction for planner sessions |
 | Prompt/customization drift reminder | `.github/hooks/prompt-doc-drift-check.json`, `.github/hooks/src/prompt_doc_drift_check.py` | Reminds when prompt/customization changes are not reflected in the root docs |
 | Living-docs reminder | `.github/hooks/living-docs-drift-check.json`, `.github/hooks/src/living_docs_drift_check.py` | Reminds when source edits have no matching plan or documentation updates |
-
-<!-- TODO: Detailed explanation on why each customization is done that way and not other (why the skill is not a prompt or an agent (or part of one) would be very useful.
-
-Also... I'm confused about the use of the concepts "primitive", "customization" and "surface". Could you rigurously clarify these terms? -->
 
 ## Design Decisions Recorded On 2026-04-29
 

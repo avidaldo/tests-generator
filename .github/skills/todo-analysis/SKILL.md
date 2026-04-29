@@ -1,27 +1,24 @@
 ---
 name: todo-analysis
 description: >
-  Analyze repository TODOs, separate clarification questions from action items,
-  and maintain a lightweight docs/implementation_plan.md for the repo's
-  SDD/living-documentation workflow. Use when triaging pending work before
-  coding or when refreshing the plan after new discoveries.
+  Analyze repository TODOs, separate clarification questions from action items, and maintain a lightweight docs/implementation_plan.md for the repo's SDD/living-documentation workflow. Use when triaging pending work before coding or when refreshing the plan after new discoveries.
 argument-hint: "[scope: optional path or topic]"
 user-invocable: true
-disable-model-invocation: false
+disable-model-invocation: false # TODO: In which cases the agent would invoke the model?
 ---
 
 # TODO Analysis
 
 This skill is the canonical planning workflow for this repository.
 
-It is a skill, not an instruction file or prompt, because it is a reusable, task-specific workflow that can be invoked directly, loaded by an agent, and maintained separately from always-on policy.
-<!-- TODO: Does the skill itself need to know that? wouldn't be better to documented for human consumption in customization_architecture.md and remove this paragraph here for token efficiency? -->
+Canonical rationale for the workflow lives in [docs/customization_architecture.md](../../../docs/customization_architecture.md). Keep this skill operational: it should tell the agent what to do, not restate the full design rationale.
+
+<!-- TODO: but refering to the doc is not loading that doc in context? wouldn't be more operational to just not quoting it? -->
 
 ## Working Model
 
 - `TODO:` is the canonical capture marker for this repository. Prefer it for new notes because low-friction capture matters more than inline taxonomy.
-- Continue reading `ARCH:`, `DESIGN:`, `FIXME:`, and `HACK:` when they already exist, but treat them as optional legacy hints rather than required categories.
-<!-- TODO: what's going to imply treating them as legacy? once they exist, seems appropriate to treat them also as TODOs at least. -->
+- Continue reading `ARCH:`, `DESIGN:`, `FIXME:`, and `HACK:` as equivalent planning inputs. They stay supported for compatibility, but `TODO:` is the only preferred marker for new notes.
 - Classify items by intent, not only by prefix. The useful buckets are: `question`, `decision`, `action`, `bug`, and `debt`.
 - A question-style TODO does not become an implementation item until it has been clarified with the user. Put it in the Clarification Queue first.
 - The implementation plan is the curated source of truth for active work. Raw TODOs remain the capture surface. Stable rationale belongs in docs and instructions after decisions are made.
@@ -68,7 +65,7 @@ Use this decision rule:
 
 If one marker contains both a question and an action, split it in the plan: clarification first, action second.
 
-<!-- TODO: deep analysis or architecture and software design good practices is paramount, so the first steps os dealing with questions and debating critically with the user is key -->
+When the item is still mostly debate, keep it in the Clarification Queue instead of inventing a premature action item.
 
 ### 5. Update `docs/implementation_plan.md`
 
@@ -146,7 +143,6 @@ This skill plans. It does not implement source changes. Its output is the refres
 - Do not start a blocked item while its clarification entry is still open.
 - Update the plan status after each completed item.
 - When a change affects workflow, architecture, or repo conventions, update the relevant docs and instructions in the same change.
-  confirmation that this plan has been reviewed.
 
 
 ---

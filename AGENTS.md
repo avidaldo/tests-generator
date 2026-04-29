@@ -92,7 +92,8 @@ Each step is run manually. See the [Usage guide in README.md](README.md#usage-ge
 - Use `.github/agents/*.agent.md` for custom agents; current agents:
   - `todo-planner` → planning-only agent for TODO triage, clarification, and `docs/implementation_plan.md` refresh
   - `sdd-implementer` → implementation agent for one approved plan item at a time, with doc sync before finish
-- Use `.github/hooks/*.json` + scripts for deterministic agent-time enforcement (PostToolUse, PreToolUse); current hooks:
+- Use agent-scoped hooks in `.github/agents/*.agent.md` when a guard rail should apply only to one agent; the planner guard rails live there by design.
+- Use `.github/hooks/*.json` + scripts for repo-wide deterministic agent-time enforcement (PostToolUse, PreToolUse); current hooks:
   - `strip-notebook-outputs.json` → strips `.ipynb` outputs after any agent file write
   - `prompt-doc-drift-check.json` → warns when prompt/customization changes may need documentation-sync updates
   - `living-docs-drift-check.json` → warns when source edits have no matching plan or documentation updates
