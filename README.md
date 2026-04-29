@@ -16,7 +16,7 @@ See [`prompts/AGENTS.md`](prompts/AGENTS.md) for the full pipeline diagram, desi
 
 Desktop application (PyQt) for viewing and editing Moodle XML question banks. Generated questions are created with 6 distractors each, since the distractor design strategy is to generate more than needed and then review. The editor allows reviewing, editing, and categorizing questions before export. It supports undo/redo, drag-and-drop reordering, and category management.
 
-See: [`editor/v3/README.md`](editor/v3/README.md)
+See: [`editor/README.md`](editor/README.md)
 
 ### Results Analysis (`results/`)
 
@@ -72,7 +72,7 @@ The agent generates questions from the file's full content, including scenario-b
 ### Step 4: Human review in the editor
 
 ```bash
-uv run python editor/v3/main.py
+uv run python editor/main.py
 ```
 
 Open the JSON file (`Ctrl+O`). Review each question:

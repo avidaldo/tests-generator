@@ -1,6 +1,6 @@
 # Implementation Plan
 
-> Updated: 2026-04-29 (refresh 2)
+> Updated: 2026-04-29 (refresh 5)
 > Branch: decomposed
 > Status: active
 
@@ -25,31 +25,36 @@
 | Q8 | resolved | `docs/customization_architecture.md:102` | What concrete advantage do Python hook scripts provide over equivalent behavior expressed as markdown instructions inside the agent file for deterministic tasks like context injection? | Resolved 2026-04-29: dynamic runtime data is the key reason → P18 |
 | Q9 | resolved | `prompts/merge-summaries.prompt.md:55` | Can subcategory weighting be reformulated in terms of expected question yield rather than concept count? Would a separate scenario-generation agent or doc help cover concept-poor areas? | Resolved 2026-04-29: keep bundled inside P4 — scenario-generation layer is speculative until the prompt design pass |
 | Q10 | resolved | `.github/instructions/customization-authoring.instructions.md:18` | Should a dedicated VS Code documentation audit skill be built that periodically fetches the official customization docs and suggests improvements to this repo's customization files? | Resolved 2026-04-29: build it → P19 |
+| Q11 | resolved | `.github/agents/todo-planner.agent.md:14` | Is the explicit handoff prompt needed given that `sdd-implementer` already has instructions — would the agent instructions alone be sufficient? | Resolved 2026-04-29: keep it — handoff prompt seeds next-step context into the new chat state; complements, not replaces, target agent instructions → P21 |
 
 ## Planned Work
 
 | ID | Status | Type | Summary | Source | Depends on |
 | --- | --- | --- | --- | --- | --- |
-| P6 | planned | action | Promote editor v3 to the main `editor/` path; update all run-command references | `editor/v3/README.md:3` | none |
+| P6 | completed | action | Promote editor v3 to the main `editor/` path; update all run-command references | `editor/v3/README.md:3` | none |
 | P11 | planned | action | Remove language column from `summarize-sources` and `merge-summaries` Subject Profiles; remove/rephrase language default from `AGENTS.md` | Q2 resolution | none |
 | P12 | planned | action | Replace specific `docs/` prohibition in `summarize-sources` with a general external-knowledge rule | `prompts/summarize-sources.prompt.md:132` | none |
 | P13 | planned | action | Update README Step 1 example to show explicit `#prompt:` invocation before materials list | `README.md:48` | none |
 | P14 | planned | decision | Build a fan-out skill that spawns `summarize-sources` as one subagent per material path | `README.md:49` | none |
-| P15 | planned | debt | Remove dangling incomplete TODO at `generate-questions.prompt.md:15` | `prompts/generate-questions.prompt.md:15` | none |
+| P15 | completed | debt | Remove dangling incomplete TODO at `generate-questions.prompt.md:15` | `prompts/generate-questions.prompt.md:15` | none |
 | P16 | planned | action | Create `docs/editor_json_schema.md` as the canonical schema; update prompt output block and editor AGENTS.md to reference it | `prompts/generate-questions.prompt.md:198` | P6 |
-| P17 | planned | debt | Remove `disable-model-invocation: false` from `todo-analysis` SKILL.md frontmatter | `.github/skills/todo-analysis/SKILL.md:7` | none |
+| P17 | completed | debt | Remove `disable-model-invocation: false` from `todo-analysis` SKILL.md frontmatter | `.github/skills/todo-analysis/SKILL.md:7` | none |
 | P18 | planned | debt | Document why hook scripts are used over markdown instructions in `customization_architecture.md`; remove the TODO | `docs/customization_architecture.md:102` | none |
 | P19 | planned | action | Build a `customization-audit` skill that fetches VS Code customization docs and reports gaps in this repo's customization files | `.github/instructions/customization-authoring.instructions.md:18` | none |
 | P4 | planned | decision | Review the prompt pipeline TODO cluster as a separate design pass | `README.md:48-49`, prompt TODOs | none |
 | P8 | planned | debt | Improve the `todo-analysis` SKILL.md enrichment step to explicitly encourage broader architecture analysis | `.github/skills/todo-analysis/SKILL.md:46` | none |
 | P9 | planned | debt | Decide whether to add file-based debug logging to the context-injection hook (`todo_planner_context.py`) | `.github/hooks/src/todo_planner_context.py:123` | none |
-| P10 | planned | action | Implement difficulty sub-categorization for editor export ("Lista pero fácil") | `editor/v3/README.md:33-34` | P6 |
+| P10 | planned | action | Implement difficulty sub-categorization for editor export ("Lista pero fácil") | `editor/README.md` | P6 |
+| P20 | completed | action | Delete `resources/convert_xml_to_md.py` (P5 decided this; file was never actually removed) | `resources/convert_xml_to_md.py:1` | none |
+| P21 | completed | debt | Remove the inline YAML comment from `todo-planner.agent.md` handoff prompt (Q11 resolved, answer already in docs) | `.github/agents/todo-planner.agent.md:14` | none |
+| P22 | completed | debt | Remove stale Q7-resolved TODO comment from `todo-analysis/SKILL.md:16` | `.github/skills/todo-analysis/SKILL.md:16` | none |
 
 ## Next Sequence
 
-1. Implement the first unblocked item (P6 — promote editor v3 to `editor/`).
-2. Then P10 and P16 which depend on P6.
-3. Continue one item at a time, updating this plan after each.
+1. P16 — Create `docs/editor_json_schema.md` (unblocked now that P6 is done).
+2. P10 — Implement difficulty sub-categorization for editor export (also unblocked by P6).
+3. P11, P12, P13 — prompt-stage cleanups (no dependencies).
+4. Continue one item at a time.
 
 
 ## Item Details
@@ -221,6 +226,72 @@
 
 - none
 
+### P20 — Delete `resources/convert_xml_to_md.py`
+
+**Type**: action
+**Source TODOs**:
+
+- `resources/convert_xml_to_md.py:1` — planning TODO; Q1 resolved and P5 recorded the decision but the file was never removed
+
+**Current understanding**:
+
+- P5 completed on 2026-04-29 recorded the *decision* to delete the file (it has no documented pipeline role and `summarize-sources` does not reference it). The file still exists with its original TODO comment.
+- This is a gap between a completed decision item and the missing implementation step.
+
+**Decision or change to make**:
+
+- Delete `resources/convert_xml_to_md.py`.
+
+**Docs to sync after implementation**:
+
+- `AGENTS.md` (resources table — check if script is listed; remove if so)
+- `README.md` (check if referenced)
+
+---
+
+### P21 — Remove stale handoff-prompt comment from `todo-planner.agent.md`
+
+**Type**: debt
+**Source**:
+
+- `.github/agents/todo-planner.agent.md:14` — inline YAML comment `# Do I need this prompt? should I edit it in any case? is not defined already in the sdd-implementer agent file?`
+
+**Current understanding**:
+
+- Q11 was resolved immediately: the handoff prompt is intentional — it seeds specific next-step context into the new chat state and complements (does not replace) the target agent's own instructions. This decision is already recorded in `docs/customization_architecture.md`.
+- The comment was never cleaned up when the decision was recorded.
+
+**Decision or change to make**:
+
+- Remove the trailing YAML comment from the `prompt:` line in the `todo-planner.agent.md` handoffs frontmatter.
+
+**Docs to sync after implementation**:
+
+- none
+
+---
+
+### P22 — Remove stale Q7-resolved TODO comment from `todo-analysis/SKILL.md`
+
+**Type**: debt
+**Source**:
+
+- `.github/skills/todo-analysis/SKILL.md:16` — `<!-- TODO: but refering to the doc is not loading that doc in context? wouldn't be more operational to just not quoting it? -->`
+
+**Current understanding**:
+
+- Q7 resolved on 2026-04-29: Markdown links in SKILL.md do not auto-load external files; keep the link for human navigation value. The question is answered — no action on the link itself. The TODO comment was never removed after resolution.
+
+**Decision or change to make**:
+
+- Remove the TODO comment at line 16. Keep the Markdown link on the adjacent line unchanged.
+
+**Docs to sync after implementation**:
+
+- none
+
+---
+
 ### P10 — Implement difficulty sub-categorization for editor export ("Lista pero fácil")
 
 **Type**: action
@@ -242,7 +313,7 @@
 
 **Docs to sync after implementation**:
 
-- `editor/v3/README.md`
+- `editor/README.md`
 - `editor/AGENTS.md`
 - `editor/SPECS_v3.md`
 
@@ -405,7 +476,15 @@
 
 ## Recently Completed
 
-- P5 — 2026-04-29. Decided to remove `resources/convert_xml_to_md.py` (unused, no pipeline role).
+- P15 — 2026-04-29. Removed dangling incomplete TODO from `generate-questions.prompt.md`.
+- P17 — 2026-04-29. Removed `disable-model-invocation: false` noise from `todo-analysis` SKILL.md frontmatter.
+- P20 — 2026-04-29. Deleted `resources/convert_xml_to_md.py` (decision made in P5; file finally removed).
+- P21 — 2026-04-29. Removed stale inline YAML comment from `todo-planner.agent.md` handoff prompt.
+- P22 — 2026-04-29. Removed stale Q7-resolved TODO comment from `todo-analysis/SKILL.md`.
+
+- P6 — 2026-04-29. Promoted `editor/v3/` to `editor/`; moved all source files, created `editor/README.md`, updated all run-command references across docs, instructions, and skill files.
+
+- P5 — 2026-04-29. Decided to remove `resources/convert_xml_to_md.py` (unused, no pipeline role). **Note**: actual file deletion not done; tracked as P20.
 - P1 — 2026-04-29. Defined the customization architecture for the SDD loop. Decided: workflow in `todo-analysis` skill, persona + handoff in custom agents, deterministic behavior in hooks.
 - P2 — 2026-04-29. Replaced stale planner setup with `todo-planner.agent.md` and `sdd-implementer.agent.md`; moved planner guard rails to agent-scoped hooks.
 - P3 — 2026-04-29. Seeded `docs/implementation_plan.md` and added living-docs reminder hook (`living-docs-drift-check.json`).
@@ -413,6 +492,7 @@
 
 ## Recently Resolved
 
+- Q11 — Resolved 2026-04-29. The explicit handoff prompt in `todo-planner.agent.md` is intentional: it seeds specific next-step context into the new chat state and complements the `sdd-implementer` instructions (does not replace them). Decision already recorded in `customization_architecture.md`. Cleanup: remove the stale YAML comment → P21.
 - Q10 — Resolved 2026-04-29. Build the `customization-audit` skill → P19. Trigger: on-demand (VS Code major release or customization regression).
 - Q9 — Resolved 2026-04-29. Yield-based weighting is speculative before a generation pass reveals whether concept-poor areas are a real problem. Bundled inside P4; scenario-generation layer becomes a new P item only if P4 confirms the gap.
 - Q8 — Resolved 2026-04-29. Python hook scripts provide runtime dynamic data (git branch, live TODO count) that static markdown instructions cannot. Harder enforcement boundary is a secondary benefit. Document this in `customization_architecture.md` → P18.

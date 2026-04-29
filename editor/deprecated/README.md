@@ -7,4 +7,4 @@ This directory contains previous iterations of the quiz editor, kept for referen
 | `v1/` | Streamlit (web) | First prototype — browser-based review interface |
 | `v2/` | Textual (TUI) | Terminal-based editor with undo/redo |
 
-The current version is `editor/v3/` (PyQt6 desktop app).
+The current version is `editor/` (PyQt6 desktop app, at `editor/main.py`).

@@ -9,7 +9,7 @@ This file is the canonical, tool-agnostic instruction surface for the `editor/` 
 
 - Keep `.github/instructions/editor.instructions.md` as a VS Code routing adapter only, not as a second source of editor policy.
 - Target editor v3 for all new development. Treat `editor/deprecated/` as reference material only.
-- When introducing or materially changing editor components, update this file and `editor/v3/README.md` together.
+- When introducing or materially changing editor components, update this file and `editor/README.md` together.
 
 ## Architecture Principles
 

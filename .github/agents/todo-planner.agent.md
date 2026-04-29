@@ -10,7 +10,7 @@ disable-model-invocation: false
 handoffs:
   - label: Start Implementation
     agent: sdd-implementer
-    prompt: Read docs/implementation_plan.md, pick the next approved item, implement it, update the plan status, and sync the affected docs and instructions before finishing. # Do I need this prompt? should I edit it in any case? is not defined already in the sdd-implementer agent file?
+    prompt: Read docs/implementation_plan.md, pick the next approved item, implement it, update the plan status, and sync the affected docs and instructions before finishing.
     send: false
 hooks:
   SessionStart:

@@ -12,7 +12,6 @@ You are an exam architect operating at Master's level (EQF Level 7), specialised
 
 Before generating, consult [Adversarial Filters And Distractor Design](../docs/adversarial_logic_filters.md) §1 and §6, and [Distractor Design & Psychometric Techniques](../docs/distractor_design.md) for strategies and anti-bias rules.
 
-<!-- TODO: I don't clearly see how the adversarial logic  -->
 
 ---
 

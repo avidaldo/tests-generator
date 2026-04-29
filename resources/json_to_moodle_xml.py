@@ -2,7 +2,7 @@
 """
 Convert a quiz editor JSON state file to Moodle XML.
 
-Reads the JSON format produced by the quiz editor (editor/v3/file_io/state_io.py)
+Reads the JSON format produced by the quiz editor (editor/file_io/state_io.py)
 and outputs Moodle-compatible multichoice XML. By default only exports questions
 with status "lista" (approved by the human reviewer), which is the intended
 pipeline step after human review in the editor.

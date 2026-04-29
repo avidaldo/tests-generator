@@ -17,9 +17,9 @@ This skill covers the final stage of the quiz pipeline: reviewed JSON state to M
 ## Procedure
 
 1. Confirm the input format.
-   Use this skill only with JSON state compatible with [editor/v3/file_io/state_io.py](../../../editor/v3/file_io/state_io.py).
+   Use this skill only with JSON state compatible with [editor/file_io/state_io.py](../../../editor/file_io/state_io.py).
 2. Review before export.
-   If the JSON has not been reviewed yet, open it in the editor workflow documented in [editor/v3/README.md](../../../editor/v3/README.md) and complete human review first.
+   If the JSON has not been reviewed yet, open it in the editor workflow documented in [editor/README.md](../../../editor/README.md) and complete human review first.
 3. Choose the status scope.
    Default export behavior is `lista` only. Include `revisar` explicitly only when the user asks for a broader export, and use `--all-statuses` only for exceptional cases.
 4. Run the export script.

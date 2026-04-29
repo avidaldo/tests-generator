@@ -60,7 +60,7 @@ Each step is run manually. See the [Usage guide in README.md](README.md#usage-ge
 ## Practical Commands
 
 - Sync Python dependencies with `uv sync`.
-- Run the editor with `uv run python editor/v3/main.py`.
+- Run the editor with `uv run python editor/main.py`.
 - Export reviewed JSON state to Moodle XML with `python resources/json_to_moodle_xml.py <input.json> <output.xml>`.
 - Verify the notebook output filter is active with `nbstripout --status`.
 

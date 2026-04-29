@@ -4,7 +4,6 @@ description: >
   Analyze repository TODOs, separate clarification questions from action items, and maintain a lightweight docs/implementation_plan.md for the repo's SDD/living-documentation workflow. Use when triaging pending work before coding or when refreshing the plan after new discoveries.
 argument-hint: "[scope: optional path or topic]"
 user-invocable: true
-disable-model-invocation: false # TODO: In which cases the agent would invoke the model?
 ---
 
 # TODO Analysis
@@ -12,8 +11,6 @@ disable-model-invocation: false # TODO: In which cases the agent would invoke th
 This skill is the canonical planning workflow for this repository.
 
 Canonical rationale for the workflow lives in [docs/customization_architecture.md](../../../docs/customization_architecture.md). Keep this skill operational: it should tell the agent what to do, not restate the full design rationale.
-
-<!-- TODO: but refering to the doc is not loading that doc in context? wouldn't be more operational to just not quoting it? -->
 
 ## Working Model
 
