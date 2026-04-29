@@ -51,6 +51,8 @@ Think like a principal engineer reviewing a codebase before a major refactor:
 
 ## Workflow
 
+<!-- TODO: I'm still confused: a workflow defined by they steps goes in an agent or in a prompt? I would like a simple quick call to my SDD loop of check implementation_plan.md, look for TODOs (in all codebase), answer those that are questions (debate with user until solved/clarified and implications clear to update implementation plan), update the implementation plan with them, handoff the implementation of the plan and finally update all instructions and docs (living documentation) after implementing (with a hook?). -->
+
 Follow these phases strictly and in order.
 
 ### Step 0 — Read the plan if it already exists

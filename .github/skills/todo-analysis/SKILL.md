@@ -11,6 +11,8 @@ user-invocable: true
 disable-model-invocation: false
 ---
 
+<!-- TODO: why is this an skill? Let's be rigurous in following VSCode current standards -->
+
 # TODO Analysis Skill
 
 This skill performs a deep, context-aware analysis of all pending work markers
@@ -37,7 +39,7 @@ in source code and in documentation files.
 | `HACK:`  | Workaround that needs a proper solution         | Medium          |
 | `NOTE:`  | Non-actionable context note — read but skip     | Info only       |
 
-<!-- NOTE: Consider simplifying to only TODO / creating shortcuts for other markers  -->
+<!-- TODO: Consider simplifying to only TODO / creating shortcuts for other markers  -->
 
 **Search commands to run:**
 
