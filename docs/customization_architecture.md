@@ -99,7 +99,13 @@ Planner guard rails do not live in a workspace hook JSON. They are declared in `
 
 The hook scripts communicate with the agent runtime through JSON on stdin and stdout.
 
-<!-- TODO: why scripts in hooks are useful instead of just using markdown instructions directly in the agent?  -->
+**Why Python hook scripts rather than markdown instructions in the agent file?**
+
+The primary reason is **dynamic data injection**: hook scripts run at agent startup and can compute and inject data that is only known at runtime — the current git branch, the live count of open TODO markers, or the current plan status. A static markdown instruction cannot do this; it can only express fixed rules.
+
+A secondary reason is **enforcement boundary**: the agent runtime executes the hook regardless of what the agent instruction says, giving a harder guarantee than a markdown instruction that the agent could implicitly ignore.
+
+For purely static rules, a markdown instruction in the agent file is simpler and equally effective. Hook scripts are justified only when runtime data is needed or a hard enforcement boundary is required. Both conditions apply to the planner guard rails; neither applies to, for example, a simple style reminder.
 
 ## Why These Primitive Choices
 
