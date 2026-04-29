@@ -1,6 +1,6 @@
 # Implementation Plan
 
-> Updated: 2026-04-29 (refresh 6)
+> Updated: 2026-04-29 (refresh 7)
 > Branch: decomposed
 > Status: active
 
@@ -35,7 +35,6 @@
 | P12 | planned | action | Replace specific `docs/` prohibition in `summarize-sources` with a general external-knowledge rule | `prompts/summarize-sources.prompt.md:132` | none |
 | P13 | planned | action | Update README Step 1 example to show explicit `#prompt:` invocation before materials list | `README.md:48` | none |
 | P14 | planned | decision | Build a fan-out skill that spawns `summarize-sources` as one subagent per material path | `README.md:49` | none |
-| P16 | planned | action | Create `docs/editor_json_schema.md` as the canonical schema; update prompt output block and editor AGENTS.md to reference it | `prompts/generate-questions.prompt.md:198` | none |
 | P18 | planned | debt | Document why hook scripts are used over markdown instructions in `customization_architecture.md`; remove the TODO | `docs/customization_architecture.md:102` | none |
 | P19 | planned | action | Build a `customization-audit` skill that fetches VS Code customization docs and reports gaps in this repo's customization files | `.github/instructions/customization-authoring.instructions.md:18` | none |
 | P4 | planned | decision | Review the prompt pipeline TODO cluster as a separate design pass | `README.md:48-49`, prompt TODOs | none |
@@ -45,10 +44,9 @@
 
 ## Next Sequence
 
-1. P16 — Create `docs/editor_json_schema.md` (unblocked now that P6 is done).
-2. P10 — Implement difficulty sub-categorization for editor export (also unblocked by P6).
-3. P11, P12, P13 — prompt-stage cleanups (no dependencies).
-4. Continue one item at a time.
+1. P10 — Implement difficulty sub-categorization for editor export.
+2. P11, P12, P13 — prompt-stage cleanups (no dependencies).
+3. Continue one item at a time.
 
 
 ## Item Details
@@ -291,29 +289,6 @@
 - `prompts/AGENTS.md`
 - `AGENTS.md` (skill inventory)
 
-### P16 — Create `docs/editor_json_schema.md` as the canonical editor JSON schema
-
-**Type**: action
-**Source TODOs**:
-
-- `prompts/generate-questions.prompt.md:198`
-
-**Current understanding**:
-
-- The JSON output schema is currently defined inline in the prompt. The editor (`state_io.py`, `xml_parser.py`) independently implements the same schema with no shared canonical reference. Any change to the schema requires manually updating both sides.
-
-**Decision or change to make**:
-
-- Create `docs/editor_json_schema.md` containing the full schema definition with field descriptions and examples.
-- Replace the inline schema block in the prompt with a brief reference: *"Output must conform to the editor JSON schema — see `docs/editor_json_schema.md`."* and a minimal structural example (not the full field table).
-- Add a reference to the schema doc in `editor/AGENTS.md` as the import contract.
-
-**Docs to sync after implementation**:
-
-- `editor/AGENTS.md`
-- `prompts/AGENTS.md` (pipeline interface section)
-- `AGENTS.md` (docs table)
-
 ### Q10 — Should a periodic VS Code documentation audit skill be built?
 
 **Source**: `.github/instructions/customization-authoring.instructions.md:18`
@@ -332,6 +307,7 @@
 
 ## Recently Completed
 
+- P16 — 2026-04-29. Created `docs/editor_json_schema.md` as the canonical schema; replaced inline field table in prompt with reference + condensed rules; updated `editor/AGENTS.md`, `prompts/AGENTS.md`, and `AGENTS.md`.
 - P15 — 2026-04-29. Removed dangling incomplete TODO from `generate-questions.prompt.md`.
 - P17 — 2026-04-29. Removed `disable-model-invocation: false` noise from `todo-analysis` SKILL.md frontmatter.
 - P20 — 2026-04-29. Deleted `resources/convert_xml_to_md.py` (decision made in P5; file finally removed).

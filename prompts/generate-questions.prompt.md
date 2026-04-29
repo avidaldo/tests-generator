@@ -130,7 +130,7 @@ The feedback for the correct answer must explain *why* it is correct, not just r
 
 ## Output Format
 
-Output a single valid JSON object matching the schema below. No prose before or after the JSON block.
+Output a single valid JSON object conforming to the **editor JSON schema** — see [`docs/editor_json_schema.md`](../docs/editor_json_schema.md) for the full field reference, scoring rationale, and a complete example. No prose before or after the JSON block.
 
 ```json
 {
@@ -156,45 +156,20 @@ Output a single valid JSON object matching the schema below. No prose before or 
           "fraction": "-50",
           "feedback": "<p>Incorrecto. Esta opción confunde X con Y porque...</p>",
           "format": "html"
-        },
-        {
-          "text": "<p>Distractor 2</p>",
-          "fraction": "-50",
-          "feedback": "<p>Incorrecto. Aunque parece razonable, invierte la relación causal: en realidad...</p>",
-          "format": "html"
         }
-        // ... 4 more distractors, total 6
+        // ... 5 more distractors, total 6
       ]
     }
   ]
 }
 ```
 
-**Field rules:**
+**Key generation rules:**
 
-| Field | Rule |
-|-------|------|
-| `id` | Sequential code: `SUBCAT_Q001`, `SUBCAT_Q002`, ... Use an abbreviation of the subcategory name. |
-| `name` | Human-readable: `"Q001: Concepto principal de la pregunta"` |
-| `question_text` | HTML. Wrap code in `<code>` or `<pre>`. Keep clean HTML — no inline styles. |
-| `general_feedback` | HTML. Full didactic explanation. |
-| `category_path` | Full Moodle path: `$course$/top/CategoryRoot/Subcategory` |
-| `status` | Always `"pendiente"` |
-| `source_ref` | One or more **concept IDs** from the summary document (e.g. `"NORM-01"` or `"NORM-01, CV-03"`). These trace the question back to the summary's concept entries, which in turn map to original source files. |
-| `answers` | Exactly 7 items: 1 with `fraction: "100"`, 6 with `fraction: "-50"` |
-| `answers[].feedback` | Required for every option. Adversarial validation depends on this. |
-
-**Scoring rationale** — `fraction` values implement a ½-penalty scheme:
-- Correct answer: `"100"` → student scores +100% of the question grade.
-- Each wrong answer: `"-50"` → student scores −50% (half the value of a right answer).
-
-This is the *answer-level* penalty and is the only scoring mechanism used in standard single-attempt mode. Do not confuse it with the `penalty` field, which is a separate Moodle concept used only in adaptive/interactive multi-try mode and is always set to `"0.0000000"` for standard exams.
-
-**Do not include** these fields — the editor fills them with correct defaults on import:
-`default_grade`, `penalty`, `single`, `shuffle_answers`, `answer_numbering`,
-`correct_feedback`, `partially_correct_feedback`, `incorrect_feedback`
-
-<!-- TODO: This output format is the interface with the editor. Shouldn't we move it to its own Single source of truth common to both and refer it here? -->
+- `status` is always `"pendiente"`.
+- `answers` must contain exactly 7 items: 1 correct (`fraction: "100"`) and 6 distractors (`fraction: "-50"`).
+- `answers[].feedback` is required for every option — adversarial validation depends on it.
+- Omit editor-populated fields (`default_grade`, `penalty`, `single`, `shuffle_answers`, `answer_numbering`, `correct_feedback`, `partially_correct_feedback`, `incorrect_feedback`) — the editor sets them on import.
 
 ---
 

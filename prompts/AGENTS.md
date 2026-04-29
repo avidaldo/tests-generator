@@ -54,7 +54,7 @@ Moodle import
 
 Each stage is run manually by the user. Stages 1 and 3 are parallelizable (independent invocations); Stage 2 is a single merge pass.
 
-**Intermediate format**: JSON matching `editor/file_io/state_io.py` schema.
+**Intermediate format**: JSON conforming to [`docs/editor_json_schema.md`](../docs/editor_json_schema.md) — the canonical schema shared between the prompt output and the editor import (`editor/file_io/state_io.py`).
 - Direct editor import — no conversion step
 - Adversarial filter preserved via required `feedback` fields per distractor
 - ~30 lines/question vs. ~60–80 for XML → roughly 2× throughput improvement

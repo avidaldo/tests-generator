@@ -31,7 +31,7 @@ This repository contains tools and prompts for generating, editing, and analyzin
 | `.github/` | VS Code-specific compatibility files and workflows | [`AGENTS.md`](AGENTS.md) |
 | `editor/` | PyQt-based Moodle XML quiz editor | [`editor/AGENTS.md`](editor/AGENTS.md) |
 | `results/` | Exam result analysis notebooks | [`results/AGENTS.md`](results/AGENTS.md) |
-| `docs/` | Domain knowledge, design documentation, and living customization records; see [`docs/customization_architecture.md`](docs/customization_architecture.md) and [`docs/agentic_enforcement_layers.md`](docs/agentic_enforcement_layers.md) | — |
+| `docs/` | Domain knowledge, design documentation, and living customization records; see [`docs/customization_architecture.md`](docs/customization_architecture.md), [`docs/agentic_enforcement_layers.md`](docs/agentic_enforcement_layers.md), and [`docs/editor_json_schema.md`](docs/editor_json_schema.md) | — |
 | `resources/` | Utility scripts (XML conversion, merging) | [`.github/instructions/resources.instructions.md`](.github/instructions/resources.instructions.md) |
 | `samples/` | Example Moodle XML files | [`.github/instructions/xml-moodle.instructions.md`](.github/instructions/xml-moodle.instructions.md) |
 

@@ -107,6 +107,8 @@ Autosave / state persistence (JSON-based).
 - `save_state(questions: list[Question], filepath: Path)`
 - `load_state(filepath: Path) -> list[Question]`
 
+**Import contract**: the JSON format is defined in [`docs/editor_json_schema.md`](../docs/editor_json_schema.md). That document is the canonical source of truth for field names, types, required values, and editor-populated defaults. Update it whenever the schema changes; do not rely solely on reading this file or `state_io.py`.
+
 Imports from: `models.question`
 
 ### `views/main_window.py`
