@@ -1,6 +1,6 @@
 # Implementation Plan
 
-> Updated: 2026-04-29 (refresh 9)
+> Updated: 2026-04-29 (refresh 10)
 > Branch: decomposed
 > Status: active
 
@@ -32,15 +32,13 @@
 | ID | Status | Type | Summary | Source | Depends on |
 | --- | --- | --- | --- | --- | --- |
 | P14 | planned | decision | Build a fan-out skill that spawns `summarize-sources` as one subagent per material path | `README.md:49` | none |
-| P18 | planned | debt | Document why hook scripts are used over markdown instructions in `customization_architecture.md`; remove the TODO | `docs/customization_architecture.md:102` | none |
 | P19 | planned | action | Build a `customization-audit` skill that fetches VS Code customization docs and reports gaps in this repo's customization files | `.github/instructions/customization-authoring.instructions.md:18` | none |
 | P4 | planned | decision | Review the prompt pipeline TODO cluster as a separate design pass | `README.md:48-49`, prompt TODOs | none |
-| P8 | planned | debt | Improve the `todo-analysis` SKILL.md enrichment step to explicitly encourage broader architecture analysis | `.github/skills/todo-analysis/SKILL.md:46` | none |
 | P9 | planned | debt | Decide whether to add file-based debug logging to the context-injection hook (`todo_planner_context.py`) | `.github/hooks/src/todo_planner_context.py:123` | none |
 
 ## Next Sequence
 
-1. P14 (decision), P18, P19, P4, P8, P9 — lower priority; no urgent dependencies.
+1. P14, P19, P4, P9 — no urgent dependencies; P9 requires a decision before coding.
 2. Continue one item at a time.
 
 
@@ -97,49 +95,6 @@
 - `AGENTS.md` (skills inventory)
 - `.github/instructions/customization-authoring.instructions.md` (remove the TODO)
 
-### P8 — Improve `todo-analysis` SKILL.md enrichment step for architecture analysis
-
-**Type**: debt
-**Source TODOs**:
-
-- `.github/skills/todo-analysis/SKILL.md:46` — "Plenty of TODOs are going to be architecture or design questions / change proposals, so a broader analysis will be important."
-
-**Current understanding**:
-
-- Step 3 ("Enrich locally") instructs the agent to read the surrounding scope and nearest relevant docs per marker. It does not call for a wider architectural assessment across modules.
-- For a codebase where most TODOs are design or architecture questions (rather than simple bug fixes), this narrow per-marker enrichment may miss cross-cutting concerns.
-
-**Decision or change to make**:
-
-- Add an explicit architecture-scan pass to Step 3: after per-marker enrichment, scan for cross-cutting impacts, module-boundary questions, and recurring themes before classifying.
-
-**Docs to sync after implementation**:
-
-- `.github/skills/todo-analysis/SKILL.md`
-
-### P18 — Document hook scripts vs. markdown instructions rationale in `customization_architecture.md`
-
-**Type**: debt
-**Source TODOs**:
-
-- `docs/customization_architecture.md:102` — `<!-- TODO: why scripts in hooks are useful instead of just using markdown instructions directly in the agent? -->`
-
-**Current understanding**:
-
-- The architecture doc explains that hooks are used for deterministic reminders and constraints, but does not explain *why* a Python script is preferred over an equivalent markdown instruction.
-- The answer: Python scripts can inject **runtime dynamic data** (current git branch, live TODO marker count) that static markdown cannot. This is the primary reason the context-injection hook is a script.
-- A secondary reason: hooks provide a harder enforcement boundary (the runtime enforces the hook regardless of what the agent instruction says).
-- For purely static rules, markdown instructions would be simpler and equally effective.
-
-**Decision or change to make**:
-
-- Add a short explanation to `customization_architecture.md` near line 102 covering: (a) dynamic data injection as the primary reason, (b) harder enforcement as secondary, (c) when markdown instructions are preferable instead.
-- Remove the TODO comment.
-
-**Docs to sync after implementation**:
-
-- none (self-contained doc change)
-
 ### P9 — Decide whether to add file-based debug logging to `todo_planner_context.py`
 
 **Type**: debt
@@ -159,95 +114,6 @@
 **Docs to sync after implementation**:
 
 - none
-
-### P10 — Implement difficulty sub-categorization for editor export ("Lista pero fácil")
-
-**Status**: completed (2026-04-29, refresh 8)
-
-**Implementation**:
-
-- Added `is_easy: bool = False` to `Question` dataclass.
-- Updated `state_io.py` to serialize/deserialize `is_easy` (default `False` on load for backward compatibility).
-- Added `ToggleEasyCommand` to `undo_commands.py`.
-- Added "★ Fácil" toggle button to the question detail panel header; status label reflects easy state for LISTA questions.
-- Added "★ Lista fácil" filter button to the sidebar filter group; `StatusFilterProxyModel` extended with `set_easy_only()`.
-- Added "Exportar XML (solo fáciles)..." menu action to export LISTA+easy questions.
-- Added `--easy-only` flag to `resources/json_to_moodle_xml.py`.
-- Added `is_easy` field to `docs/editor_json_schema.md`.
-- Updated `editor/AGENTS.md`, `editor/README.md`.
-
-### P11 — Remove language setting from early prompt stages
-
-**Type**: action
-**Source TODOs**:
-
-- `prompts/summarize-sources.prompt.md:27`
-- `prompts/merge-summaries.prompt.md:23`
-- `AGENTS.md:42`
-
-**Current understanding**:
-
-- All three prompt stages declare a Spanish output language in the Subject Profile. This locks intermediate artifacts to one language and forces full re-runs if the output language changes.
-- `AGENTS.md` states a default output language at repo level, which is inconsistent with language being a per-invocation concern.
-
-**Decision or change to make**:
-
-- Remove the output language row from the Subject Profile tables in `summarize-sources.prompt.md` and `merge-summaries.prompt.md`.
-- Update the language row in `generate-questions.prompt.md` to make explicit that it is the sole stage where output language is set.
-- Remove or rephrase the language default from `AGENTS.md` (line 42 area).
-
-**Docs to sync after implementation**:
-
-- `AGENTS.md`
-- `prompts/AGENTS.md`
-- `README.md` (if it references language defaults)
-
-### P12 — Replace specific `docs/` prohibition with a general external-knowledge rule
-
-**Type**: action
-**Source TODOs**:
-
-- `prompts/summarize-sources.prompt.md:132-133`
-
-**Current understanding**:
-
-- The prompt currently has a specific rule: *"Do not reference or read `docs/adversarial_logic_filters.md` or `docs/distractor_design.md`."* Those files are auto-injected only via `question-design.instructions.md` which has `applyTo: prompts/generate-questions.prompt.md` — so they are not a real risk here.
-- The actual risk is the agent using training knowledge or other workspace content not in the provided source files.
-- The specific prohibition is misleading (implies only those two files are the risk) and doesn't cover the real concern.
-
-**Decision or change to make**:
-
-- Remove the specific prohibition line.
-- Add a general rule: *"Use only the information present in the source materials provided by the user. Do not introduce external knowledge, assumptions, or information not found in those files."*
-
-**Docs to sync after implementation**:
-
-- none (self-contained prompt change)
-
-### P13 — Update README Step 1 example to show explicit prompt invocation
-
-**Type**: action
-**Source TODOs**:
-
-- `README.md:48`
-
-**Current understanding**:
-
-- The README Step 1 shows a materials list example inside a code block, but does not show how to invoke the prompt. A new user would not know to attach `#prompt:prompts/summarize-sources.prompt.md` before listing paths.
-
-**Decision or change to make**:
-
-- Update the code block to show the full invocation:
-  ```
-  #prompt:prompts/summarize-sources.prompt.md
-
-  Summarise the following course materials:
-  - /path/to/ml-course/notebooks/01-preprocessing/
-  ```
-
-**Docs to sync after implementation**:
-
-- none (self-contained README change)
 
 ### P14 — Build a fan-out summarization skill
 
@@ -275,24 +141,11 @@
 - `prompts/AGENTS.md`
 - `AGENTS.md` (skill inventory)
 
-### Q10 — Should a periodic VS Code documentation audit skill be built?
-
-**Source**: `.github/instructions/customization-authoring.instructions.md:18`
-
-**Question**: Is a VS Code customization audit skill — one that fetches the current VS Code customization docs and analyzes this repo's customization files for gaps or outdated patterns — worth building?
-
-**Context**: The TODO compares this to the built-in `/init` command but web-aware and repo-aware. The "skill vs prompt" decision was already resolved on 2026-04-29 in favor of skill. What remains open is whether to actually implement it, and if so: what docs URL(s) it would fetch, how it would compare fetched docs against this repo's customization files, and how output would be actionable.
-
-**Options**:
-
-- **Yes, build it**: The VS Code customization surface evolves; periodic checks would catch deprecated patterns and new primitives. The skill would use `#tool:web/fetch` to pull the overview and each primitive's doc page, then compare against the live customization files.
-- **No, skip it**: The customization architecture is well-documented and already reviewed on 2026-04-22. Re-reading docs on demand when something breaks is lower cost than maintaining an audit skill.
-- **Deferred**: Note the idea but do not plan it now; revisit when VS Code releases a major customization update.
-
-**Next step**: Decide whether to plan, defer, or close the idea.
 
 ## Recently Completed
 
+- P18 — 2026-04-29. Added hook-script-vs-markdown-instructions rationale section to `customization_architecture.md`; removed TODO comment. (Completed silently; plan updated retroactively in refresh 10.)
+- P8 — 2026-04-29. Removed stale TODO comment from `todo-analysis/SKILL.md` Step 3; cross-cutting scan section was already present.
 - P13 — 2026-04-29. Updated README Step 1 code block to show `#prompt:prompts/summarize-sources.prompt.md` invocation; removed resolved TODO comment.
 - P12 — 2026-04-29. Replaced specific `docs/adversarial_logic_filters.md` prohibition in `summarize-sources` Rules with a general external-knowledge rule; removed TODO comment.
 - P11 — 2026-04-29. Removed Output language row from `summarize-sources` and `merge-summaries` Subject Profiles; added note to `generate-questions` that it is the sole language-setting stage; rephrased `AGENTS.md` language convention to reflect stage-scoped language; updated `prompts/AGENTS.md` Subject Profile table.

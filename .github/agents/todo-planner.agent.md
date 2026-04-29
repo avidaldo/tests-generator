@@ -4,7 +4,7 @@ description: >
   Planning-only agent for the repo's SDD/living-documentation loop. Use when
   reviewing TODOs, separating open questions from implementation work, and
   updating docs/implementation_plan.md before coding.
-tools: ['search', 'read', 'web', 'vscode/memory', 'github/issue_read', 'github.vscode-pull-request-github/issue_fetch', 'github.vscode-pull-request-github/activePullRequest', 'execute/getTerminalOutput', 'execute/testFailure', 'agent', 'vscode/askQuestions']
+tools: ['search', 'read', 'web', 'vscode/memory', 'github/issue_read', 'github.vscode-pull-request-github/issue_fetch', 'github.vscode-pull-request-github/activePullRequest', 'execute/getTerminalOutput', 'execute/testFailure', 'agent', 'vscode/askQuestions', 'edit']
 user-invocable: true
 disable-model-invocation: false
 handoffs:
