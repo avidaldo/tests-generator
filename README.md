@@ -39,7 +39,7 @@ Open `prompts/summarize-sources.prompt.md` as a prompt. Provide:
 
 - **Path(s) to course materials** — can be directories or files in external repos outside this workspace:
 
-  ```
+  ```text
   Summarise the following course materials:
   - /path/to/ml-course/notebooks/01-preprocessing/
   - /path/to/ml-course/notebooks/02-evaluation/
@@ -53,7 +53,6 @@ Open `prompts/summarize-sources.prompt.md` as a prompt. Provide:
 The agent produces a rich content summary preserving all explanations, processes, cases, and examples. **Save it as a `.md` file** (e.g. `summary-ml-preprocessing.md`).
 
 > **Tip — multiple repos**: Run once per repo or topic area. Each run gets a clean context window. You'll have one summary file per repo.
-
 > **Tip — large repos**: If the source material is very large (>100 pages), split by topic area.
 
 ### Step 2: Merge summaries into subcategory files
@@ -77,6 +76,7 @@ uv run python editor/v3/main.py
 ```
 
 Open the JSON file (`Ctrl+O`). Review each question:
+
 - **Pendiente** → not yet reviewed
 - **Revisar** → needs changes
 - **Lista** → approved for export
@@ -88,8 +88,6 @@ python resources/json_to_moodle_xml.py ml-normalisation.json ml-normalisation.xm
 ```
 
 Only questions marked `lista` are exported. Import the XML into Moodle.
-
-
 
 ## Setup
 
@@ -119,6 +117,8 @@ pip install PyQt6 lxml
 
 ## Documentation
 
+- [Customization Architecture](docs/customization_architecture.md)
+- [Implementation Plan](docs/implementation_plan.md)
 - [Adversarial Filters & Prompting Techniques](docs/adversarial_logic_filters.md)
 - [Distractor Design & Psychometric Techniques](docs/distractor_design.md)
 - [Summary Document Format](docs/summary_format.md)
@@ -129,4 +129,14 @@ pip install PyQt6 lxml
 
 ## AI-Assisted Development
 
-This repository uses AI coding assistants as development tools. See [`AGENTS.md`](AGENTS.md) for cross-agent instructions, [`.github/instructions/prompt-authoring.instructions.md`](.github/instructions/prompt-authoring.instructions.md) for prompt design standards (applied automatically when editing prompt or instruction files), and [`.vscode/settings.json`](.vscode/settings.json) for the workspace-level VS Code prompt discovery adapter.
+This repository uses AI coding assistants as development tools. See [`AGENTS.md`](AGENTS.md) for cross-agent instructions, [`docs/customization_architecture.md`](docs/customization_architecture.md) for the current customization design, [`.github/instructions/prompt-authoring.instructions.md`](.github/instructions/prompt-authoring.instructions.md) for prompt design standards, and [`.vscode/settings.json`](.vscode/settings.json) for the workspace-level VS Code customization settings.
+
+### Planning Loop
+
+The development workflow is intentionally simple:
+
+1. Capture local doubts or pending work as `TODO:` comments.
+2. Refresh [`docs/implementation_plan.md`](docs/implementation_plan.md) with the `todo-planner` custom agent.
+3. Resolve Clarification Queue items before coding.
+4. Implement one approved item at a time with `sdd-implementer` or the standard coding agent.
+5. Update the plan and the relevant docs or instructions in the same change.

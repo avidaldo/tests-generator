@@ -2,6 +2,7 @@
   "chat.promptFilesLocations": {
     "prompts": true
   },
+  "chat.useCustomAgentHooks": true,
   "chat.useNestedAgentsMdFiles": true,
   "chat.includeReferencedInstructions": true,
   "[markdown]": {

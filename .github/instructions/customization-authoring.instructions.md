@@ -15,6 +15,8 @@ applyTo:
 
 ## File format specs (VS Code docs: https://code.visualstudio.com/docs/copilot/customization/overview, last reviewed 2026-04-22)
 
+<!-- TODO: would some skill or prompt (not sure which would be better) that from time to time will read the updated documentation in the web and make a complete analysis of customization files in this repo to suggest improvements? something similar to current built-in /init but using the updated documentation -->
+
 ### `.instructions.md` (stored in `.github/instructions/`)
 
 Frontmatter fields (all optional):

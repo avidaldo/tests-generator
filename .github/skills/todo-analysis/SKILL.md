@@ -1,265 +1,153 @@
 ---
 name: todo-analysis
 description: >
-  Analyzes all TODO, ARCH, DESIGN, and FIXME comments across the codebase to
-  produce a structured implementation plan saved as docs/implementation_plan.md.
-  Use this skill when asked to: review or prioritize technical debt, plan
-  architectural changes, understand cross-file impact of pending work, or
-  create an implementation roadmap before writing any code.
-argument-hint: "[scope: all|arch|design|fixme|todo] [path: optional subfolder]"
+  Analyze repository TODOs, separate clarification questions from action items,
+  and maintain a lightweight docs/implementation_plan.md for the repo's
+  SDD/living-documentation workflow. Use when triaging pending work before
+  coding or when refreshing the plan after new discoveries.
+argument-hint: "[scope: optional path or topic]"
 user-invocable: true
 disable-model-invocation: false
 ---
 
-<!-- TODO: why is this an skill? Let's be rigurous in following VSCode current standards -->
+# TODO Analysis
 
-# TODO Analysis Skill
+This skill is the canonical planning workflow for this repository.
 
-This skill performs a deep, context-aware analysis of all pending work markers
-in a codebase and produces a prioritized, actionable implementation plan. It
-reads but never modifies source files. The only file it writes is
-`docs/implementation_plan.md`.
+It is a skill, not an instruction file or prompt, because it is a reusable, task-specific workflow that can be invoked directly, loaded by an agent, and maintained separately from always-on policy.
+<!-- TODO: Does the skill itself need to know that? wouldn't be better to documented for human consumption in customization_architecture.md and remove this paragraph here for token efficiency? -->
 
----
+## Working Model
 
-## Phase 1 — Discovery
+- `TODO:` is the canonical capture marker for this repository. Prefer it for new notes because low-friction capture matters more than inline taxonomy.
+- Continue reading `ARCH:`, `DESIGN:`, `FIXME:`, and `HACK:` when they already exist, but treat them as optional legacy hints rather than required categories.
+<!-- TODO: what's going to imply treating them as legacy? once they exist, seems appropriate to treat them also as TODOs at least. -->
+- Classify items by intent, not only by prefix. The useful buckets are: `question`, `decision`, `action`, `bug`, and `debt`.
+- A question-style TODO does not become an implementation item until it has been clarified with the user. Put it in the Clarification Queue first.
+- The implementation plan is the curated source of truth for active work. Raw TODOs remain the capture surface. Stable rationale belongs in docs and instructions after decisions are made.
 
-Search the codebase for all pending work markers. Use `Grep` or `Bash` with
-patterns that cover common variants. Cast the net wide — look for markers both
-in source code and in documentation files.
+## Workflow
 
-**Markers to find (case-insensitive):**
+### 1. Read the current plan first
 
-| Prefix   | Meaning                                         | Priority signal |
-|----------|-------------------------------------------------|-----------------|
-| `ARCH:`  | Architectural decision — cross-cutting change   | High            |
-| `DESIGN:`| Interface/API/module boundary change            | High            |
-| `TODO:`  | Tactical change, scope may vary                 | Medium          |
-| `FIXME:` | Bug with a known cause                          | High (bugs)     |
-| `HACK:`  | Workaround that needs a proper solution         | Medium          |
-| `NOTE:`  | Non-actionable context note — read but skip     | Info only       |
+If `docs/implementation_plan.md` exists, read it before scanning the codebase. Preserve useful history instead of overwriting it blindly.
 
-<!-- TODO: Consider simplifying to only TODO / creating shortcuts for other markers  -->
+### 2. Discover markers
 
-**Search commands to run:**
+Search the codebase for `TODO:` first. Then run a compatibility sweep for `ARCH:`, `DESIGN:`, `FIXME:`, and `HACK:` so older notes are not lost.
 
-```bash
-# Primary sweep — all source files
-grep -rn --include="*.py" --include="*.ts" --include="*.js" \
-  --include="*.tsx" --include="*.jsx" --include="*.java" \
-  --include="*.go" --include="*.rs" --include="*.rb" \
-  --include="*.md" \
-  -E "(TODO|ARCH|DESIGN|FIXME|HACK|NOTE)\s*:" . 2>/dev/null
+Record for each marker:
 
-# Secondary sweep — any file type, catch stragglers
-grep -rn --exclude-dir=".git" --exclude-dir="node_modules" \
-  --exclude-dir=".venv" --exclude-dir="__pycache__" \
-  -E "(TODO|ARCH|DESIGN|FIXME|HACK)\s*:" . 2>/dev/null
-```
+- file path
+- line number
+- full marker text
+- enclosing function, class, section, or module
+- whether the text is phrased as a question
 
-Collect every result. Record: **file path**, **line number**, **full comment
-text**, and **surrounding function/class name** (read ±15 lines of context).
+### 3. Enrich locally
 
----
+<!-- TODO: Plenty of TODOs are going to be architecture or design questions / change proposals, so a broader analysis will be important. Recurrent architecture questioning is important in SDD for keeping the project modular and scalable and therefore avoid context problems in the future. -->
 
-## Phase 2 — Contextual Enrichment
+For every marker, read the surrounding scope and the nearest relevant docs. Do not classify from the comment text alone.
 
-For each discovered marker, do NOT just read the comment in isolation. Perform
-active context gathering:
+Minimum context bar:
 
-1. **Read the surrounding scope** — the function, class, or module containing
-   the marker. Understand what the code currently does and why the marker was
-   placed where it was.
+- read the full enclosing scope
+- identify the direct callers or neighboring files when the note affects behavior
+- check whether the note overlaps with another TODO or doc section
 
-2. **Trace usages** — if the marker mentions a class, function, or data
-   structure, find all usages with `Grep` or `Glob`. Build a list of files
-   that would be affected by this change.
+### 4. Classify by intent
 
-3. **Read related documentation** — look for `README.md`, `ARCHITECTURE.md`,
-   `docs/`, `ADR/`, or `CHANGELOG` files that provide architectural context.
-   If the TODO references a library or external system, fetch its documentation
-   URL if available.
+Use this decision rule:
 
-4. **Find cross-references** — check if multiple markers reference the same
-   concept, data model, or component. These are likely coupled changes.
+- `question`: asks why, whether, where a workflow belongs, or what primitive should own something
+- `decision`: architectural or workflow choice that needs approval before coding
+- `action`: clear implementation step with a plausible next edit
+- `bug`: current behavior is wrong and the fix direction is understood
+- `debt`: cleanup, migration, or structural improvement with no immediate bug
 
-5. **Check git history** — run `git log --oneline -10 -- <file>` for heavily
-   annotated files to understand recent evolution.
+If one marker contains both a question and an action, split it in the plan: clarification first, action second.
 
----
+<!-- TODO: deep analysis or architecture and software design good practices is paramount, so the first steps os dealing with questions and debating critically with the user is key -->
 
-## Phase 3 — Analysis and Dependency Mapping
+### 5. Update `docs/implementation_plan.md`
 
-After enrichment, analyze the full picture:
+Keep the plan lightweight enough to update after every meaningful step. Do not turn it into a second codebase inventory.
 
-**Scope classification:**
-
-| Label          | Definition                                                     |
-|----------------|----------------------------------------------------------------|
-| `local`        | Change is contained within a single function/method           |
-| `cross-file`   | Change requires touching 2–5 files                            |
-| `cross-module` | Change spans a module or package boundary                      |
-| `architectural`| Change affects public APIs, data models, or system boundaries  |
-
-**Dependency analysis:**
-- Which TODOs must be resolved *before* others can start?
-- Which TODOs conflict (e.g., two markers proposing incompatible designs)?
-- Which TODOs are independent and can be parallelized?
-
-**Complexity estimation (t-shirt sizing):**
-
-| Size | Meaning                                                  |
-|------|----------------------------------------------------------|
-| S    | < 30 min — single-file, clear path, no dependencies     |
-| M    | 30 min–2 h — a few files, straightforward refactor      |
-| L    | 2–8 h — cross-module, needs design decisions             |
-| XL   | > 1 day — architectural, requires review before starting |
-
----
-
-## Phase 4 — Output: `docs/implementation_plan.md`
-
-Write the plan to `docs/implementation_plan.md`. Create the `docs/` directory
-if it does not exist. Use the exact template below. Do not truncate or
-summarize — every discovered marker must appear in the inventory.
+Use this template:
 
 ```markdown
 # Implementation Plan
 
-> **Generated**: {ISO date}
-> **Branch**: {git branch}
-> **Scope**: {N} markers analyzed across {M} files
-> **Status**: DRAFT — review before implementing
+> Updated: {ISO date}
+> Branch: {git branch}
+> Status: active | blocked-for-clarification | archived
 
----
+## Working Agreements
 
-## Executive Summary
+- TODO is the canonical capture marker.
+- Question-style TODOs stay in the Clarification Queue until resolved.
+- Implement one approved item at a time.
+- Sync docs and instructions after implementation, not during speculation.
 
-{2–4 sentences describing the overall shape of the pending work: what major
-themes emerge, which areas of the codebase carry the most debt, and a
-high-level recommended order of attack.}
+## Clarification Queue
 
----
+| ID | Status | Source | Question | Next step |
+|---|---|---|---|---|
+| Q1 | open | path/to/file.md:12 | Should this workflow live in a skill or an agent? | Discuss and record the decision |
 
-## Inventory
+## Planned Work
 
-### 🔴 Architectural (`ARCH:`) — {count}
+| ID | Status | Type | Summary | Source | Depends on |
+|---|---|---|---|---|---|
+| P1 | planned | decision | Define the customization architecture for the SDD loop | AGENTS.md:3 | Q1 |
 
-| # | File | Line | Summary | Scope | Size |
-|---|------|------|---------|-------|------|
-| A1 | path/to/file.py | 42 | Short description | architectural | XL |
+## Next Sequence
 
-### 🟡 Design-level (`DESIGN:`) — {count}
-
-| # | File | Line | Summary | Scope | Size |
-|---|------|------|---------|-------|------|
-
-### 🟢 Tactical (`TODO:`) — {count}
-
-| # | File | Line | Summary | Scope | Size |
-|---|------|------|---------|-------|------|
-
-### 🔴 Bugs (`FIXME:`) — {count}
-
-| # | File | Line | Summary | Scope | Size |
-|---|------|------|---------|-------|------|
-
-### 🟠 Workarounds (`HACK:`) — {count}
-
-| # | File | Line | Summary | Scope | Size |
-|---|------|------|---------|-------|------|
-
----
-
-## Dependency Graph
-
-{ASCII or Mermaid diagram showing which items block others.}
-
-```
-A1 (auth redesign)
- └── D3 (update user model)
-      └── T7 (fix login flow)
-      └── T12 (update tests)
-```
-
----
-
-## Recommended Implementation Sequence
-
-Ordered by: unblock others first → bugs → ARCH → DESIGN → TODO.
-Items on the same indentation level can be parallelized.
-
-```
-Sprint 1 (unblock everything):
-  1. F2 — Fix null pointer in user loader [S, isolated]
-  2. A1 — Auth redesign [XL, blocks D3, T7, T12]
-
-Sprint 2 (design work, after A1 review):
-  3. D3 — Update user model [M, needs A1 merged]
-  4. D5 — API response envelope [M, independent]
-
-Sprint 3 (tactical work):
-  5. T7 — Fix login flow [M, needs D3]
-  6. T12 — Update tests [M, needs D3]
-  7. H4 — Replace session hack [L, independent]
-```
-
----
+1. Resolve the open clarification items that block planning.
+2. Implement the smallest approved decision or action item.
+3. Update this file, then sync docs and instructions touched by that change.
 
 ## Item Details
 
-### A1 — {Short title}
+### P1 — Define the customization architecture for the SDD loop
 
-**File**: `path/to/file.py` · Line 42
-**Marker**: `# ARCH: Redesign the auth layer to support OAuth2 providers`
-**Scope**: architectural · **Size**: XL
-**Blast radius**: {list every file that must change}
+**Type**: decision
+**Source TODOs**:
+- path/to/file.md:12 — TODO text
 
-**Current behavior**:
-{What the code currently does — 2–4 sentences based on code reading.}
+**Current understanding**:
+- Short, concrete summary of what the codebase currently does.
 
-**Why this matters**:
-{Context from docs/code comments explaining the motivation.}
+**Decision or change to make**:
+- Concrete outcome, not vague aspiration.
 
-**Proposed approach**:
-{Concrete steps, not vague suggestions. If the marker itself gives direction,
-expand on it. If not, propose the most conservative option.}
+**Docs to sync after implementation**:
+- AGENTS.md
+- README.md
 
-**Key questions to resolve before starting**:
-- {Question 1}
-- {Question 2}
+## Recently Resolved
 
-**Tests to write or update**:
-- {Test area 1}
+- Q1 — Resolved on 2026-04-29. The reusable workflow lives in a skill; the persona and handoff live in a custom agent.
 
-**Blocks**: D3, T7, T12
-**Blocked by**: none
-
----
-
-{Repeat Item Details section for every marker in the inventory.}
-
----
-
-## Open Questions
-
-{List any ambiguities discovered during analysis that need human input before
-the plan can be executed. Number them so they can be referenced in discussion.}
-
-1. {Question about conflicting markers, unclear ownership, missing docs, etc.}
-
----
-
-## Notes for the Implementing Agent
-
-- Implement ONE item at a time. Do not batch changes across multiple items.
-- Run the test suite after each item before moving to the next.
-- Update this plan file to mark completed items (add ✅ to the inventory row).
-- If implementation reveals new information that changes the plan, stop and
-  update this document before continuing.
-- Do not implement `architectural` (XL) items without an explicit human
-  confirmation that this plan has been reviewed.
 ```
+
+### 6. Stop at the right boundary
+
+This skill plans. It does not implement source changes. Its output is the refreshed `docs/implementation_plan.md` and a concise summary of:
+
+- open clarification items
+- approved next implementation item
+- docs and instructions likely to need sync after implementation
+
+## Notes For The Implementing Agent
+
+- Read `docs/implementation_plan.md` before editing anything.
+- Do not start a blocked item while its clarification entry is still open.
+- Update the plan status after each completed item.
+- When a change affects workflow, architecture, or repo conventions, update the relevant docs and instructions in the same change.
+  confirmation that this plan has been reviewed.
+
 
 ---
 
