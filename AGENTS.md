@@ -72,6 +72,7 @@ Each step is run manually. See the [Usage guide in README.md](README.md#usage-ge
 - Refresh `.github/implementation_plan.md` with [`.github/prompts/refresh-plan.prompt.md`](.github/prompts/refresh-plan.prompt.md) before coding when the task touches multiple files, unresolved design questions, or existing TODOs.
 - Resolve Clarification Queue items with the user before implementation.
 - Implement one approved item at a time with [`.github/prompts/implement-plan-item.prompt.md`](.github/prompts/implement-plan-item.prompt.md), then sync the plan and any affected docs or instructions before finishing.
+- For long unattended delegated or cloud-oriented runs, [`.github/prompts/run-batch-maintenance.prompt.md`](.github/prompts/run-batch-maintenance.prompt.md) is the advanced optional lane. It processes approved and unblocked items iteratively but does not replace the canonical safe loop.
 
 ## VS Code Customization Layer
 

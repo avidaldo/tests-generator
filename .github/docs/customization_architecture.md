@@ -68,12 +68,14 @@ This keeps the workflow honest:
 5. Run `.github/prompts/implement-plan-item.prompt.md` to enter the implementation workflow for one approved item.
 6. Update `.github/implementation_plan.md` and sync the relevant docs and instructions in the same change.
 
+An advanced optional lane also exists for long unattended work. `.github/prompts/run-batch-maintenance.prompt.md` targets `batch-maintainer`, which refreshes the plan when needed, processes approved and unblocked items iteratively, and stops when it reaches unresolved decision work or validation failures it cannot repair confidently. It is intentionally not the default path.
+
 ## Entry Point Tiers
 
 VS Code now has a deliberate preferred-entry model for this repo:
 
 1. **Prompts are the preferred entry points.** The recommended slash commands are `.github/prompts/refresh-plan.prompt.md` and `.github/prompts/implement-plan-item.prompt.md` for repo maintenance, plus the quiz-generation prompts in `prompts/`.
-2. **Agents are the execution surfaces.** `todo-planner` and `sdd-implementer` own persona, hook scope, and the durable workflow contracts that the maintenance prompts target directly.
+2. **Agents are the execution surfaces.** `todo-planner`, `sdd-implementer`, and `batch-maintainer` own persona, hook scope, and the durable workflow contracts that the maintenance prompts target directly.
 3. **Skills are auxiliary reusable modules.** Skills still exist in the repo for other workflows, but the SDD loop no longer depends on a separate planning skill layer.
 
 This keeps the preferred UX prompt-first while using direct configuration, not prompt-body indirection, to select the execution surface.
@@ -122,6 +124,8 @@ For purely static rules, a markdown instruction in the agent file is simpler and
 - `.github/prompts/refresh-plan.prompt.md` and `.github/prompts/implement-plan-item.prompt.md` are prompts because they are thin, user-facing launchers. They optimize slash-menu discovery and bind directly to the execution agents.
 - `todo-planner` is a custom agent because it owns the planning persona, the planning workflow, and planner-only hooks.
 - `sdd-implementer` is a custom agent because implementation behavior is persistent, plan-driven, and intentionally limited to one approved item per run.
+- `.github/prompts/run-batch-maintenance.prompt.md` is a prompt because it is still just a lightweight launcher. The unattended queue behavior belongs in the bound agent, not in prompt-body orchestration.
+- `batch-maintainer` is a custom agent because unattended queue execution needs a durable workflow contract, stop conditions, and target-aware isolation guidance that should remain reusable across local, delegated, and cloud-oriented runs.
 - The maintenance prompts bind directly to visible custom agents because that is the cleanest mechanically supported design in this VS Code setup.
 - Visible agents are acceptable here as advanced or secondary entry points. The prompts remain the preferred UX, but not the only surface.
 - The separate `todo-analysis` skill was removed because it did not have a real second consumer. Inlining it into `todo-planner` reduced indirection without losing workflow clarity.
@@ -135,8 +139,10 @@ For purely static rules, a markdown instruction in the agent file is simpler and
 | --- | --- | --- |
 | Planning launcher | `.github/prompts/refresh-plan.prompt.md` | Preferred slash-command entry for the guarded planning workflow |
 | Implementation launcher | `.github/prompts/implement-plan-item.prompt.md` | Preferred slash-command entry for plan-driven implementation |
+| Advanced batch launcher | `.github/prompts/run-batch-maintenance.prompt.md` | Advanced optional slash-command entry for long unattended maintenance runs |
 | Planning persona and workflow | `.github/agents/todo-planner.agent.md` | Planning agent with plan refresh workflow and planner-only hooks |
 | Implementation persona and workflow | `.github/agents/sdd-implementer.agent.md` | Implementation agent that executes one approved item at a time |
+| Advanced batch persona and workflow | `.github/agents/batch-maintainer.agent.md` | Advanced maintenance agent that iterates over approved and unblocked items until the queue empties or a stop condition is reached |
 | Planner guard rails | `.github/hooks/src/todo_planner_context.py`, `.github/hooks/src/todo_planner_write_guard.py` | Agent-scoped context injection and write restriction for planner sessions |
 | Prompt/customization drift reminder | `.github/hooks/prompt-doc-drift-check.json`, `.github/hooks/src/prompt_doc_drift_check.py` | Reminds when prompt/customization changes are not reflected in the root docs |
 | Living-docs reminder | `.github/hooks/living-docs-drift-check.json`, `.github/hooks/src/living_docs_drift_check.py` | Reminds when source edits have no matching plan or documentation updates |

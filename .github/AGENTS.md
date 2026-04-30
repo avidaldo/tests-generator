@@ -37,6 +37,7 @@ This folder contains the VS Code and Copilot customization layer for repository 
 
 - `todo-planner` — planning agent for the SDD loop; direct target of [`refresh-plan.prompt.md`](prompts/refresh-plan.prompt.md); owns clarification workflow and planner-only hooks.
 - `sdd-implementer` — implementation agent for the SDD loop; direct target of [`implement-plan-item.prompt.md`](prompts/implement-plan-item.prompt.md); implements one approved item at a time and syncs docs.
+- `batch-maintainer` — advanced optional maintenance agent for long unattended delegated or cloud-oriented runs; iterates through approved and unblocked items, keeps the plan and docs synced, and stops at unresolved decisions.
 
 ### Current Skills
 

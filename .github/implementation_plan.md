@@ -1,9 +1,9 @@
 # Implementation Plan
 
-> Updated: 2026-04-30 (refresh 15)
+> Updated: 2026-04-30 (refresh 17)
 > Branch: decomposed
 > Status: active
-> Refresh 15 summary: no new clarification items; narrowed P4 to the remaining merge-summaries design TODO and added P31 for the todo-planner context root-path bug.
+> Refresh 17 summary: completed P32 by adding the advanced optional batch-maintenance launcher and agent, documenting it as an unattended lane that keeps the canonical safe loop intact.
 
 ## Working Agreements
 
@@ -138,6 +138,8 @@
 
 ## Recently Completed
 
+- P32 — 2026-04-30. Added `batch-maintainer` and `run-batch-maintenance.prompt.md` as an advanced optional unattended-maintenance lane; documented queue execution over approved and unblocked items, target-aware branch isolation, and the rule that unresolved decisions still stop the run instead of replacing the canonical safe loop.
+
 - P14 — 2026-04-30. Added `.github/skills/summarize-all-sources/SKILL.md` for Stage 1 fan-out, updated the project and customization inventories, and replaced the README multi-repo TODO with the documented skill workflow.
 
 - P30 — 2026-04-30. Fixed `.github/hooks/src/todo_planner_write_guard.py` to resolve the repository root correctly; validated that absolute `.github/implementation_plan.md` edits are allowed while unrelated files are still denied.
@@ -170,6 +172,8 @@
 - P7 — 2026-04-29. Removed legacy planner surfaces; documented active hook, handoff, and terminology model in `customization_architecture.md`.
 
 ## Recently Resolved
+
+- 2026-04-30 - The repo now has an advanced optional unattended-maintenance lane for delegated and cloud-oriented runs, but the canonical precise workflow remains `refresh-plan.prompt.md` followed by `implement-plan-item.prompt.md`. The batch lane consumes approved and unblocked items only and stops on unresolved decisions.
 
 - 2026-04-30 - Maintenance prompts now live in `.github/prompts/`. Root `prompts/` is reserved for question-generation workflows.
 - 2026-04-30 - The old root maintenance-prompt duplicates were removed. `.github/prompts/` is now the only supported maintenance-launcher surface.
