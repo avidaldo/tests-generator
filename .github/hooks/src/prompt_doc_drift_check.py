@@ -24,6 +24,7 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 _PATCH_PATH_PATTERN = re.compile(r"^\*\*\* (?:Add|Update|Delete) File: (?P<path>.+?)(?: -> .+)?$", re.MULTILINE)
 _TRIGGER_GLOBS = (
     "prompts/*.prompt.md",
+    ".github/prompts/*.prompt.md",
     ".github/instructions/*.instructions.md",
     ".github/skills/*/SKILL.md",
     ".github/agents/*.agent.md",
@@ -33,6 +34,9 @@ _SYNC_SURFACES = {
     "README.md",
     "AGENTS.md",
     "prompts/AGENTS.md",
+    ".github/README.md",
+    ".github/AGENTS.md",
+    ".github/prompts/AGENTS.md",
     ".github/copilot-instructions.md",
 }
 

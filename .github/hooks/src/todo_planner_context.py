@@ -15,7 +15,7 @@ from pathlib import Path
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-PLAN_PATH = REPO_ROOT / "docs" / "implementation_plan.md"
+PLAN_PATH = REPO_ROOT / ".github" / "implementation_plan.md"
 MARKERS = ("TODO", "ARCH", "DESIGN", "FIXME", "HACK")
 TEXT_SUFFIXES = {
     ".agent.md",
@@ -79,7 +79,7 @@ def _git_branch() -> str:
 
 def _plan_preview() -> str:
     if not PLAN_PATH.exists():
-        return "No implementation plan exists yet. Create docs/implementation_plan.md before planning ends."
+        return "No implementation plan exists yet. Create .github/implementation_plan.md before planning ends."
 
     try:
         lines = PLAN_PATH.read_text(encoding="utf-8").splitlines()
@@ -108,7 +108,7 @@ def main() -> None:
         "Rules:",
         "- TODO is the canonical capture marker.",
         "- Question-style TODOs go into the Clarification Queue before implementation.",
-        "- You may only update docs/implementation_plan.md in this agent.",
+        "- You may only update .github/implementation_plan.md in this agent.",
         "Current plan preview:",
         _plan_preview(),
     ])

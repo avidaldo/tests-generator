@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""PreToolUse hook that restricts todo-planner writes to docs/implementation_plan.md.
+"""PreToolUse hook that restricts todo-planner writes to .github/implementation_plan.md.
 
 Configured in `.github/agents/todo-planner.agent.md` as an agent-scoped hook.
 It is intentionally not registered in a workspace `.github/hooks/*.json` file
@@ -15,7 +15,7 @@ from pathlib import Path
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-ALLOWED_PATHS = {"docs", "docs/implementation_plan.md"}
+ALLOWED_PATHS = {".github", ".github/implementation_plan.md"}
 PATCH_PATH_PATTERN = re.compile(r"^\*\*\* (?:Add|Update|Delete) File: (?P<path>.+?)(?: -> .+)?$", re.MULTILINE)
 
 
@@ -81,7 +81,7 @@ def main() -> None:
         "hookSpecificOutput": {
             "hookEventName": "PreToolUse",
             "permissionDecision": "deny",
-            "permissionDecisionReason": "todo-planner may only update docs/implementation_plan.md",
+            "permissionDecisionReason": "todo-planner may only update .github/implementation_plan.md",
             "additionalContext": "Switch to the sdd-implementer agent after the plan is reviewed if you need to modify code or other docs.",
         }
     }))

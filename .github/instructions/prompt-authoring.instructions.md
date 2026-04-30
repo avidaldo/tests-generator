@@ -4,8 +4,8 @@ description: "Use when authoring or updating prompt files or instruction files."
 applyTo: '**/*.prompt.md,**/*.instructions.md'
 ---
 
-- Canonical prompt authoring instructions live in [prompts/AGENTS.md](../../prompts/AGENTS.md). Follow that file as the source of truth for the `prompts/` module.
-- Preserve the active two-stage workflow: `summarize-sources.prompt.md` feeds `generate-questions.prompt.md`; deprecated prompts stay reference-only unless the task explicitly revives them.
+- Canonical prompt authoring instructions live in [prompts/AGENTS.md](../../prompts/AGENTS.md) for question-generation prompts and [prompts/AGENTS.md](../prompts/AGENTS.md) for maintenance launchers. Follow the nearest layer-specific file as the source of truth.
+- Preserve the active question-generation workflow: `summarize-sources.prompt.md` feeds `merge-summaries.prompt.md`, which then feeds `generate-questions.prompt.md`; deprecated prompts stay reference-only unless the task explicitly revives them.
 - For quiz-generation prompts, keep the one-subcategory-at-a-time workflow and preserve the requirement to consult [docs/adversarial_logic_filters.md](../../docs/adversarial_logic_filters.md).
 - Keep prompt files scoped to one reusable workflow. If the task needs persistent persona, tool restrictions, or multi-stage handoffs, prefer a custom agent or skill instead of broadening the prompt.
 

@@ -1,6 +1,6 @@
 # Implementation Plan
 
-> Updated: 2026-04-30 (refresh 11)
+> Updated: 2026-04-30 (refresh 12)
 > Branch: decomposed
 > Status: active
 
@@ -91,7 +91,8 @@
 
 **Docs to sync after implementation**:
 
-- `AGENTS.md` (skills inventory)
+- `.github/AGENTS.md`
+- `AGENTS.md` (customization summary)
 - `.github/instructions/customization-authoring.instructions.md` (remove the TODO)
 
 ### P9 — Decide whether to add file-based debug logging to `todo_planner_context.py`
@@ -138,10 +139,13 @@
 
 - `README.md`
 - `prompts/AGENTS.md`
-- `AGENTS.md` (skill inventory)
+- `.github/AGENTS.md`
+- `AGENTS.md` (customization summary)
 
 ## Recently Completed
 
+- P28 — 2026-04-30. Split prompt surfaces by layer: maintenance prompts now live in `.github/prompts/`, while root `prompts/` is reserved for the quiz-generation pipeline.
+- P27 — 2026-04-30. Moved customization docs and the active implementation plan into `.github/`, added `.github/AGENTS.md` and `.github/README.md`, and split project vs. customization documentation surfaces.
 - P26 — 2026-04-30. Inlined the planning workflow from `todo-analysis` into `todo-planner`, removed the separate planning skill, and updated the current architecture docs to match.
 - P25 — 2026-04-30. Proved that direct prompt binding works cleanly when `todo-planner` and `sdd-implementer` are visible, then bound both maintenance prompts directly to those agents.
 - P24 — 2026-04-29. Clarified the prompt-launcher semantics in the two SDD launcher prompts and made `implement-plan-item` explicitly single-item-only.
@@ -168,6 +172,8 @@
 
 ## Recently Resolved
 
+- 2026-04-30 - Maintenance prompts now live in `.github/prompts/`. Root `prompts/` is reserved for question-generation workflows.
+- 2026-04-30 - Customization docs and the active implementation plan now live under `.github/`. Root `docs/` is reserved for project and domain documentation.
 - 2026-04-30 - Visible direct prompt binding is the current mechanically supported architecture: `refresh-plan.prompt.md` now targets `todo-planner` directly and `implement-plan-item.prompt.md` targets `sdd-implementer` directly.
 - 2026-04-30 - The SDD loop no longer uses a separate `todo-analysis` skill. The planning workflow was inlined into `todo-planner` because it had no real second consumer.
 - 2026-04-30 - Visible custom agents are acceptable as advanced entry points. Prompts remain the preferred UX, but the repo no longer depends on hidden-agent prompt indirection.

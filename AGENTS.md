@@ -12,11 +12,11 @@
 ## Planning And Living Documentation
 
 - `TODO:` is the default inline capture marker. Prefer low-friction capture over elaborate inline taxonomies.
-- `docs/implementation_plan.md` is the curated active plan. Question-style TODOs must be moved there as Clarification Queue entries before implementation starts.
-- Use [`prompts/refresh-plan.prompt.md`](prompts/refresh-plan.prompt.md) to refresh the plan and surface unresolved questions before larger changes.
-- Use [`prompts/implement-plan-item.prompt.md`](prompts/implement-plan-item.prompt.md) after the relevant plan item is approved.
+- `.github/implementation_plan.md` is the curated active plan. Question-style TODOs must be moved there as Clarification Queue entries before implementation starts.
+- Use [`.github/prompts/refresh-plan.prompt.md`](.github/prompts/refresh-plan.prompt.md) to refresh the plan and surface unresolved questions before larger changes.
+- Use [`.github/prompts/implement-plan-item.prompt.md`](.github/prompts/implement-plan-item.prompt.md) after the relevant plan item is approved.
 - When a change affects architecture, workflow, or agent behavior, update the relevant docs and instruction files in the same change.
-- Canonical rationale for this split lives in [docs/customization_architecture.md](docs/customization_architecture.md).
+- Canonical rationale for this split lives in [`.github/customization_architecture.md`](.github/customization_architecture.md).
 
 ## Project Overview
 
@@ -26,12 +26,13 @@ This repository contains tools and prompts for generating, editing, and analyzin
 
 | Path | Purpose | Instructions |
 | ---- | ------- | ------------ |
-| `prompts/` | Canonical user-facing prompt files (`.prompt.md`) for workflow launchers and quiz generation | [`prompts/AGENTS.md`](prompts/AGENTS.md) |
+| `prompts/` | Canonical question-generation prompt files (`.prompt.md`) | [`prompts/AGENTS.md`](prompts/AGENTS.md) |
+| `.github/prompts/` | Repository-maintenance prompt launchers for the SDD loop | [`.github/prompts/AGENTS.md`](.github/prompts/AGENTS.md) |
 | `.github/instructions/` | VS Code file-scoped instruction adapters (`.instructions.md`) | [`AGENTS.md`](AGENTS.md) |
-| `.github/` | VS Code-specific compatibility files and workflows | [`AGENTS.md`](AGENTS.md) |
+| `.github/` | VS Code customization layer: agents, prompts, hooks, and living customization docs | [`.github/AGENTS.md`](.github/AGENTS.md) |
 | `editor/` | PyQt-based Moodle XML quiz editor | [`editor/AGENTS.md`](editor/AGENTS.md) |
 | `results/` | Exam result analysis notebooks | [`results/AGENTS.md`](results/AGENTS.md) |
-| `docs/` | Domain knowledge, design documentation, and living customization records; see [`docs/customization_architecture.md`](docs/customization_architecture.md), [`docs/agentic_enforcement_layers.md`](docs/agentic_enforcement_layers.md), and [`docs/editor_json_schema.md`](docs/editor_json_schema.md) | — |
+| `docs/` | Domain knowledge and project-facing documentation; see [`docs/editor_json_schema.md`](docs/editor_json_schema.md), [`docs/summary_format.md`](docs/summary_format.md), [`docs/adversarial_logic_filters.md`](docs/adversarial_logic_filters.md), and [`docs/distractor_design.md`](docs/distractor_design.md) | — |
 | `resources/` | Utility scripts (XML conversion, merging) | [`.github/instructions/resources.instructions.md`](.github/instructions/resources.instructions.md) |
 | `samples/` | Example Moodle XML files | [`.github/instructions/xml-moodle.instructions.md`](.github/instructions/xml-moodle.instructions.md) |
 
@@ -66,38 +67,14 @@ Each step is run manually. See the [Usage guide in README.md](README.md#usage-ge
 ## Planning Workflow
 
 - Capture open work locally with `TODO:` markers.
-- Refresh `docs/implementation_plan.md` with [`prompts/refresh-plan.prompt.md`](prompts/refresh-plan.prompt.md) before coding when the task touches multiple files, unresolved design questions, or existing TODOs.
+- Refresh `.github/implementation_plan.md` with [`.github/prompts/refresh-plan.prompt.md`](.github/prompts/refresh-plan.prompt.md) before coding when the task touches multiple files, unresolved design questions, or existing TODOs.
 - Resolve Clarification Queue items with the user before implementation.
-- Implement one approved item at a time with [`prompts/implement-plan-item.prompt.md`](prompts/implement-plan-item.prompt.md), then sync the plan and any affected docs or instructions before finishing.
+- Implement one approved item at a time with [`.github/prompts/implement-plan-item.prompt.md`](.github/prompts/implement-plan-item.prompt.md), then sync the plan and any affected docs or instructions before finishing.
 
-## VS Code Customization Layout
+## VS Code Customization Layer
 
-- Keep `AGENTS.md` files as the canonical cross-agent instruction surface. Root and subfolder `AGENTS.md` files are both loaded by VS Code (`chat.useNestedAgentsMdFiles`).
-- Keep `prompts/*.prompt.md` as the canonical user-facing workflow entry points; discovered via `chat.promptFilesLocations` in `.vscode/settings.json`.
-- Current workflow launchers in `prompts/`: `refresh-plan.prompt.md` and `implement-plan-item.prompt.md` for repo maintenance, plus the quiz-generation pipeline prompts documented in `prompts/AGENTS.md`.
-- `chat.useCustomAgentHooks` is enabled in `.vscode/settings.json` so planner-only guard rails can live with the custom agent that needs them.
-- Use `.github/instructions/*.instructions.md` for file-type-scoped rules; current files and their `applyTo` targets:
-  - `customization-authoring.instructions.md` → `.github/instructions/*.instructions.md`, `.github/agents/*.agent.md`, `.github/skills/**/SKILL.md`
-  - `editor.instructions.md` → `editor/**`
-  - `documentation-sync.instructions.md` → sync surfaces plus prompt/customization files that commonly create drift
-  - `markdown.instructions.md` → `**/*.md`
-  - `notebooks.instructions.md` → `**/*.ipynb`
-  - `prompt-authoring.instructions.md` → `**/*.prompt.md`, `**/*.instructions.md` (includes prompt design research guidance, formerly `metaprompting.prompt.md`)
-  - `question-design.instructions.md` → `prompts/generate-questions.prompt.md` (auto-attaches psychometric domain knowledge)
-  - `python.instructions.md` → `**/*.py`
-  - `resources.instructions.md` → `resources/**`
-  - `results.instructions.md` → `results/**`
-  - `xml-moodle.instructions.md` → `**/*.xml`
-- Markdown links in `.instructions.md` files to canonical sources are resolved automatically (`chat.includeReferencedInstructions`).
-- Use `.github/agents/*.agent.md` for custom agents; current agents:
-  - `todo-planner` → hidden runtime planning agent invoked by `refresh-plan.prompt.md`; owns clarification workflow and planner-only hooks
-  - `sdd-implementer` → hidden runtime implementation agent invoked by `implement-plan-item.prompt.md`; implements one approved plan item at a time and syncs docs
-- Use agent-scoped hooks in `.github/agents/*.agent.md` when a guard rail should apply only to one agent; the planner guard rails live there by design.
-- Use `.github/hooks/*.json` + scripts for repo-wide deterministic agent-time enforcement (PostToolUse, PreToolUse); current hooks:
-  - `strip-notebook-outputs.json` → strips `.ipynb` outputs after any agent file write
-  - `prompt-doc-drift-check.json` → warns when prompt/customization changes may need documentation-sync updates
-  - `living-docs-drift-check.json` → warns when source edits have no matching plan or documentation updates
-- Use `.github/skills/<name>/SKILL.md` for portable, on-demand multi-step workflows; current skills:
-  - `todo-analysis` → hidden planning workflow module loaded by `todo-planner`; triages TODOs into a lightweight implementation plan with a clarification queue
-  - `notebook-hygiene` → installs the full four-layer notebook output enforcement stack
-  - `editor-export` → exports reviewed editor JSON state to Moodle XML with explicit status control
+- The detailed customization inventory now lives in [`.github/AGENTS.md`](.github/AGENTS.md).
+- The human-oriented customization guide now lives in [`.github/README.md`](.github/README.md).
+- Maintenance prompt policy now lives in [`.github/prompts/AGENTS.md`](.github/prompts/AGENTS.md).
+- Root `prompts/` remains reserved for the quiz-generation pipeline and stays enabled through `.vscode/settings.json`.
+- Keep this root file focused on project-facing policy and discovery; do not duplicate the full customization inventory here.

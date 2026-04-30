@@ -11,9 +11,9 @@ This design was aligned against the current VS Code customization docs reviewed 
 | Surface | Role | Update cadence |
 | --- | --- | --- |
 | `TODO:` comments | Raw capture for ideas, doubts, bugs, and debt | Captured near the affected file with minimal ceremony; triaged later |
-| `docs/implementation_plan.md` | Curated active plan and clarification queue | Before and after implementation |
-| `docs/*.md` | Stable human-facing rationale and design decisions | When decisions settle |
-| `AGENTS.md` and `*.instructions.md` | Agent behavior, routing, and always-on policy | When the agent should behave differently |
+| `.github/implementation_plan.md` | Curated active plan and clarification queue | Before and after implementation |
+| `.github/*.md` | Stable customization rationale and design decisions | When decisions settle |
+| `AGENTS.md`, `.github/AGENTS.md`, and `*.instructions.md` | Agent behavior, routing, and always-on policy | When the agent should behave differently |
 
 None of these surfaces replaces the others.
 
@@ -26,7 +26,7 @@ None of these surfaces replaces the others.
 
 - A `primitive` is a VS Code customization type such as an instruction file, prompt, skill, custom agent, hook, or MCP server.
 - A `customization` is one concrete repo artifact that uses a primitive, for example `.github/agents/todo-planner.agent.md` or `.github/hooks/living-docs-drift-check.json`.
-- A `surface` is a place where behavior or truth is stored and discovered, such as `docs/implementation_plan.md`, `AGENTS.md`, or the `.github/hooks/` folder.
+- A `surface` is a place where behavior or truth is stored and discovered, such as `.github/implementation_plan.md`, `.github/AGENTS.md`, or the `.github/hooks/` folder.
 
 ## Primitive Allocation
 
@@ -62,17 +62,17 @@ This keeps the workflow honest:
 ## Recommended Loop
 
 1. Capture new doubts or ideas as `TODO:` comments close to the code or document they affect.
-2. Run `refresh-plan.prompt.md` to enter the guarded planning workflow and refresh `docs/implementation_plan.md`.
+2. Run `.github/prompts/refresh-plan.prompt.md` to enter the guarded planning workflow and refresh `.github/implementation_plan.md`.
 3. Resolve Clarification Queue items with the user before coding.
 4. Choose one approved plan item.
-5. Run `implement-plan-item.prompt.md` to enter the implementation workflow for one approved item.
-6. Update `docs/implementation_plan.md` and sync the relevant docs and instructions in the same change.
+5. Run `.github/prompts/implement-plan-item.prompt.md` to enter the implementation workflow for one approved item.
+6. Update `.github/implementation_plan.md` and sync the relevant docs and instructions in the same change.
 
 ## Entry Point Tiers
 
 VS Code now has a deliberate preferred-entry model for this repo:
 
-1. **Prompts are the preferred entry points.** The recommended slash commands are `refresh-plan.prompt.md` and `implement-plan-item.prompt.md` for repo maintenance, plus the quiz-generation prompts in `prompts/`.
+1. **Prompts are the preferred entry points.** The recommended slash commands are `.github/prompts/refresh-plan.prompt.md` and `.github/prompts/implement-plan-item.prompt.md` for repo maintenance, plus the quiz-generation prompts in `prompts/`.
 2. **Agents are the execution surfaces.** `todo-planner` and `sdd-implementer` own persona, hook scope, and the durable workflow contracts that the maintenance prompts target directly.
 3. **Skills are auxiliary reusable modules.** Skills still exist in the repo for other workflows, but the SDD loop no longer depends on a separate planning skill layer.
 
@@ -86,7 +86,7 @@ Use instructions when the primary consumer is the agent and the information shou
 
 Practical rule:
 
-- If the content explains why a design exists, it belongs in `docs/`.
+- If the content explains why a design exists, it belongs in `docs/` for project rationale or `.github/*.md` for customization rationale.
 - If the content says how the agent should behave, route, or prioritize while working, it belongs in `AGENTS.md` or an instruction file.
 - If the content is a reusable multi-step workflow with a concrete second consumer or bundled resources, it belongs in a skill.
 - If the content depends on a persona or hook scope, it belongs in a custom agent.
@@ -119,21 +119,21 @@ For purely static rules, a markdown instruction in the agent file is simpler and
 
 ## Why These Primitive Choices
 
-- `refresh-plan.prompt.md` and `implement-plan-item.prompt.md` are prompts because they are thin, user-facing launchers. They optimize slash-menu discovery and bind directly to the execution agents.
+- `.github/prompts/refresh-plan.prompt.md` and `.github/prompts/implement-plan-item.prompt.md` are prompts because they are thin, user-facing launchers. They optimize slash-menu discovery and bind directly to the execution agents.
 - `todo-planner` is a custom agent because it owns the planning persona, the planning workflow, and planner-only hooks.
 - `sdd-implementer` is a custom agent because implementation behavior is persistent, plan-driven, and intentionally limited to one approved item per run.
 - The maintenance prompts bind directly to visible custom agents because that is the cleanest mechanically supported design in this VS Code setup.
 - Visible agents are acceptable here as advanced or secondary entry points. The prompts remain the preferred UX, but not the only surface.
 - The separate `todo-analysis` skill was removed because it did not have a real second consumer. Inlining it into `todo-planner` reduced indirection without losing workflow clarity.
-- The launcher prompts stay in `prompts/` because that is already the workspace prompt-discovery surface. Creating a second prompt root would add routing complexity without reducing ambiguity.
+- The maintenance prompts live in `.github/prompts/`, which is the default workspace prompt root. The root `prompts/` folder stays dedicated to the quiz-generation pipeline and is enabled separately in `.vscode/settings.json`.
 - The living-docs reminder is a workspace hook JSON because it should apply repo-wide after relevant source edits.
 
 ## Current Mapping
 
 | Surface | Current file(s) | Responsibility |
 | --- | --- | --- |
-| Planning launcher | `prompts/refresh-plan.prompt.md` | Preferred slash-command entry for the guarded planning workflow |
-| Implementation launcher | `prompts/implement-plan-item.prompt.md` | Preferred slash-command entry for plan-driven implementation |
+| Planning launcher | `.github/prompts/refresh-plan.prompt.md` | Preferred slash-command entry for the guarded planning workflow |
+| Implementation launcher | `.github/prompts/implement-plan-item.prompt.md` | Preferred slash-command entry for plan-driven implementation |
 | Planning persona and workflow | `.github/agents/todo-planner.agent.md` | Planning agent with plan refresh workflow and planner-only hooks |
 | Implementation persona and workflow | `.github/agents/sdd-implementer.agent.md` | Implementation agent that executes one approved item at a time |
 | Planner guard rails | `.github/hooks/src/todo_planner_context.py`, `.github/hooks/src/todo_planner_write_guard.py` | Agent-scoped context injection and write restriction for planner sessions |
@@ -147,4 +147,5 @@ For purely static rules, a markdown instruction in the agent file is simpler and
 - Maintenance prompts are the preferred VS Code entry points for the SDD loop.
 - The planning workflow now lives directly in `todo-planner` rather than in a separate skill.
 - Persona and planner-only guard rails live in custom agents.
+- Customization docs and maintenance prompts live under `.github/`, while root `docs/` and root `prompts/` stay project-facing.
 - Hooks provide deterministic reminders and constraints only; they do not author docs.

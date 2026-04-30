@@ -7,11 +7,11 @@ applyTo:
   - ".github/skills/**/SKILL.md"
 ---
 
-- Keep canonical project policy in [AGENTS.md](../../AGENTS.md) and module policy in [prompts/AGENTS.md](../../prompts/AGENTS.md), [editor/AGENTS.md](../../editor/AGENTS.md), and [results/AGENTS.md](../../results/AGENTS.md). Link to those sources instead of copying prose into customization files.
+- Keep canonical project policy in [AGENTS.md](../../AGENTS.md) and canonical customization policy in [AGENTS.md](../AGENTS.md). Keep project prompt policy in [prompts/AGENTS.md](../../prompts/AGENTS.md) and maintenance prompt policy in [prompts/AGENTS.md](../prompts/AGENTS.md). Link to those sources instead of copying prose into customization files.
 - `description` is the discovery surface. Use "Use when..." phrasing with the concrete tasks, file types, or workflows that should cause the customization to load.
 - Keep `applyTo` patterns specific. Avoid `**` unless the rule genuinely applies workspace-wide, and re-check the glob after file moves or layout changes.
 - Keep adapters thin and workflow-specific files focused on the non-obvious constraints an agent cannot infer quickly from nearby code.
-- When adding or removing a customization file, update [AGENTS.md](../../AGENTS.md) in the same change so the inventory stays accurate.
+- When adding or removing a customization file, update [AGENTS.md](../AGENTS.md) and the short customization summary in [AGENTS.md](../../AGENTS.md) in the same change so the inventory stays accurate.
 
 ## File format specs (VS Code docs: https://code.visualstudio.com/docs/copilot/customization/overview, last reviewed 2026-04-22)
 
@@ -75,4 +75,4 @@ Hook command properties: `type` (must be `"command"`), `command`, `windows`, `li
 
 - Repo-wide hooks live in `.github/hooks/*.json`. Agent-specific hooks belong in the `hooks` frontmatter of `.agent.md` files.
 
-See [docs/agentic_enforcement_layers.md](../../docs/agentic_enforcement_layers.md) for this project's hook design decisions.
+See [agentic_enforcement_layers.md](../agentic_enforcement_layers.md) for this project's hook design decisions.

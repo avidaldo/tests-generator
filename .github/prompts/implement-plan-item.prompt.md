@@ -5,6 +5,6 @@ argument-hint: "[item id or short target: optional]"
 agent: sdd-implementer
 ---
 
-Implement from `docs/implementation_plan.md`.
+Implement from `.github/implementation_plan.md`.
 
 - Treat `$ARGUMENTS` as the preferred approved item to target when it is provided.

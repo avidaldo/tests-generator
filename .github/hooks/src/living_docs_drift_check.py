@@ -54,12 +54,15 @@ def _matches_trigger(path: str) -> bool:
 
 def _is_sync_surface(path: str) -> bool:
     return (
-        path == "docs/implementation_plan.md"
+        path == ".github/implementation_plan.md"
         or path == "README.md"
         or path == "AGENTS.md"
+        or path == ".github/README.md"
+        or path == ".github/AGENTS.md"
         or path.endswith("/AGENTS.md")
         or path == ".github/copilot-instructions.md"
         or path.startswith("docs/")
+        or (path.startswith(".github/") and path.endswith(".md"))
         or path.startswith(".github/instructions/")
     )
 
@@ -109,8 +112,8 @@ def main() -> None:
     print(json.dumps({
         "systemMessage": (
             "Living-docs reminder: source changes "
-            f"({preview}) currently have no matching updates in docs/, AGENTS.md, README.md, "
-            "or docs/implementation_plan.md. If behavior or workflow changed, sync the plan and the relevant docs before finishing."
+            f"({preview}) currently have no matching updates in docs/, .github/, AGENTS.md, README.md, "
+            "or .github/implementation_plan.md. If behavior or workflow changed, sync the plan and the relevant docs before finishing."
         )
     }))
 

@@ -1,0 +1,71 @@
+# Customization Layer — Agent Instructions
+
+## Purpose
+
+This folder contains the VS Code and Copilot customization layer for repository maintenance. It is separate from the question-generation project surfaces in root `docs/` and root `prompts/`.
+
+## Planning And Living Documentation
+
+- `TODO:` is the default inline capture marker.
+- `.github/implementation_plan.md` is the curated active plan. Question-style TODOs must be moved there as Clarification Queue entries before implementation starts.
+- Use [`refresh-plan.prompt.md`](prompts/refresh-plan.prompt.md) to refresh the plan and surface unresolved questions before larger changes.
+- Use [`implement-plan-item.prompt.md`](prompts/implement-plan-item.prompt.md) after the relevant plan item is approved.
+- When a change affects customization architecture, workflow, or agent behavior, update the relevant `.github` docs and instruction files in the same change.
+- Canonical rationale lives in [customization_architecture.md](customization_architecture.md).
+- Hook rationale lives in [agentic_enforcement_layers.md](agentic_enforcement_layers.md).
+
+## Customization Structure
+
+| Path | Purpose |
+| ---- | ------- |
+| `prompts/` | Maintenance prompt launchers for the SDD loop |
+| `agents/` | Custom agents for planning and implementation |
+| `instructions/` | File-scoped customization rules and sync adapters |
+| `hooks/` | Deterministic guard rails and reminder hooks |
+| `skills/` | Reusable auxiliary workflows with concrete second consumers |
+| `*.md` | Human-facing customization docs, rationale, and active plan |
+
+## Current VS Code Layout
+
+- `.github/prompts/` is the default workspace prompt root in VS Code.
+- Root `prompts/` stays enabled through `.vscode/settings.json` for the quiz-generation pipeline.
+- `chat.useCustomAgentHooks` is enabled so planner-only guard rails can live with `todo-planner`.
+- `chat.useNestedAgentsMdFiles` is enabled, so this file complements the root [../AGENTS.md](../AGENTS.md) rather than replacing it.
+
+### Current Agents
+
+- `todo-planner` — planning agent for the SDD loop; direct target of [`refresh-plan.prompt.md`](prompts/refresh-plan.prompt.md); owns clarification workflow and planner-only hooks.
+- `sdd-implementer` — implementation agent for the SDD loop; direct target of [`implement-plan-item.prompt.md`](prompts/implement-plan-item.prompt.md); implements one approved item at a time and syncs docs.
+
+### Current Skills
+
+- `notebook-hygiene` — installs the full four-layer notebook output enforcement stack.
+- `editor-export` — exports reviewed editor JSON state to Moodle XML with explicit status control.
+
+### Current Instructions
+
+- `customization-authoring.instructions.md` — applies to `.github/instructions/*.instructions.md`, `.github/agents/*.agent.md`, and `.github/skills/**/SKILL.md`.
+- `customization-documentation-sync.instructions.md` — applies to the `.github` customization docs, maintenance prompts, agents, instructions, and skills.
+- `project-documentation-sync.instructions.md` — applies to the root project docs and question-generation prompts.
+- `editor.instructions.md` — applies to `editor/**`.
+- `markdown.instructions.md` — applies to `**/*.md`.
+- `notebooks.instructions.md` — applies to `**/*.ipynb`.
+- `prompt-authoring.instructions.md` — applies to `**/*.prompt.md` and `**/*.instructions.md`.
+- `python.instructions.md` — applies to `**/*.py`.
+- `question-design.instructions.md` — applies to `prompts/generate-questions.prompt.md`.
+- `resources.instructions.md` — applies to `resources/**`.
+- `results.instructions.md` — applies to `results/**`.
+- `xml-moodle.instructions.md` — applies to `**/*.xml`.
+
+### Current Hooks
+
+- `strip-notebook-outputs.json` — strips `.ipynb` outputs after agent file writes.
+- `prompt-doc-drift-check.json` — reminds when prompt or customization edits lack matching doc updates.
+- `living-docs-drift-check.json` — reminds when source edits have no matching plan or documentation updates.
+
+## Update Rules
+
+- Keep [copilot-instructions.md](copilot-instructions.md) as a thin VS Code adapter.
+- When adding or removing customization files, update this file and the short customization summary in [../AGENTS.md](../AGENTS.md) in the same change.
+- Keep maintenance prompt policy in [prompts/AGENTS.md](prompts/AGENTS.md).
+- Keep project prompt policy in [../prompts/AGENTS.md](../prompts/AGENTS.md).

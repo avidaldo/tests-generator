@@ -118,28 +118,19 @@ pip install PyQt6 lxml
 
 ## Documentation
 
-- [Customization Architecture](docs/customization_architecture.md)
-- [Implementation Plan](docs/implementation_plan.md)
 - [Adversarial Filters & Prompting Techniques](docs/adversarial_logic_filters.md)
 - [Distractor Design & Psychometric Techniques](docs/distractor_design.md)
 - [Summary Document Format](docs/summary_format.md)
-- [Agentic Enforcement Layers](docs/agentic_enforcement_layers.md)
+- [Editor JSON Schema](docs/editor_json_schema.md)
 - [Editor Architecture](editor/AGENTS.md)
 - [Results Privacy Policy](results/AGENTS.md)
 - [Prompt Pipeline Design](prompts/AGENTS.md)
 
 ## AI-Assisted Development
 
-This repository uses AI coding assistants as development tools. See [`AGENTS.md`](AGENTS.md) for cross-agent instructions, [`docs/customization_architecture.md`](docs/customization_architecture.md) for the current customization design, [`.github/instructions/prompt-authoring.instructions.md`](.github/instructions/prompt-authoring.instructions.md) for prompt design standards, and [`.vscode/settings.json`](.vscode/settings.json) for the workspace-level VS Code customization settings.
+This repository uses AI coding assistants as development tools.
 
-### Planning Loop
-
-The development workflow is intentionally simple:
-
-1. Capture local doubts or pending work as `TODO:` comments.
-2. Refresh [`docs/implementation_plan.md`](docs/implementation_plan.md) with [`prompts/refresh-plan.prompt.md`](prompts/refresh-plan.prompt.md).
-3. Resolve Clarification Queue items before coding.
-4. Implement one approved item at a time with [`prompts/implement-plan-item.prompt.md`](prompts/implement-plan-item.prompt.md).
-5. Update the plan and the relevant docs or instructions in the same change.
-
-The underlying `todo-planner`, `sdd-implementer`, and `todo-analysis` customizations still exist, but they are runtime layers behind the prompt launchers rather than the primary UI entry points.
+- Project-facing instructions live in [AGENTS.md](AGENTS.md).
+- Customization-layer docs and maintenance workflows live in [`.github/README.md`](.github/README.md), [`.github/AGENTS.md`](.github/AGENTS.md), and [`.github/customization_architecture.md`](.github/customization_architecture.md).
+- Prompt design standards live in [`.github/instructions/prompt-authoring.instructions.md`](.github/instructions/prompt-authoring.instructions.md).
+- Workspace-level discovery settings live in [`.vscode/settings.json`](.vscode/settings.json).

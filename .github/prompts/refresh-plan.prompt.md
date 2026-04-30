@@ -5,6 +5,6 @@ argument-hint: "[scope: optional path or topic]"
 agent: todo-planner
 ---
 
-Refresh `docs/implementation_plan.md` using the repository planning workflow.
+Refresh `.github/implementation_plan.md` using the repository planning workflow.
 
 - Treat `$ARGUMENTS` as optional scope guidance if it is provided.

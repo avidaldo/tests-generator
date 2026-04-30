@@ -2,12 +2,10 @@
 
 ## Current State
 
-This folder contains the canonical user-facing prompt files for the repository. VS Code is configured to discover prompt files from this folder.
+This folder contains the canonical question-generation prompt files for the repository. VS Code discovers this folder through `chat.promptFilesLocations` in `.vscode/settings.json`. Repository-maintenance launchers live in [../.github/prompts/AGENTS.md](../.github/prompts/AGENTS.md).
 
 | File | Status | Description |
 | ---- | ------ | ----------- |
-| `refresh-plan.prompt.md` | **Active — Workflow Launcher** | Public slash-command entry for the guarded planning workflow; invokes `todo-planner` programmatically |
-| `implement-plan-item.prompt.md` | **Active — Workflow Launcher** | Public slash-command entry for plan-driven implementation; invokes `sdd-implementer` programmatically |
 | `summarize-sources.prompt.md` | **Active — Stage 1** | Rich content extraction from source files; one per repo or topic area |
 | `merge-summaries.prompt.md` | **Active — Stage 2** | Organizes raw summaries into subcategory files with cross-cutting context |
 | `generate-questions.prompt.md` | **Active — Stage 3** | Question generation in JSON format; one subcategory file per invocation |
@@ -15,16 +13,6 @@ This folder contains the canonical user-facing prompt files for the repository. 
 | `deprecated/generate-test.prompt.md` | **Deprecated** | Monolithic prompt — superseded by the 3-stage pipeline |
 
 > **Note:** `metaprompting.prompt.md` was merged into `.github/instructions/prompt-authoring.instructions.md` — it was behavioural guidance, not a workflow prompt.
-
-### Workflow Launchers
-
-The two maintenance prompts are intentionally thin launchers:
-
-- `refresh-plan.prompt.md` is the public entry point for the SDD planning loop. It invokes the hidden `todo-planner` agent programmatically, preserving planner-only hooks without exposing the agent as a primary UI surface.
-- `implement-plan-item.prompt.md` is the public entry point for plan-driven implementation. It invokes the hidden `sdd-implementer` agent programmatically.
-- The planning prompt ends by telling the user to run `/implement-plan-item`; it does not rely on an agent handoff button.
-
-They live in the same folder as the quiz-generation prompts because `prompts/` is already the workspace prompt-discovery surface. No second prompt root is needed.
 
 ### Pipeline Overview
 
@@ -66,7 +54,7 @@ Moodle import
 
 Each stage is run manually by the user. Stages 1 and 3 are parallelizable (independent invocations); Stage 2 is a single merge pass.
 
-The workflow launchers above are separate from this quiz-generation pipeline. They maintain the repository itself rather than generating quiz artifacts.
+Repository-maintenance launchers are documented separately in [../.github/prompts/AGENTS.md](../.github/prompts/AGENTS.md). This file is only for the quiz-generation pipeline.
 
 **Intermediate format**: JSON conforming to [`docs/editor_json_schema.md`](../docs/editor_json_schema.md) — the canonical schema shared between the prompt output and the editor import (`editor/file_io/state_io.py`).
 
