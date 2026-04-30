@@ -1,9 +1,9 @@
 # Implementation Plan
 
-> Updated: 2026-04-30 (refresh 14)
+> Updated: 2026-04-30 (refresh 15)
 > Branch: decomposed
 > Status: active
-> Refresh 14 summary: no new clarification items; added P30 for the todo-planner write-guard root-path bug.
+> Refresh 15 summary: no new clarification items; narrowed P4 to the remaining merge-summaries design TODO and added P31 for the todo-planner context root-path bug.
 
 ## Working Agreements
 
@@ -32,44 +32,65 @@
 
 | ID | Status | Type | Summary | Source | Depends on |
 | --- | --- | --- | --- | --- | --- |
+| P31 | planned | bug | Fix `todo_planner_context.py` repo-root resolution so plan preview and marker scans use the real workspace root | `.github/hooks/src/todo_planner_context.py:17-18`, `.github/hooks/src/todo_planner_context.py:82` | none |
 | P19 | planned | action | Build a `customization-audit` skill that fetches VS Code customization docs and reports gaps in this repo's customization files | `.github/instructions/customization-authoring.instructions.md:18` | none |
-| P4 | planned | decision | Review the prompt pipeline TODO cluster as a separate design pass | `README.md:48-49`, prompt TODOs | none |
+| P4 | planned | decision | Decide how `merge-summaries` should estimate subcategory question yield and scenario coverage | `prompts/merge-summaries.prompt.md:54` | none |
 | P9 | planned | debt | Decide whether to add file-based debug logging to the context-injection hook (`todo_planner_context.py`) | `.github/hooks/src/todo_planner_context.py:123` | none |
 
 ## Next Sequence
 
-1. P19 — build the `customization-audit` skill.
-2. P4, P9 — no urgent dependencies after that; P9 still requires a decision before coding.
+1. P31 — fix the planner context repo-root bug so plan preview and marker counts reflect the real workspace.
+2. P19 — build the `customization-audit` skill.
+3. P4, P9 — the remaining design/debt items once the planner hooks are trustworthy again.
 
 ## Item Details
 
-### P4 - Review the prompt pipeline TODO cluster as a separate design pass
+### P4 - Decide how `merge-summaries` should estimate subcategory question yield and scenario coverage
 
 **Type**: decision
 **Source TODOs**:
 
-- `README.md:48-49`
-- `prompts/summarize-sources.prompt.md:27`
-- `prompts/summarize-sources.prompt.md:133`
-- `prompts/merge-summaries.prompt.md:23`
-- `prompts/merge-summaries.prompt.md:55`
-- `prompts/generate-questions.prompt.md:15`
-- `prompts/generate-questions.prompt.md:198`
-- `AGENTS.md:42`
+- `prompts/merge-summaries.prompt.md:54-57`
 
 **Current understanding**:
 
-- Most prompt TODOs are not implementation tasks yet. They are design questions about subject-profile scope, context boundaries, scenario generation, and interface ownership.
+- The only live prompt-pipeline TODO now lives in `merge-summaries.prompt.md`.
+- It asks whether subcategories should be weighted by raw concept count or by expected question yield, and whether concept-poor but scenario-rich areas need a dedicated scenario-seeding input or workflow.
 
 **Decision or change to make**:
 
-- Resolve the open questions first, then update the prompts in one focused pass.
+- Decide whether to keep concept-count weighting, introduce an explicit yield heuristic, or add a separate scenario-seeding surface.
+- Update `merge-summaries.prompt.md` and the user-facing workflow docs only after that choice is explicit.
 
 **Docs to sync after implementation**:
 
 - `README.md`
 - `prompts/AGENTS.md`
 - `AGENTS.md`
+
+### P31 — Fix the `todo-planner` context hook repo-root bug
+
+**Type**: bug
+**Source observations**:
+
+- `.github/hooks/src/todo_planner_context.py:17` — `REPO_ROOT = Path(__file__).resolve().parents[2]`
+- `.github/hooks/src/todo_planner_context.py:18` — `PLAN_PATH = REPO_ROOT / ".github" / "implementation_plan.md"`
+- `.github/hooks/src/todo_planner_context.py:82` — fallback `"No implementation plan exists yet..."` surfaced in this planner session despite the existing plan file.
+
+**Current understanding**:
+
+- `todo_planner_write_guard.py` already needed `parents[3]` to reach the repo root; `todo_planner_context.py` still uses `parents[2]`.
+- That makes `PLAN_PATH` resolve to `.github/.github/implementation_plan.md`, which explains the stale planner context saying no plan exists.
+- The same bug likely skews marker scans and any git-derived planner context gathered from that hook.
+
+**Decision or change to make**:
+
+- Align repo-root resolution with the fixed write guard.
+- Revalidate the injected plan preview, marker counts, and branch detection in a planner session after the fix.
+
+**Docs to sync after implementation**:
+
+- none
 
 ### P19 — Build a `customization-audit` skill
 
