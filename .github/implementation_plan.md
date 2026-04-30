@@ -32,16 +32,14 @@
 
 | ID | Status | Type | Summary | Source | Depends on |
 | --- | --- | --- | --- | --- | --- |
-| P31 | planned | bug | Fix `todo_planner_context.py` repo-root resolution so plan preview and marker scans use the real workspace root | `.github/hooks/src/todo_planner_context.py:17-18`, `.github/hooks/src/todo_planner_context.py:82` | none |
 | P19 | planned | action | Build a `customization-audit` skill that fetches VS Code customization docs and reports gaps in this repo's customization files | `.github/instructions/customization-authoring.instructions.md:18` | none |
 | P4 | planned | decision | Decide how `merge-summaries` should estimate subcategory question yield and scenario coverage | `prompts/merge-summaries.prompt.md:54` | none |
 | P9 | planned | debt | Decide whether to add file-based debug logging to the context-injection hook (`todo_planner_context.py`) | `.github/hooks/src/todo_planner_context.py:123` | none |
 
 ## Next Sequence
 
-1. P31 — fix the planner context repo-root bug so plan preview and marker counts reflect the real workspace.
-2. P19 — build the `customization-audit` skill.
-3. P4, P9 — the remaining design/debt items once the planner hooks are trustworthy again.
+1. P19 — build the `customization-audit` skill.
+2. P4, P9 — the remaining design/debt items now that the planner hooks are trustworthy again.
 
 ## Item Details
 
@@ -138,6 +136,7 @@
 
 ## Recently Completed
 
+- P31 — 2026-04-30. Fixed `.github/hooks/src/todo_planner_context.py` to resolve the real repository root, then revalidated that the hook now injects the live `.github/implementation_plan.md` preview, correct marker counts, and the active branch name instead of the stale "no plan exists" fallback.
 - P32 — 2026-04-30. Added `batch-maintainer` and `run-batch-maintenance.prompt.md` as an advanced optional unattended-maintenance lane; documented queue execution over approved and unblocked items, target-aware branch isolation, and the rule that unresolved decisions still stop the run instead of replacing the canonical safe loop.
 
 - P14 — 2026-04-30. Added `.github/skills/summarize-all-sources/SKILL.md` for Stage 1 fan-out, updated the project and customization inventories, and replaced the README multi-repo TODO with the documented skill workflow.

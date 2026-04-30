@@ -14,7 +14,7 @@ import sys
 from pathlib import Path
 
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[3]
 PLAN_PATH = REPO_ROOT / ".github" / "implementation_plan.md"
 MARKERS = ("TODO", "ARCH", "DESIGN", "FIXME", "HACK")
 TEXT_SUFFIXES = {
