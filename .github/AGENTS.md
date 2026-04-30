@@ -40,6 +40,7 @@ This folder contains the VS Code and Copilot customization layer for repository 
 
 ### Current Skills
 
+- `summarize-all-sources` — fans out `summarize-sources.prompt.md` across multiple material paths and returns one summary per path.
 - `notebook-hygiene` — installs the full four-layer notebook output enforcement stack.
 - `editor-export` — exports reviewed editor JSON state to Moodle XML with explicit status control.
 

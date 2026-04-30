@@ -16,10 +16,12 @@ This folder contains the canonical question-generation prompt files for the repo
 
 ### Pipeline Overview
 
+Optional helper for Stage 1 fan-out: [`.github/skills/summarize-all-sources/SKILL.md`](../.github/skills/summarize-all-sources/SKILL.md) can orchestrate one isolated `summarize-sources.prompt.md` run per material path, then return one summary artifact per path.
+
 ```text
 User provides repos (list of paths)
         │
-        ▼  ── one invocation per repo (parallelizable) ──
+        ▼  ── one invocation per repo/path (parallelizable; optional `summarize-all-sources` orchestration) ──
 [Stage 1: summarize-sources.prompt.md]
         │  Reads source files; extracts rich content (definitions,
         │  explanations, processes, cases, comparisons, examples)
@@ -52,7 +54,7 @@ User reviews subcategory files, adjusts if needed
 Moodle import
 ```
 
-Each stage is run manually by the user. Stages 1 and 3 are parallelizable (independent invocations); Stage 2 is a single merge pass.
+Each stage is run manually by the user. Stages 1 and 3 are parallelizable (independent invocations); Stage 1 fan-out can also be orchestrated through the `summarize-all-sources` skill. Stage 2 is still a single merge pass.
 
 Repository-maintenance launchers are documented separately in [../.github/prompts/AGENTS.md](../.github/prompts/AGENTS.md). This file is only for the quiz-generation pipeline.
 

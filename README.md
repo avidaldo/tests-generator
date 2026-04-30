@@ -33,7 +33,7 @@ Jupyter notebooks for analyzing exam outcomes: difficulty indices, score distrib
 - Course materials in one or more repositories (`.md`, `.ipynb`, `.py` files)
 - This repository cloned locally
 
-### Step 1: Summarise source materials (one per repo)
+### Step 1: Summarise source materials (one summary per path)
 
 Open `prompts/summarize-sources.prompt.md` as a prompt. Provide:
 
@@ -47,13 +47,14 @@ Open `prompts/summarize-sources.prompt.md` as a prompt. Provide:
   - /path/to/ml-course/notebooks/02-evaluation/
   - /path/to/ml-theory/docs/bias-variance.md
   ```
-<!-- TODO: Shouldn't a subagent be used for each material, to avoid overloading the context and paralelize? wouldn't that be better for performance and scalability? -->
+
+Preferred for multi-repo or multi-folder subjects: invoke the [`.github/skills/summarize-all-sources/SKILL.md`](.github/skills/summarize-all-sources/SKILL.md) workflow. It fans out one isolated Stage 1 summarization per path and still returns one summary artifact per path.
 
 - **Subject Profile overrides** (optional) — if not stated in the message, the agent will ask.
 
-The agent produces a rich content summary preserving all explanations, processes, cases, and examples. **Save it as a `.md` file** (e.g. `summary-ml-preprocessing.md`).
+Each Stage 1 run produces a rich content summary preserving all explanations, processes, cases, and examples. **Save each output as a `.md` file** (e.g. `summary-ml-preprocessing.md`).
 
-> **Tip — multiple repos**: Run once per repo or topic area. Each run gets a clean context window. You'll have one summary file per repo.
+> **Tip — multiple repos**: Prefer the `summarize-all-sources` skill when you already have a list of paths. It keeps one clean context window per path and still yields one summary file per repo or topic area.
 > **Tip — large repos**: If the source material is very large (>100 pages), split by topic area.
 
 ### Step 2: Merge summaries into subcategory files

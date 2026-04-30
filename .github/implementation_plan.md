@@ -1,8 +1,9 @@
 # Implementation Plan
 
-> Updated: 2026-04-30 (refresh 13)
+> Updated: 2026-04-30 (refresh 14)
 > Branch: decomposed
 > Status: active
+> Refresh 14 summary: no new clarification items; added P30 for the todo-planner write-guard root-path bug.
 
 ## Working Agreements
 
@@ -31,15 +32,14 @@
 
 | ID | Status | Type | Summary | Source | Depends on |
 | --- | --- | --- | --- | --- | --- |
-| P14 | planned | decision | Build a fan-out skill that spawns `summarize-sources` as one subagent per material path | `README.md:49` | none |
 | P19 | planned | action | Build a `customization-audit` skill that fetches VS Code customization docs and reports gaps in this repo's customization files | `.github/instructions/customization-authoring.instructions.md:18` | none |
 | P4 | planned | decision | Review the prompt pipeline TODO cluster as a separate design pass | `README.md:48-49`, prompt TODOs | none |
 | P9 | planned | debt | Decide whether to add file-based debug logging to the context-injection hook (`todo_planner_context.py`) | `.github/hooks/src/todo_planner_context.py:123` | none |
 
 ## Next Sequence
 
-1. P14, P19, P4, P9 — no urgent dependencies; P9 requires a decision before coding.
-2. Continue one item at a time.
+1. P19 — build the `customization-audit` skill.
+2. P4, P9 — no urgent dependencies after that; P9 still requires a decision before coding.
 
 ## Item Details
 
@@ -115,34 +115,11 @@
 
 - none
 
-### P14 — Build a fan-out summarization skill
-
-**Type**: decision
-**Source TODOs**:
-
-- `README.md:49`
-
-**Current understanding**:
-
-- Current workflow requires the user to manually run `summarize-sources` once per repo/topic in separate sessions. For large subjects with many repos, this is friction-heavy and sequential.
-- A fan-out skill would accept a list of material paths, spawn `summarize-sources` as a subagent per path (parallelized, context-isolated), and return N summary files.
-- The primitive choice is a **skill** (not a custom agent) because it is a reusable, parameterized multi-step workflow rather than a persona with guard rails.
-
-**Decision or change to make**:
-
-- Create `.github/skills/summarize-all-sources/SKILL.md`.
-- Define the skill interface: takes a list of source paths and an optional shared Subject Profile; fans out one `summarize-sources` subagent per path; collects outputs.
-- Update `README.md` Step 1 to mention the fan-out skill as the preferred option for multi-repo subjects.
-- Update `prompts/AGENTS.md` pipeline diagram to reflect the optional fan-out.
-
-**Docs to sync after implementation**:
-
-- `README.md`
-- `prompts/AGENTS.md`
-- `.github/AGENTS.md`
-- `AGENTS.md` (customization summary)
-
 ## Recently Completed
+
+- P14 — 2026-04-30. Added `.github/skills/summarize-all-sources/SKILL.md` for Stage 1 fan-out, updated the project and customization inventories, and replaced the README multi-repo TODO with the documented skill workflow.
+
+- P30 — 2026-04-30. Fixed `.github/hooks/src/todo_planner_write_guard.py` to resolve the repository root correctly; validated that absolute `.github/implementation_plan.md` edits are allowed while unrelated files are still denied.
 
 - P29 — 2026-04-30. Moved durable customization rationale into `.github/docs/`, removed stale root duplicate customization docs and maintenance prompts, and removed the obsolete broad `documentation-sync.instructions.md` rule.
 - P28 — 2026-04-30. Split prompt surfaces by layer: maintenance prompts now live in `.github/prompts/`, while root `prompts/` is reserved for the quiz-generation pipeline.

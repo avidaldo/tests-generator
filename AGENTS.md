@@ -55,6 +55,8 @@ See [`prompts/AGENTS.md`](prompts/AGENTS.md) for the active prompt inventory, pi
 
 Active workflow: `summarize-sources.prompt.md` (rich content extraction, one per repo) → `merge-summaries.prompt.md` (subcategory files with cross-cutting context) → `generate-questions.prompt.md` (one subcategory file per invocation) → editor review → XML export.
 
+For multi-repo subjects, the optional [`summarize-all-sources` skill](.github/skills/summarize-all-sources/SKILL.md) can fan out Stage 1 into one isolated summarization per path before the merge step.
+
 Each step is run manually. See the [Usage guide in README.md](README.md#usage-generating-exam-questions) for step-by-step instructions.
 
 ## Practical Commands
