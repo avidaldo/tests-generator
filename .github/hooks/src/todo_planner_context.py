@@ -9,13 +9,17 @@ of relying on a workspace-wide hook.
 from __future__ import annotations
 
 import json
+import os
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[3]
 PLAN_PATH = REPO_ROOT / ".github" / "implementation_plan.md"
+DEBUG_ENV_VAR = "TODO_PLANNER_CONTEXT_DEBUG"
+DEFAULT_DEBUG_LOG_PATH = Path(tempfile.gettempdir()) / REPO_ROOT.name / "todo_planner_context.json"
 MARKERS = ("TODO", "ARCH", "DESIGN", "FIXME", "HACK")
 TEXT_SUFFIXES = {
     ".agent.md",
@@ -92,6 +96,42 @@ def _plan_preview() -> str:
     return preview
 
 
+def _resolve_debug_path(raw_path: str) -> Path:
+    path = Path(raw_path).expanduser()
+    if path.is_absolute():
+        return path
+    return REPO_ROOT / path
+
+
+def _debug_log_path(argv: list[str]) -> Path | None:
+    for arg in argv:
+        if arg == "--debug":
+            return DEFAULT_DEBUG_LOG_PATH
+        if arg.startswith("--debug="):
+            path_text = arg.split("=", 1)[1].strip()
+            if path_text:
+                return _resolve_debug_path(path_text)
+
+    env_value = os.getenv(DEBUG_ENV_VAR, "").strip()
+    if not env_value:
+        return None
+
+    normalized = env_value.lower()
+    if normalized in {"0", "false", "no", "off"}:
+        return None
+    if normalized in {"1", "true", "yes", "on"}:
+        return DEFAULT_DEBUG_LOG_PATH
+    return _resolve_debug_path(env_value)
+
+
+def _write_debug_log(debug_path: Path, payload: str) -> None:
+    try:
+        debug_path.parent.mkdir(parents=True, exist_ok=True)
+        debug_path.write_text(payload + "\n", encoding="utf-8")
+    except OSError:
+        pass
+
+
 def main() -> None:
     try:
         json.load(sys.stdin)
@@ -113,14 +153,18 @@ def main() -> None:
         _plan_preview(),
     ])
 
-    print(json.dumps({
+    payload = json.dumps({
         "hookSpecificOutput": {
             "hookEventName": "SessionStart",
             "additionalContext": context,
         }
-    }))
+    })
 
-    # TODO: for a better understanding of the hook, could we log the context in a file for debugging purposes?
+    print(payload)
+
+    debug_path = _debug_log_path(sys.argv[1:])
+    if debug_path is not None:
+        _write_debug_log(debug_path, payload)
 
 
 if __name__ == "__main__":

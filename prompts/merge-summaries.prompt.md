@@ -51,9 +51,7 @@ Read all summaries and produce a proposed subcategory list. For each subcategory
 | 3 | Validación Cruzada | ~5 | repo-a/04-evaluation.md |
 | ... | | | |
 
-<!-- TODO: we keep weighting a subcategory by it's concepts, but I would like to do it by how many questions can we extract. I know we don't know that since we are in a previous step so, how can we do it? I'm concern that some concepts are prone to more questions than others, since they have more relationships with other and/or affect different processes and subcases.
-
-For instance, it will be nice to create different questions about real world machine learning scenarios to identify the kind of problem to deal with (classification, regression, no supervised, anomaly detection, a hybrid of clustering and classification...). The notebooks explain those concepts but don't define lot os scenarios, so some creativity is required here. However, I could manually create a doc with example scenarios to add to the input notes, but that's not ideal even... perhaps a new agent or skill that looks for creating example scenarios for the concepts previously identified?  -->
+**Weighting note:** At this stage, keep subcategory weighting tied to approximate concept counts. Do not add expected-question-yield heuristics or a separate scenario-seeding workflow unless a later generation pass shows a real coverage gap that concept counts cannot explain.
 
 **Total concepts:** ~45
 **Cross-cutting concepts:** overfitting (appears in Regularización, Validación Cruzada, Bias-Variance)

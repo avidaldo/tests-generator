@@ -1,9 +1,9 @@
 # Implementation Plan
 
-> Updated: 2026-04-30 (refresh 17)
-> Branch: decomposed
+> Updated: 2026-04-30 (refresh 21)
+> Branch: copilot/advanced-unattended-maintenance-another-one
 > Status: active
-> Refresh 17 summary: completed P32 by adding the advanced optional batch-maintenance launcher and agent, documenting it as an unattended lane that keeps the canonical safe loop intact.
+> Refresh 21 summary: no new actionable marker drift; the remaining marker hits are still documentation references and history entries, so the approved queue stays empty.
 
 ## Working Agreements
 
@@ -30,114 +30,22 @@
 
 ## Planned Work
 
-| ID | Status | Type | Summary | Source | Depends on |
-| --- | --- | --- | --- | --- | --- |
-| P31 | planned | bug | Fix `todo_planner_context.py` repo-root resolution so plan preview and marker scans use the real workspace root | `.github/hooks/src/todo_planner_context.py:17-18`, `.github/hooks/src/todo_planner_context.py:82` | none |
-| P19 | planned | action | Build a `customization-audit` skill that fetches VS Code customization docs and reports gaps in this repo's customization files | `.github/instructions/customization-authoring.instructions.md:18` | none |
-| P4 | planned | decision | Decide how `merge-summaries` should estimate subcategory question yield and scenario coverage | `prompts/merge-summaries.prompt.md:54` | none |
-| P9 | planned | debt | Decide whether to add file-based debug logging to the context-injection hook (`todo_planner_context.py`) | `.github/hooks/src/todo_planner_context.py:123` | none |
+No approved items currently queued.
 
 ## Next Sequence
 
-1. P31 — fix the planner context repo-root bug so plan preview and marker counts reflect the real workspace.
-2. P19 — build the `customization-audit` skill.
-3. P4, P9 — the remaining design/debt items once the planner hooks are trustworthy again.
+1. Refresh the plan before starting another implementation step.
 
 ## Item Details
 
-### P4 - Decide how `merge-summaries` should estimate subcategory question yield and scenario coverage
-
-**Type**: decision
-**Source TODOs**:
-
-- `prompts/merge-summaries.prompt.md:54-57`
-
-**Current understanding**:
-
-- The only live prompt-pipeline TODO now lives in `merge-summaries.prompt.md`.
-- It asks whether subcategories should be weighted by raw concept count or by expected question yield, and whether concept-poor but scenario-rich areas need a dedicated scenario-seeding input or workflow.
-
-**Decision or change to make**:
-
-- Decide whether to keep concept-count weighting, introduce an explicit yield heuristic, or add a separate scenario-seeding surface.
-- Update `merge-summaries.prompt.md` and the user-facing workflow docs only after that choice is explicit.
-
-**Docs to sync after implementation**:
-
-- `README.md`
-- `prompts/AGENTS.md`
-- `AGENTS.md`
-
-### P31 — Fix the `todo-planner` context hook repo-root bug
-
-**Type**: bug
-**Source observations**:
-
-- `.github/hooks/src/todo_planner_context.py:17` — `REPO_ROOT = Path(__file__).resolve().parents[2]`
-- `.github/hooks/src/todo_planner_context.py:18` — `PLAN_PATH = REPO_ROOT / ".github" / "implementation_plan.md"`
-- `.github/hooks/src/todo_planner_context.py:82` — fallback `"No implementation plan exists yet..."` surfaced in this planner session despite the existing plan file.
-
-**Current understanding**:
-
-- `todo_planner_write_guard.py` already needed `parents[3]` to reach the repo root; `todo_planner_context.py` still uses `parents[2]`.
-- That makes `PLAN_PATH` resolve to `.github/.github/implementation_plan.md`, which explains the stale planner context saying no plan exists.
-- The same bug likely skews marker scans and any git-derived planner context gathered from that hook.
-
-**Decision or change to make**:
-
-- Align repo-root resolution with the fixed write guard.
-- Revalidate the injected plan preview, marker counts, and branch detection in a planner session after the fix.
-
-**Docs to sync after implementation**:
-
-- none
-
-### P19 — Build a `customization-audit` skill
-
-**Type**: action
-**Source TODOs**:
-
-- `.github/instructions/customization-authoring.instructions.md:18`
-
-**Current understanding**:
-
-- The VS Code customization surface evolves; the repo's customization files were last reviewed 2026-04-22. Without a periodic check, outdated patterns (like `infer` → `user-invocable`) accumulate silently.
-- The skill would fetch the VS Code customization docs overview and key primitive pages using `#tool:web/fetch`, then compare against this repo's live customization files and report gaps or deprecated patterns.
-
-**Decision or change to make**:
-
-- Create `.github/skills/customization-audit/SKILL.md`.
-- Define the skill workflow: (1) fetch `https://code.visualstudio.com/docs/copilot/customization/overview` and linked primitive pages; (2) read all customization files in `.github/`; (3) report: deprecated fields in use, missing recommended fields, new primitives not yet adopted.
-- Update `AGENTS.md` skills inventory.
-
-**Docs to sync after implementation**:
-
-- `.github/AGENTS.md`
-- `AGENTS.md` (customization summary)
-- `.github/instructions/customization-authoring.instructions.md` (remove the TODO)
-
-### P9 — Decide whether to add file-based debug logging to `todo_planner_context.py`
-
-**Type**: debt
-**Source TODOs**:
-
-- `.github/hooks/src/todo_planner_context.py:123` — `# TODO: for a better understanding of the hook, could we log the context in a file for debugging purposes?`
-
-**Current understanding**:
-
-- The comment is a complete question at the end of `main()`, not a dangling note. It asks whether context output (the JSON the hook sends to the agent runtime) should also be logged to a file to make hook behavior easier to debug.
-- The hook currently prints JSON to stdout. A parallel debug log file would help when the runtime context is opaque.
-
-**Decision or change to make**:
-
-- Decide whether debug logging adds enough value given how rarely hook behavior needs inspection. If yes, implement optional logging (e.g., controlled by an env var or `--debug` flag). If no, remove the TODO and note why.
-
-**Docs to sync after implementation**:
-
-- none
+No active item details. Refresh the plan before queuing more implementation work.
 
 ## Recently Completed
 
+- P33 — 2026-04-30. Replaced the stale resolved P4 TODO in `prompts/merge-summaries.prompt.md` with a stable weighting note that preserves concept-count guidance, then revalidated that no live `TODO:` marker remains in that prompt.
+- P9 — 2026-04-30. Added opt-in debug logging to `.github/hooks/src/todo_planner_context.py` via `--debug` or `TODO_PLANNER_CONTEXT_DEBUG`, kept default behavior stdout-only, removed the resolved TODO, and validated both unchanged stdout and debug-file emission.
+- P19 — 2026-04-30. Added `.github/skills/customization-audit/SKILL.md`, updated the customization inventories and `.github/README.md`, and replaced the old customization-authoring TODO with a concrete periodic-audit workflow.
+- P31 — 2026-04-30. Fixed `.github/hooks/src/todo_planner_context.py` to resolve the real repository root, then revalidated that the hook now injects the live `.github/implementation_plan.md` preview, correct marker counts, and the active branch name instead of the stale "no plan exists" fallback.
 - P32 — 2026-04-30. Added `batch-maintainer` and `run-batch-maintenance.prompt.md` as an advanced optional unattended-maintenance lane; documented queue execution over approved and unblocked items, target-aware branch isolation, and the rule that unresolved decisions still stop the run instead of replacing the canonical safe loop.
 
 - P14 — 2026-04-30. Added `.github/skills/summarize-all-sources/SKILL.md` for Stage 1 fan-out, updated the project and customization inventories, and replaced the README multi-repo TODO with the documented skill workflow.
@@ -172,6 +80,9 @@
 - P7 — 2026-04-29. Removed legacy planner surfaces; documented active hook, handoff, and terminology model in `customization_architecture.md`.
 
 ## Recently Resolved
+
+- 2026-04-30 - Resolved P9 direction: if hook-context debug logging is added, it must be opt-in behind an env var or flag. Default planner-hook behavior stays stdout-only.
+- 2026-04-30 - Resolved P4: keep concept-count weighting in `merge-summaries` for now. Do not add yield heuristics or a scenario-seeding surface until an actual generation pass shows under-covered subcategories that concept count cannot explain.
 
 - 2026-04-30 - The repo now has an advanced optional unattended-maintenance lane for delegated and cloud-oriented runs, but the canonical precise workflow remains `refresh-plan.prompt.md` followed by `implement-plan-item.prompt.md`. The batch lane consumes approved and unblocked items only and stops on unresolved decisions.
 

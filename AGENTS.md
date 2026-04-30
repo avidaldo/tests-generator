@@ -76,6 +76,7 @@ Each step is run manually. See the [Usage guide in README.md](README.md#usage-ge
 
 ## VS Code Customization Layer
 
+- The optional [`customization-audit` skill](.github/skills/customization-audit/SKILL.md) compares this repo's `.github` customization files against current VS Code customization docs and reports drift or deprecated patterns.
 - The detailed customization inventory now lives in [`.github/AGENTS.md`](.github/AGENTS.md).
 - The human-oriented customization guide now lives in [`.github/README.md`](.github/README.md).
 - Maintenance prompt policy now lives in [`.github/prompts/AGENTS.md`](.github/prompts/AGENTS.md).

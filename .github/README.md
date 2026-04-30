@@ -8,6 +8,7 @@ This folder contains the repository's VS Code and Copilot customization layer. I
 - Use [`implement-plan-item.prompt.md`](prompts/implement-plan-item.prompt.md) to implement exactly one approved plan item.
 - Use [`run-batch-maintenance.prompt.md`](prompts/run-batch-maintenance.prompt.md) only when you explicitly want the advanced unattended lane for approved and unblocked items; it stops on unresolved decisions instead of replacing the safe loop.
 - `todo-planner`, `sdd-implementer`, and `batch-maintainer` remain visible as advanced or secondary entry points, but the prompts are the preferred UX.
+- Use [`skills/customization-audit/SKILL.md`](skills/customization-audit/SKILL.md) when you need a periodic drift audit against the current VS Code customization docs.
 
 ## Canonical Files
 
