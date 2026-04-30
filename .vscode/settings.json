@@ -1,6 +1,7 @@
 {
   "chat.promptFilesLocations": {
-    "prompts": true
+    "prompts": true,
+    ".github/prompts": true
   },
   "[markdown]": {
     "editor.wordWrap": "bounded",

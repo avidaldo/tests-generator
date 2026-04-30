@@ -14,7 +14,7 @@ This folder contains the canonical prompt files for the repository, along with p
 This file is the canonical, tool-agnostic instruction surface for the `prompts/` module.
 
 - Keep `.github/instructions/prompt-authoring.instructions.md` as a VS Code routing adapter only, not as a second source of prompt policy.
-- Keep canonical project prompt files under `prompts/` in this repository. Use VS Code settings only to discover that location.
+- Keep canonical project prompt files under `prompts/` in this repository. The only exception is `.github/prompts/`, which is reserved for repository-maintenance workflow prompts. Use VS Code settings only to discover those canonical locations.
 - Use current prompt metadata only. In prompt files, `agent` must be a valid agent identifier such as `ask`, `agent`, `plan`, or a custom agent name available in the workspace.
 - Keep prompt instructions focused on a single reusable workflow. If a workflow requires persistent persona, tool restrictions, or handoffs, prefer a custom agent or skill instead of growing one prompt indefinitely.
 - When designing or reviewing prompts, consult current official prompting guidance and current VS Code customization docs before changing the file.

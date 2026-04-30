@@ -10,7 +10,7 @@ This repository contains tools and prompts for generating, editing, and analyzin
 |------|---------|--------------|
 | `prompts/` | Canonical prompt files (`.prompt.md`) and prompt design/decomposition notes | [`prompts/AGENTS.md`](prompts/AGENTS.md) |
 | `.github/instructions/` | VS Code file-scoped instruction adapters (`.instructions.md`) | [`AGENTS.md`](AGENTS.md) |
-| `.github/` | VS Code-specific compatibility files and workflows | [`AGENTS.md`](AGENTS.md) |
+| `.github/` | VS Code-specific compatibility files, workflows, and maintenance prompts | [`.github/AGENTS.md`](.github/AGENTS.md) |
 | `editor/` | PyQt-based Moodle XML quiz editor | [`editor/AGENTS.md`](editor/AGENTS.md) |
 | `results/` | Exam result analysis notebooks | [`results/AGENTS.md`](results/AGENTS.md) |
 | `docs/` | Domain knowledge and design documentation | — |
@@ -43,8 +43,9 @@ The monolithic `generate-test.prompt.md` is planned for decomposition into a pip
 
 ## VS Code Customization Layout
 
-- Keep `prompts/*.prompt.md` as the canonical prompt files for this repository.
-- Use `.vscode/settings.json` to make VS Code discover prompt files from `prompts/`.
+- Keep `prompts/*.prompt.md` as the canonical prompt files for quiz-generation and prompt-authoring workflows.
+- Keep `.github/prompts/*.prompt.md` as the canonical prompt files for repository-maintenance workflows.
+- Use `.vscode/settings.json` to make VS Code discover prompt files from both locations.
 - Use `.github/copilot-instructions.md` and `.github/instructions/*.instructions.md` only as VS Code-specific adapters.
 - Keep `AGENTS.md` files as the canonical cross-agent instruction surface.
 
