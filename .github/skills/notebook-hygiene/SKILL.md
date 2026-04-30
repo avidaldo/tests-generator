@@ -5,7 +5,7 @@ description: Install all four enforcement layers for notebook output hygiene in 
 
 # Notebook Hygiene Installer
 
-This skill installs the full four-layer enforcement stack for notebook output hygiene (see [`agentic_enforcement_layers.md`](../../agentic_enforcement_layers.md) for the full architectural rationale and tradeoff analysis).
+This skill installs the full four-layer enforcement stack for notebook output hygiene (see [`agentic_enforcement_layers.md`](../../docs/agentic_enforcement_layers.md) for the full architectural rationale and tradeoff analysis).
 
 ## What This Skill Installs
 

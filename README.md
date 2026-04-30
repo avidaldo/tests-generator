@@ -131,6 +131,6 @@ pip install PyQt6 lxml
 This repository uses AI coding assistants as development tools.
 
 - Project-facing instructions live in [AGENTS.md](AGENTS.md).
-- Customization-layer docs and maintenance workflows live in [`.github/README.md`](.github/README.md), [`.github/AGENTS.md`](.github/AGENTS.md), and [`.github/customization_architecture.md`](.github/customization_architecture.md).
+- Customization-layer docs and maintenance workflows live in [`.github/README.md`](.github/README.md), [`.github/AGENTS.md`](.github/AGENTS.md), and [`.github/docs/README.md`](.github/docs/README.md).
 - Prompt design standards live in [`.github/instructions/prompt-authoring.instructions.md`](.github/instructions/prompt-authoring.instructions.md).
 - Workspace-level discovery settings live in [`.vscode/settings.json`](.vscode/settings.json).

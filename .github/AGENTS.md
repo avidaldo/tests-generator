@@ -11,8 +11,8 @@ This folder contains the VS Code and Copilot customization layer for repository 
 - Use [`refresh-plan.prompt.md`](prompts/refresh-plan.prompt.md) to refresh the plan and surface unresolved questions before larger changes.
 - Use [`implement-plan-item.prompt.md`](prompts/implement-plan-item.prompt.md) after the relevant plan item is approved.
 - When a change affects customization architecture, workflow, or agent behavior, update the relevant `.github` docs and instruction files in the same change.
-- Canonical rationale lives in [customization_architecture.md](customization_architecture.md).
-- Hook rationale lives in [agentic_enforcement_layers.md](agentic_enforcement_layers.md).
+- Canonical rationale lives in [docs/customization_architecture.md](docs/customization_architecture.md).
+- Hook rationale lives in [docs/agentic_enforcement_layers.md](docs/agentic_enforcement_layers.md).
 
 ## Customization Structure
 
@@ -20,10 +20,11 @@ This folder contains the VS Code and Copilot customization layer for repository 
 | ---- | ------- |
 | `prompts/` | Maintenance prompt launchers for the SDD loop |
 | `agents/` | Custom agents for planning and implementation |
+| `docs/` | Durable customization rationale and decision records |
 | `instructions/` | File-scoped customization rules and sync adapters |
 | `hooks/` | Deterministic guard rails and reminder hooks |
 | `skills/` | Reusable auxiliary workflows with concrete second consumers |
-| `*.md` | Human-facing customization docs, rationale, and active plan |
+| `README.md`, `AGENTS.md`, `implementation_plan.md` | Customization entry, inventory, and operational plan surfaces |
 
 ## Current VS Code Layout
 

@@ -16,7 +16,7 @@
 - Use [`.github/prompts/refresh-plan.prompt.md`](.github/prompts/refresh-plan.prompt.md) to refresh the plan and surface unresolved questions before larger changes.
 - Use [`.github/prompts/implement-plan-item.prompt.md`](.github/prompts/implement-plan-item.prompt.md) after the relevant plan item is approved.
 - When a change affects architecture, workflow, or agent behavior, update the relevant docs and instruction files in the same change.
-- Canonical rationale for this split lives in [`.github/customization_architecture.md`](.github/customization_architecture.md).
+- Canonical rationale for this split lives in [`.github/docs/customization_architecture.md`](.github/docs/customization_architecture.md).
 
 ## Project Overview
 

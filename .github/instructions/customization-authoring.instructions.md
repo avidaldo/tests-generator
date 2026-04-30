@@ -75,4 +75,4 @@ Hook command properties: `type` (must be `"command"`), `command`, `windows`, `li
 
 - Repo-wide hooks live in `.github/hooks/*.json`. Agent-specific hooks belong in the `hooks` frontmatter of `.agent.md` files.
 
-See [agentic_enforcement_layers.md](../agentic_enforcement_layers.md) for this project's hook design decisions.
+See [agentic_enforcement_layers.md](../docs/agentic_enforcement_layers.md) for this project's hook design decisions.
