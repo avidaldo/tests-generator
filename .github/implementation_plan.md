@@ -135,7 +135,7 @@
 
 ## Recently Completed
 
-- P19 — 2026-04-30. Added `.github/skills/customization-audit/SKILL.md`, updated the customization inventories, and replaced the old customization-authoring TODO with a concrete periodic-audit workflow.
+- P19 — 2026-04-30. Added `.github/skills/customization-audit/SKILL.md`, updated the customization inventories and `.github/README.md`, and replaced the old customization-authoring TODO with a concrete periodic-audit workflow.
 - P31 — 2026-04-30. Fixed `.github/hooks/src/todo_planner_context.py` to resolve the real repository root, then revalidated that the hook now injects the live `.github/implementation_plan.md` preview, correct marker counts, and the active branch name instead of the stale "no plan exists" fallback.
 - P32 — 2026-04-30. Added `batch-maintainer` and `run-batch-maintenance.prompt.md` as an advanced optional unattended-maintenance lane; documented queue execution over approved and unblocked items, target-aware branch isolation, and the rule that unresolved decisions still stop the run instead of replacing the canonical safe loop.
 
