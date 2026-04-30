@@ -23,9 +23,9 @@ This skill audits the repository's VS Code customization layer against the curre
 ## Procedure
 
 1. Fetch the current docs with `#tool:web/fetch`.
-   Start from `https://code.visualstudio.com/docs/copilot/customization/overview`, then fetch the primitive pages relevant to the requested scope (for example prompt files, custom instructions, chat modes / agents, and skills).
+   Start from `https://code.visualstudio.com/docs/copilot/customization/overview`, then fetch the primitive pages relevant to the requested scope (for example prompt files, custom instructions, agent-related pages, and skills).
 2. Read the live repo customization files.
-   Inspect the relevant files under `.github/` with `#tool:glob`, `#tool:view`, and `#tool:rg`, including inventories, prompts, agents, instructions, hooks, skills, and any settings files that control discovery.
+   Inspect the relevant files under `.github/` with `#tool:glob`, `#tool:view`, and the available text-search tool, including inventories, prompts, agents, instructions, hooks, skills, and any settings files that control discovery.
 3. Compare docs against the repo.
    Look for deprecated fields still in use, recommended fields or guardrails the repo omits, supported primitives the repo could adopt, and local docs that no longer match the actual VS Code behavior described by the docs.
 4. Report findings with evidence.
