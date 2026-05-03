@@ -6,7 +6,7 @@ AI-assisted generation, editing, and analysis of Moodle XML quiz exams.
 
 ### Test Generation (`prompts/`)
 
-Prompt-based system for generating multiple-choice exam questions from course materials. The workflow reads source files (`.md`, `.ipynb`, `.py`) from any repository, produces rich content summaries, merges them into self-contained subcategory files, and then generates questions one subcategory at a time in editor-native JSON. Human review in the editor is mandatory before Moodle XML export.
+Prompt-based system for generating multiple-choice exam questions from course materials. The workflow reads source files (`.md`, `.ipynb`, `.py`) from any repository, produces loss-minimizing Stage 1 extraction files, merges them into self-contained subcategory files with explicit question surfaces, and then generates questions one subcategory batch at a time in editor-native JSON. Human review in the editor is mandatory before Moodle XML export.
 
 Active workflow: [`prompts/summarize-sources.prompt.md`](prompts/summarize-sources.prompt.md) → [`prompts/merge-summaries.prompt.md`](prompts/merge-summaries.prompt.md) → [`prompts/generate-questions.prompt.md`](prompts/generate-questions.prompt.md)
 
@@ -52,24 +52,25 @@ Preferred for multi-repo or multi-folder subjects: invoke the [`.github/skills/s
 
 - **Subject Profile overrides** (optional) — if not stated in the message, the agent will ask.
 
-Each Stage 1 run produces a rich content summary preserving all explanations, processes, cases, and examples. **Save each output as a `.md` file** (e.g. `summary-ml-preprocessing.md`).
+Each Stage 1 run produces a loss-minimizing extraction file preserving all explanations, processes, cases, comparisons, decision criteria, misconceptions, and examples. **Save each output as a `.md` file** (e.g. `summary-ml-preprocessing.md`).
 
 > **Tip — multiple repos**: Prefer the `summarize-all-sources` skill when you already have a list of paths. It keeps one clean context window per path and still yields one summary file per repo or topic area.
-> **Tip — large repos**: If the source material is very large (>100 pages), split by topic area.
+> **Rule — large repos**: If the source material is very large or heterogeneous, split by coherent topic area before extraction. Do not accept a repo-level synopsis as a valid Stage 1 output.
 
 ### Step 2: Merge summaries into subcategory files
 
 Open `prompts/merge-summaries.prompt.md` as a prompt. Provide all summary files from Step 1 and the Moodle category root path (e.g. `$course$/top/MachineLearning`).
 
-The agent proposes a subcategory taxonomy — review and adjust, then it produces **one `.md` file per subcategory**. Each file is self-contained and includes a "Related context" section enabling cross-subcategory questions.
+The agent proposes a subcategory taxonomy — review and adjust, then it produces **one `.md` file per subcategory**. Each file is self-contained and includes concept IDs, a "Related context" section enabling cross-subcategory questions, and explicit `SURF-*` question surfaces to drive exhaustive downstream generation.
 
-### Step 3: Generate questions (one subcategory at a time)
+### Step 3: Generate question batches (one subcategory at a time)
 
 Open `prompts/generate-questions.prompt.md` as a prompt. Provide one subcategory `.md` file from Step 2.
 
-The agent generates questions from the file's full content, including scenario-based and cross-subcategory relationship questions. Output is a JSON file — save it (e.g. `ml-normalisation.json`).
+The agent generates one coverage-first JSON batch from the file's full content, including scenario-based and cross-subcategory relationship questions. Output is a JSON file — save it (e.g. `ml-normalisation-b01.json`). Repeat on the same subcategory with additional `SURF-*` scopes when you want more coverage than fits in one batch.
 
 > **One subcategory per invocation** — each gets a fresh context window, no drift.
+> **One batch per invocation** — keep each output within a safe reviewable window, then continue with more surfaces as needed.
 
 ### Step 4: Human review in the editor
 

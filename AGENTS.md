@@ -53,7 +53,7 @@ This repository contains tools and prompts for generating, editing, and analyzin
 
 See [`prompts/AGENTS.md`](prompts/AGENTS.md) for the active prompt inventory, pipeline diagram, design rationale, and file responsibilities.
 
-Active workflow: `summarize-sources.prompt.md` (rich content extraction, one per repo) → `merge-summaries.prompt.md` (subcategory files with cross-cutting context) → `generate-questions.prompt.md` (one subcategory file per invocation) → editor review → XML export.
+Active workflow: `summarize-sources.prompt.md` (loss-minimizing Stage 1 extraction, one per repo or coherent topic area; split large corpora first) → `merge-summaries.prompt.md` (subcategory files with concept IDs, question surfaces, and cross-cutting context) → `generate-questions.prompt.md` (one subcategory batch per invocation) → editor review → XML export.
 
 For multi-repo subjects, the optional [`summarize-all-sources` skill](.github/skills/summarize-all-sources/SKILL.md) can fan out Stage 1 into one isolated summarization per path before the merge step.
 
