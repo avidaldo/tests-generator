@@ -16,6 +16,14 @@ The summary document is the **loss-minimizing bridge between source materials an
 
 A Stage 1 summary document has three sections in this order.
 
+In this repository, the top-level section headings should be written exactly as H1 headings:
+
+- `# File Inventory`
+- `# Content`
+- `# Cross-References`
+
+Do not downgrade those headings to `##` and do not wrap format examples in fenced code blocks inside the final artifact.
+
 ### Section 1: File Inventory
 
 A traceability table listing every processed file.
@@ -98,3 +106,23 @@ This section records relationships that span source files and will matter during
 - If two passages look similar but one adds nuance, preserve the nuance.
 - If the input is too large or heterogeneous for one faithful document, split it by topic area instead of compressing it.
 - The final document must be rich enough that Stage 2 can work without reopening the original repository.
+
+## Repository Validation Conventions
+
+These checks are intentionally simple so they can be run after every small Stage 1 batch.
+
+- Keep the inventory table as the only markdown table whose first column starts with bare digits. This repository often counts inventory rows with `rg -c '^\| [0-9]+ \| '`, so unrelated tables with a numeric first column can create false positives.
+- Avoid fenced code blocks in Stage 1 artifacts. They add noise to the summaries and complicate lightweight validation.
+- Validate exact top-level headings with:
+
+  `rg -n '^# (File Inventory|Content|Cross-References)$' summary-*.md`
+
+- Validate inventory-row presence with:
+
+  `rg -c '^\| [0-9]+ \| ' summary-*.md`
+
+- Validate the absence of fenced code blocks with:
+
+  `rg -n '^```' summary-*.md`
+
+- If any artifact fails one of these checks, fix that artifact before launching more Stage 1 work or before sending the files to Stage 2.

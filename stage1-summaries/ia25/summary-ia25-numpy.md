@@ -1,6 +1,6 @@
-<!-- markdownlint-disable MD041 -->
+<!-- markdownlint-disable MD025 -->
 
-## File Inventory
+# File Inventory
 
 | # | File | Type | Relevant |
 | --- | --- | --- | --- |
@@ -8,7 +8,7 @@
 | 2 | lists_nd_arrays_examples.ipynb | `.ipynb` | ✅ |
 | 3 | numpy2_algebra.ipynb | `.ipynb` | ✅ |
 
-## Content
+# Content
 
 ## [Source: numpy1.ipynb]
 
@@ -405,7 +405,7 @@ It explicitly warns that matrix multiplication must not be confused with element
 
 The operation is described as vitally important in computing, with the notebook naming image processing, machine learning, cryptography, data compression, simulation of physical systems, and solving systems of linear equations as application areas.
 
-## Cross-References
+# Cross-References
 
 ## Comparisons and distinctions
 

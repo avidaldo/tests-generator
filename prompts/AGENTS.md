@@ -60,6 +60,15 @@ Moodle import
 
 Each stage is run manually by the user. Stages 1 and 3 are parallelizable (independent invocations); Stage 1 fan-out can also be orchestrated through the `summarize-all-sources` skill. Stage 2 is still a single merge pass. If a repo is too large or heterogeneous for one faithful Stage 1 document, split it by coherent topic area before continuing; a monolithic lossy summary is invalid.
 
+### Stage 1 Operational Guardrails
+
+- Write Stage 1 artifacts to a deterministic subject-scoped folder such as `stage1-summaries/<subject>/summary-<repo-or-topic>.md` so partial progress is inspectable and resumable.
+- Keep a lightweight manifest in that folder tracking every Stage 1 unit with an explicit status such as `pending`, `running`, `done`, or `needs-fix`.
+- Fan out in small batches, typically 2 to 4 Stage 1 units at a time. Do not dispatch the full corpus before validating the first outputs.
+- After each batch, validate every produced summary against [docs/summary_format.md](../docs/summary_format.md). In this repo the practical minimum is: exact H1 headings `# File Inventory`, `# Content`, `# Cross-References`; a valid inventory table; and no fenced code blocks.
+- Stop the batch on the first invalid summary. Repair or rerun that unit, then revalidate before launching more Stage 1 work.
+- Treat existing partial summaries as inputs to validate, not as automatically trusted artifacts. Stage 2 should receive only validated Stage 1 files.
+
 Repository-maintenance launchers are documented separately in [../.github/prompts/AGENTS.md](../.github/prompts/AGENTS.md). This file is only for the quiz-generation pipeline.
 
 **Intermediate format**: JSON conforming to [`docs/editor_json_schema.md`](../docs/editor_json_schema.md) — the canonical schema shared between the prompt output and the editor import (`editor/file_io/state_io.py`).

@@ -52,10 +52,17 @@ Preferred for multi-repo or multi-folder subjects: invoke the [`.github/skills/s
 
 - **Subject Profile overrides** (optional) — if not stated in the message, the agent will ask.
 
-Each Stage 1 run produces a loss-minimizing extraction file preserving all explanations, processes, cases, comparisons, decision criteria, misconceptions, and examples. **Save each output as a `.md` file** (e.g. `summary-ml-preprocessing.md`).
+Each Stage 1 run produces a loss-minimizing extraction file preserving all explanations, processes, cases, comparisons, decision criteria, misconceptions, and examples. Save each output as a `.md` file in a deterministic subject-scoped artifact folder, for example `stage1-summaries/ml/summary-preprocessing.md`.
 
 > **Tip — multiple repos**: Prefer the `summarize-all-sources` skill when you already have a list of paths. It keeps one clean context window per path and still yields one summary file per repo or topic area.
 > **Rule — large repos**: If the source material is very large or heterogeneous, split by coherent topic area before extraction. Do not accept a repo-level synopsis as a valid Stage 1 output.
+
+Recommended Stage 1 operating procedure:
+
+- Keep a simple manifest in the same subject folder, for example `stage1-summaries/ml/manifest.md`, with one row per Stage 1 unit and a status such as `pending`, `running`, `done`, or `needs-fix`.
+- Fan out only 2 to 4 Stage 1 units at a time. Validate the first batch before launching more work.
+- After each batch, run the lightweight checks from [docs/summary_format.md](docs/summary_format.md). In practice this usually means exact H1 section headings, a valid inventory table, and no fenced code blocks.
+- If one summary fails validation, stop and repair that file before continuing. Do not send unvalidated Stage 1 artifacts into the merge step.
 
 ### Step 2: Merge summaries into subcategory files
 

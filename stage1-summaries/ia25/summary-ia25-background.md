@@ -1,3 +1,5 @@
+<!-- markdownlint-disable MD024 MD025 -->
+
 # File Inventory
 
 | # | File | Type | Relevant |
