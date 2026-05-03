@@ -1,9 +1,6 @@
 ---
 description: >
-  Generate multiple-choice exam questions for ONE subcategory in editor-native
-  JSON format. Run after the merge step, one subcategory file at a time.
-  Input: a self-contained subcategory file produced by merge-summaries.prompt.md.
-  Output: a JSON file ready to open directly in the quiz editor (Ctrl+O).
+  Generate multiple-choice exam questions for ONE subcategory in editor-native JSON format. Run after the merge step, one subcategory file at a time, and repeat in batches when the subcategory exposes more question surfaces than fit in one safe output window. Input: a self-contained subcategory file produced by merge-summaries.prompt.md. Output: a JSON file ready to open directly in the quiz editor (Ctrl+O).
 ---
 
 # Question Generation Agent
@@ -28,6 +25,19 @@ Read the **Subject Profile** from the subcategory file header (the `Question foc
 
 ---
 
+## Optional Invocation Parameters
+
+The user may additionally specify:
+
+| Parameter | Default | Options |
+|-----------|---------|---------|
+| **Question batch size** | `20` | `1`–`20` |
+| **Surface scope** | `all` | `all` · explicit `SURF-*` list from the subcategory file |
+
+Use these parameters to generate repeated batches from the same subcategory when the material supports more than one safe output window.
+
+---
+
 ## Required Input
 
 The user provides **one subcategory file** — a self-contained Markdown document produced by `merge-summaries.prompt.md`. This file contains:
@@ -37,11 +47,12 @@ The user provides **one subcategory file** — a self-contained Markdown documen
 - **Relationships and distinctions** between concepts within this subcategory
 - **Common misconceptions** found in the source material
 - **Examples and scenarios** with concrete details
+- **Question surfaces** (`SURF-*`) describing distinct high-yield angles that should be converted into questions
 - **Related context** — brief summaries of concepts from other subcategories that enable cross-subcategory questions
 
 All the information needed to generate questions is in this file. No additional files or inputs are required (unless the user wants to override Subject Profile parameters).
 
-**Scope**: Generate questions only from the content present in the subcategory file. Do not add external knowledge beyond what the file contains. The "Related context" section is valid material for questions — use it to create questions that test understanding of relationships between this subcategory's concepts and related concepts from other subcategories.
+**Scope**: Generate questions only from the content present in the subcategory file. Do not add external knowledge beyond what the file contains. The "Related context" section is valid material for questions — use it to create questions that test understanding of relationships between this subcategory's concepts and related concepts from other subcategories. Treat `SURF-*` entries as the preferred coverage units when they exist.
 
 ---
 
@@ -89,7 +100,8 @@ Generate questions about code constructs, API usage, syntax patterns, and implem
 - Focus on deep comprehension, procedures, and relationships between concepts
 - Questions must be self-contained: include all necessary context in the stem; never reference "the notes", "the notebook", or "class materials"
 - Ask directly — avoid preambles that serve as hints for other questions
-- Exhaustive coverage of all solid concepts in the source files
+- Coverage-first batching: within one output, cover as many distinct high-yield surfaces as possible before writing multiple near-duplicate questions about the same narrow angle
+- Exhaustive coverage of all solid concepts, procedures, scenarios, comparisons, misconceptions, and edge cases across repeated batches
 </design_principles>
 
 ---
@@ -97,11 +109,18 @@ Generate questions about code constructs, API usage, syntax patterns, and implem
 ## Generation Algorithm
 
 <generation_algorithm>
-Work through this algorithm for each concept before moving to the next.
+Work through this algorithm before writing any question.
 
 ### Phase 0: Content Deconstruction
 
-For each concept in the summary (identified by its concept ID), identify exploitable angles before writing any question:
+Build a coverage map from the subcategory file.
+
+1. If the file includes `Question surfaces`, use them as the primary units of coverage.
+2. If `Surface scope` is `all`, select the highest-yield set of distinct surfaces that fit within the chosen question batch size.
+3. If the user specifies explicit `SURF-*` IDs, restrict the batch to those surfaces.
+4. For each selected surface, identify the linked concept IDs and the exact type of understanding being tested.
+
+For each selected concept or surface, identify exploitable angles before writing any question:
 
 1. Precise definition — what it IS
 2. What it is NOT (common wrong definition or confusion)
@@ -110,12 +129,19 @@ For each concept in the summary (identified by its concept ID), identify exploit
 5. Practical implications ("¿Qué ocurre si...?")
 6. Common mistakes and typical student confusions
 7. Edge cases or notable exceptions
+8. Quantitative anchors, parameters, thresholds, or concrete scenario details when present
 
 ### Phase 1: Question Design
 
 Design scenarios that require connecting multiple concepts. Questions may be long if context is needed to establish a non-trivial scenario.
 
 Apply distractor strategies from [docs/distractor_design.md](../docs/distractor_design.md). Use variety across questions — do not rely on a single strategy.
+
+Coverage rules for this phase:
+
+- Prefer one strong question from each selected `SURF-*` entry before generating a second question from the same surface.
+- Do not spend the whole batch on definitions. Force diversity across definitions, procedures, comparisons, scenarios, misconceptions, diagnostics, and cross-subcategory interactions when the subcategory supports them.
+- If two candidate questions test the same surface in nearly the same way, keep the stronger one and replace the other with a different surface.
 
 ### Phase 2: Adversarial Feedback Validation
 
@@ -126,6 +152,15 @@ For every distractor, write its `feedback` field explaining **unambiguously** wh
 > If you struggle to explain a distractor's falseness without saying "it's not the best option" or "it's almost correct", **discard that distractor and generate another**. A weak feedback is a signal that the distractor is ambiguous and will mislead students unfairly.
 
 The feedback for the correct answer must explain *why* it is correct, not just restate it.
+
+### Phase 3: Coverage Self-Check
+
+Before finalizing the JSON, verify all of the following:
+
+1. Every generated question maps to one or more concept IDs in `source_ref`.
+2. The batch covers distinct surfaces rather than repeating the same narrow angle.
+3. The batch includes the highest-yield material available in the selected scope: procedures, scenarios, comparisons, misconceptions, and decision criteria should not be omitted in favor of easy definitional questions.
+4. No question depends on knowledge not stated in the subcategory file.
 </generation_algorithm>
 
 ---
@@ -177,7 +212,8 @@ Output a single valid JSON object conforming to the **editor JSON schema** — s
 
 ## Output Constraints
 
-- Maximum **20 questions per output** to stay within a safe generation window.
-- If a subcategory has more concepts than can produce ~20 questions, split the subcategory into smaller sub-subcategories in the summary and generate each separately.
+- Maximum **20 questions per output** to stay within a safe generation window. Use the `Question batch size` parameter when the user requests fewer.
+- Large subcategories are expected to be generated in repeated batches. If the subcategory file contains more eligible `SURF-*` entries than fit in one batch, cover a coherent subset now and continue in later invocations.
+- If a single subcategory remains too large or internally incoherent even after batching, that is a Stage 2 split problem and should be fixed in the merge output rather than by writing a lossy question batch.
 - The JSON must be valid and parseable — no trailing commas, no comments in the final output (the schema example above uses `//` only for illustration).
 - Shuffle the correct answer into a non-predictable position across questions. Do not always place it first or last.

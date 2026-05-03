@@ -1,3 +1,24 @@
+[project]
+name = "tests-generator"
+version = "0.1.0"
+description = "Moodle Tests Generator and Results Analyzer"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "pyqt6>=6.0.0",
+    "pandas>=2.0.0",
+    "numpy>=1.24.0",
+    "matplotlib>=3.7.0",
+    "nbformat>=5.9.0",
+    "ipykernel>=6.25.0",
+]
+
+[dependency-groups]
+dev = [
+    "nbstripout>=0.7.0",
+    "yapf>=0.40.0",
+]
+
 [tool.yapf]
 based_on_style = "pep8"
 column_limit = 120

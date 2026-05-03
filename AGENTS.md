@@ -53,9 +53,15 @@ This repository contains tools and prompts for generating, editing, and analyzin
 
 See [`prompts/AGENTS.md`](prompts/AGENTS.md) for the active prompt inventory, pipeline diagram, design rationale, and file responsibilities.
 
-Active workflow: `summarize-sources.prompt.md` (rich content extraction, one per repo) → `merge-summaries.prompt.md` (subcategory files with cross-cutting context) → `generate-questions.prompt.md` (one subcategory file per invocation) → editor review → XML export.
+Active workflow: `summarize-sources.prompt.md` (loss-minimizing Stage 1 extraction, one per repo or coherent topic area; split large corpora first) → `merge-summaries.prompt.md` (subcategory files with concept IDs, question surfaces, and cross-cutting context) → `generate-questions.prompt.md` (one subcategory batch per invocation) → editor review → XML export.
 
 For multi-repo subjects, the optional [`summarize-all-sources` skill](.github/skills/summarize-all-sources/SKILL.md) can fan out Stage 1 into one isolated summarization per path before the merge step.
+
+Stage 1 operational policy in this repo:
+
+- Prefer deterministic artifact paths such as `stage1-summaries/<subject>/summary-<unit>.md`.
+- Keep a manifest or checkpoint file for each Stage 1 subject run.
+- Fan out in small batches and validate each written artifact against [docs/summary_format.md](docs/summary_format.md) before launching more units or starting Stage 2.
 
 Each step is run manually. See the [Usage guide in README.md](README.md#usage-generating-exam-questions) for step-by-step instructions.
 

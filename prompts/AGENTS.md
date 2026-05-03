@@ -6,9 +6,9 @@ This folder contains the canonical question-generation prompt files for the repo
 
 | File | Status | Description |
 | ---- | ------ | ----------- |
-| `summarize-sources.prompt.md` | **Active — Stage 1** | Rich content extraction from source files; one per repo or topic area |
-| `merge-summaries.prompt.md` | **Active — Stage 2** | Organizes raw summaries into subcategory files with cross-cutting context |
-| `generate-questions.prompt.md` | **Active — Stage 3** | Question generation in JSON format; one subcategory file per invocation |
+| `summarize-sources.prompt.md` | **Active — Stage 1** | Loss-minimizing source extraction from source files; one per repo or coherent topic area; split large corpora before extraction |
+| `merge-summaries.prompt.md` | **Active — Stage 2** | Organizes raw extraction files into subcategory files with concept IDs, question surfaces, and cross-cutting context |
+| `generate-questions.prompt.md` | **Active — Stage 3** | Question generation in JSON batches; one batch per invocation from one subcategory file, repeat until surfaces are covered |
 | `deprecated/inventory.prompt.md` | **Deprecated** | Superseded by `summarize-sources.prompt.md` |
 | `deprecated/generate-test.prompt.md` | **Deprecated** | Monolithic prompt — superseded by the 3-stage pipeline |
 
@@ -23,10 +23,12 @@ User provides repos (list of paths)
         │
         ▼  ── one invocation per repo/path (parallelizable; optional `summarize-all-sources` orchestration) ──
 [Stage 1: summarize-sources.prompt.md]
-        │  Reads source files; extracts rich content (definitions,
-        │  explanations, processes, cases, comparisons, examples)
-        │  Strips irrelevant code and metadata
-        │  Output: summary-{repo}.md  (one per repo, self-contained)
+        │  Reads source files; performs loss-minimizing extraction
+        │  (definitions, explanations, procedures, cases,
+        │  comparisons, decision criteria, misconceptions,
+        │  quantitative anchors, edge cases)
+        │  Strips only irrelevant code syntax and boilerplate
+        │  Output: summary-{repo-or-topic}.md  (one per coherent input unit)
         ▼
 User collects all summary files
         │
@@ -34,7 +36,8 @@ User collects all summary files
 [Stage 2: merge-summaries.prompt.md]
         │  Reads all summaries; proposes subcategory taxonomy
         │  User reviews and adjusts subcategory names/boundaries
-        │  Assigns concept IDs; adds "Related context" for cross-cutting concepts
+        │  Assigns concept IDs; records question surfaces; adds
+        │  "Related context" for cross-cutting concepts
         │  Output: subcategory-{name}.md  (one per subcategory, self-contained)
         ▼
 User reviews subcategory files, adjusts if needed
@@ -42,8 +45,9 @@ User reviews subcategory files, adjusts if needed
         ▼  ── one invocation per subcategory file (parallelizable) ──
 [Stage 3: generate-questions.prompt.md]
         │  Reads one subcategory file (sole input)
-        │  Generates questions + adversarial feedback validation
-        │  Output: {subcategory}.json  (one per subcategory)
+        │  Generates one coverage-first JSON batch + adversarial
+        │  feedback validation
+        │  Output: {subcategory}-{batch}.json
         ▼
 [Quiz Editor — human review]   ← mandatory validation gate
         │  Human marks: Pendiente / Revisar / Lista
@@ -54,7 +58,16 @@ User reviews subcategory files, adjusts if needed
 Moodle import
 ```
 
-Each stage is run manually by the user. Stages 1 and 3 are parallelizable (independent invocations); Stage 1 fan-out can also be orchestrated through the `summarize-all-sources` skill. Stage 2 is still a single merge pass.
+Each stage is run manually by the user. Stages 1 and 3 are parallelizable (independent invocations); Stage 1 fan-out can also be orchestrated through the `summarize-all-sources` skill. Stage 2 is still a single merge pass. If a repo is too large or heterogeneous for one faithful Stage 1 document, split it by coherent topic area before continuing; a monolithic lossy summary is invalid.
+
+### Stage 1 Operational Guardrails
+
+- Write Stage 1 artifacts to a deterministic subject-scoped folder such as `stage1-summaries/<subject>/summary-<repo-or-topic>.md` so partial progress is inspectable and resumable.
+- Keep a lightweight manifest in that folder tracking every Stage 1 unit with an explicit status such as `pending`, `running`, `done`, or `needs-fix`.
+- Fan out in small batches, typically 2 to 4 Stage 1 units at a time. Do not dispatch the full corpus before validating the first outputs.
+- After each batch, validate every produced summary against [docs/summary_format.md](../docs/summary_format.md). In this repo the practical minimum is: exact H1 headings `# File Inventory`, `# Content`, `# Cross-References`; a valid inventory table; and no fenced code blocks.
+- Stop the batch on the first invalid summary. Repair or rerun that unit, then revalidate before launching more Stage 1 work.
+- Treat existing partial summaries as inputs to validate, not as automatically trusted artifacts. Stage 2 should receive only validated Stage 1 files.
 
 Repository-maintenance launchers are documented separately in [../.github/prompts/AGENTS.md](../.github/prompts/AGENTS.md). This file is only for the quiz-generation pipeline.
 
@@ -140,16 +153,17 @@ The original monolithic `generate-test.prompt.md` performed reading, organisatio
 | Merge | Taxonomy + cross-cutting context | All summaries (small: no source files) |
 | Generate (per subcategory) | Question design + adversarial validation | One subcategory file |
 
-### Why Rich Summaries, Not Concept Lists
+### Why Loss-Minimizing Extraction, Not High-Level Summaries
 
-An earlier design extracted only concept names and definitions. This lost:
+An earlier design extracted only concept names and definitions. A later failure mode produced repo-level overviews with a small content synopsis. Both lose too much information. They discard:
 
 - **Processes**: step-by-step algorithms and procedures
 - **Cases and analogies**: real-world examples that motivate scenario-based questions
 - **Comparisons and decision criteria**: when to use X vs. Y, and why
 - **Quantitative details**: numerical values and thresholds that make questions concrete
+- **Misconceptions and failure modes**: exactly the material that supports strong distractors
 
-The current design preserves full content from source files, stripping only code syntax (in `conceptual-only` mode) and irrelevant metadata. The rule is: **when in doubt, keep it.**
+The current design is therefore intentionally loss-minimizing. Stage 1 preserves source-organized content from each relevant file, stripping only raw code syntax (in `conceptual-only` mode) and irrelevant metadata. The rule is: **when in doubt, keep it.**
 
 ### Why a Merge Step
 
@@ -162,12 +176,13 @@ Without a merge, the same subcategory (e.g. "normalisation") appears independent
 
 ### Why Self-Contained Subcategory Files
 
-The question generator receives one file and produces one JSON. This means:
+The question generator receives one file and produces one JSON batch. This means:
 
 - Each generation invocation gets a **fresh context window** — no drift
 - No cross-file dependencies at generation time
 - Stages 1 and 3 are trivially parallelizable (independent invocations)
 - The subcategory file can be reviewed and adjusted before generation
+- The merge stage can record explicit `SURF-*` question surfaces so Stage 3 can cover the material systematically instead of improvising from concept names alone
 
 ### Why Concept IDs Are Assigned at Stage 2
 
@@ -176,6 +191,12 @@ Concept IDs are stable references for `source_ref` in question JSON. They need t
 - The same concept may appear in multiple raw summaries under different names
 - The subcategory a concept belongs to determines its ID prefix
 - IDs assigned before merging would need renaming and conflict resolution
+
+### Why Question Surfaces Are Assigned at Stage 2
+
+Question yield depends on more than concept count. Good questions come from distinct surfaces such as definitions, comparisons, procedures, decision criteria, misconceptions, scenarios, quantitative anchors, and edge cases.
+
+Stage 2 is the first point where the taxonomy is stable enough to record those surfaces explicitly. That makes Stage 3 coverage-driven instead of relying on the generator to rediscover every angle from scratch in each batch.
 
 ### Why the Editor Is a Mandatory Step
 

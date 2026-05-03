@@ -1,9 +1,9 @@
 # Implementation Plan
 
-> Updated: 2026-04-30 (refresh 21)
-> Branch: copilot/advanced-unattended-maintenance-another-one
+> Updated: 2026-05-03 (refresh 22)
+> Branch: decomposed
 > Status: active
-> Refresh 21 summary: no new actionable marker drift; the remaining marker hits are still documentation references and history entries, so the approved queue stays empty.
+> Refresh 22 summary: reconciled the autonomous merge work into decomposed, preserving completed items from both branches and removing stale planned-work entries.
 
 ## Working Agreements
 
@@ -24,7 +24,7 @@
 | Q6 | resolved | `.github/skills/todo-analysis/SKILL.md:7` | What does `disable-model-invocation: false` control in VS Code skill frontmatter, and are there cases where setting it to `true` would make sense for this skill? | Resolved 2026-04-29: remove the field — it is noise in a SKILL.md context → P17 |
 | Q7 | resolved | `.github/skills/todo-analysis/SKILL.md:16` | Does a Markdown link inside a SKILL.md to another doc cause that doc to be auto-loaded in context? | Resolved 2026-04-29: keep as-is — human navigation value justifies the link even without auto-loading |
 | Q8 | resolved | `.github/docs/customization_architecture.md` | What concrete advantage do Python hook scripts provide over equivalent behavior expressed as markdown instructions inside the agent file for deterministic tasks like context injection? | Resolved 2026-04-29: dynamic runtime data is the key reason → P18 |
-| Q9 | resolved | `prompts/merge-summaries.prompt.md:55` | Can subcategory weighting be reformulated in terms of expected question yield rather than concept count? Would a separate scenario-generation agent or doc help cover concept-poor areas? | Resolved 2026-04-29: keep bundled inside P4 — scenario-generation layer is speculative until the prompt design pass |
+| Q9 | resolved | `prompts/merge-summaries.prompt.md:55` | Can subcategory weighting be reformulated in terms of expected question yield rather than concept count? Would a separate scenario-generation agent or doc help cover concept-poor areas? | Resolved 2026-04-29: keep bundled inside P4. Final outcome 2026-05-03: use explicit question surfaces as the yield heuristic inside merge; no separate scenario-generation layer for now. |
 | Q10 | resolved | `.github/instructions/customization-authoring.instructions.md:18` | Should a dedicated VS Code documentation audit skill be built that periodically fetches the official customization docs and suggests improvements to this repo's customization files? | Resolved 2026-04-29: build it → P19 |
 | Q11 | resolved | `.github/agents/todo-planner.agent.md:14` | Is the explicit handoff prompt needed given that `sdd-implementer` already has instructions — would the agent instructions alone be sufficient? | Resolved 2026-04-29: keep it — handoff prompt seeds next-step context into the new chat state; complements, not replaces, target agent instructions → P21 |
 
@@ -42,7 +42,8 @@ No active item details. Refresh the plan before queuing more implementation work
 
 ## Recently Completed
 
-- P33 — 2026-04-30. Replaced the stale resolved P4 TODO in `prompts/merge-summaries.prompt.md` with a stable weighting note that preserves concept-count guidance, then revalidated that no live `TODO:` marker remains in that prompt.
+- P4 — 2026-05-03. Reframed the prompt pipeline around question yield instead of raw concept count by making Stage 1 loss-minimizing and source-preserving, adding explicit `SURF-*` question surfaces in Stage 2, and making Stage 3 run coverage-first repeated batches. Synced `README.md`, `docs/summary_format.md`, `prompts/AGENTS.md`, and `AGENTS.md` to the new contract.
+- P33 — 2026-04-30. Replaced the stale resolved P4 TODO in `prompts/merge-summaries.prompt.md` with a stable weighting note and revalidated that no live `TODO:` marker remains in that prompt.
 - P9 — 2026-04-30. Added opt-in debug logging to `.github/hooks/src/todo_planner_context.py` via `--debug` or `TODO_PLANNER_CONTEXT_DEBUG`, kept default behavior stdout-only, removed the resolved TODO, and validated both unchanged stdout and debug-file emission.
 - P19 — 2026-04-30. Added `.github/skills/customization-audit/SKILL.md`, updated the customization inventories and `.github/README.md`, and replaced the old customization-authoring TODO with a concrete periodic-audit workflow.
 - P31 — 2026-04-30. Fixed `.github/hooks/src/todo_planner_context.py` to resolve the real repository root, then revalidated that the hook now injects the live `.github/implementation_plan.md` preview, correct marker counts, and the active branch name instead of the stale "no plan exists" fallback.
@@ -82,7 +83,6 @@ No active item details. Refresh the plan before queuing more implementation work
 ## Recently Resolved
 
 - 2026-04-30 - Resolved P9 direction: if hook-context debug logging is added, it must be opt-in behind an env var or flag. Default planner-hook behavior stays stdout-only.
-- 2026-04-30 - Resolved P4: keep concept-count weighting in `merge-summaries` for now. Do not add yield heuristics or a scenario-seeding surface until an actual generation pass shows under-covered subcategories that concept count cannot explain.
 
 - 2026-04-30 - The repo now has an advanced optional unattended-maintenance lane for delegated and cloud-oriented runs, but the canonical precise workflow remains `refresh-plan.prompt.md` followed by `implement-plan-item.prompt.md`. The batch lane consumes approved and unblocked items only and stops on unresolved decisions.
 
