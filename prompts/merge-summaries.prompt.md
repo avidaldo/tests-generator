@@ -140,7 +140,7 @@ Brief summaries of concepts from other subcategories that relate to this one. Th
 - Include enough content that the question generator can create cross-subcategory questions — particularly scenario-based and comparison questions — without seeing the other subcategory's file.
 - For simple definitional relationships, 1–2 sentences are sufficient. For cases, analogies, decision criteria, and process interactions, include the full scenario or reasoning as it appears in the source summaries. Do not truncate cases.
 - Example of sufficient related context (precision/recall in a subcategory about classification metrics):
-  > **Precision vs. Recall trade-off** (primary subcategory: Métricas de Clasificación): En algunos contextos se prefiere la precisión y en otros el recall. Por ejemplo, un clasificador de vídeos seguros para niños debería tener alta precisión aunque rechace vídeos válidos (bajo recall). Un detector de ladrones en videovigilancia prefiere 99% de recall aunque tenga solo 30% de precisión (muchas falsas alarmas).
+  > **Precision vs. Recall trade-off** (primary subcategory: Classification Metrics): In some contexts, precision is preferred, while in others, recall matters more. For example, a classifier for child-safe videos should have high precision even if it rejects valid videos (low recall). A thief detector in video surveillance would prefer 99% recall even if it only has 30% precision (many false alarms).
 - Focus on *how* the related concept connects to this subcategory's topic, not on defining the concept from scratch — but include the connecting scenarios in full.
 
 ### Question surfaces
