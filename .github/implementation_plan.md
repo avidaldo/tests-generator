@@ -1,9 +1,10 @@
 # Implementation Plan
 
-> Updated: 2026-05-03 (refresh 22)
+> Updated: 2026-05-04 (refresh 24 + local sync)
 > Branch: decomposed
 > Status: active
-> Refresh 22 summary: reconciled the autonomous merge work into decomposed, preserving completed items from both branches and removing stale planned-work entries.
+> Refresh 24 summary: queued P36 to extend the self-contained Stage 3 rule from stems to learner-facing feedback and repair the remaining Stage 3 artifact text that still refers to “the material”.
+> Local sync 2026-05-04: completed P36 by extending the self-contained rule to learner-facing feedback, syncing `prompts/AGENTS.md`, and repairing the remaining Stage 3 feedback text that still referred to source material.
 
 ## Working Agreements
 
@@ -42,6 +43,9 @@ No active item details. Refresh the plan before queuing more implementation work
 
 ## Recently Completed
 
+- P36 — 2026-05-04. Extended `prompts/generate-questions.prompt.md` so Stage 3 learner-facing feedback forbids external-document anchors, added a final learner-facing-text validation pass, synced `prompts/AGENTS.md`, and repaired the remaining three feedback strings in `stage3-question-batches/saa2/ai-foundations-and-learning-paradigms/batch-001.json`. Validation confirmed no remaining forbidden material anchors under `stage3-question-batches/**`.
+- P35 — 2026-05-04. Hardened `prompts/generate-questions.prompt.md` so Stage 3 `question_text` forbids external-document anchors with explicit Spanish and English examples plus a final stem-only validation pass, synced `prompts/AGENTS.md`, and repaired the five offending stems in `stage3-question-batches/saa2/ai-foundations-and-learning-paradigms/batch-001.json`. Scope remained limited to stems; feedback phrasing was left unchanged.
+- P34 — 2026-05-04. Changed Stage 3 question generation to write batches directly to deterministic `stage3-question-batches/<subject>/<subcategory>/batch-###.json` paths, synced `README.md`, `prompts/AGENTS.md`, and `AGENTS.md`, and removed the manual save-from-chat expectation from the workflow.
 - P4 — 2026-05-03. Reframed the prompt pipeline around question yield instead of raw concept count by making Stage 1 loss-minimizing and source-preserving, adding explicit `SURF-*` question surfaces in Stage 2, and making Stage 3 run coverage-first repeated batches. Synced `README.md`, `docs/summary_format.md`, `prompts/AGENTS.md`, and `AGENTS.md` to the new contract.
 - P33 — 2026-04-30. Replaced the stale resolved P4 TODO in `prompts/merge-summaries.prompt.md` with a stable weighting note and revalidated that no live `TODO:` marker remains in that prompt.
 - P9 — 2026-04-30. Added opt-in debug logging to `.github/hooks/src/todo_planner_context.py` via `--debug` or `TODO_PLANNER_CONTEXT_DEBUG`, kept default behavior stdout-only, removed the resolved TODO, and validated both unchanged stdout and debug-file emission.

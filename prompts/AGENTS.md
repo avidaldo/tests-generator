@@ -8,7 +8,7 @@ This folder contains the canonical question-generation prompt files for the repo
 | ---- | ------ | ----------- |
 | `summarize-sources.prompt.md` | **Active — Stage 1** | Loss-minimizing source extraction from source files; one per repo or coherent topic area; split large corpora before extraction |
 | `merge-summaries.prompt.md` | **Active — Stage 2** | Organizes raw extraction files into subcategory files with concept IDs, question surfaces, and cross-cutting context |
-| `generate-questions.prompt.md` | **Active — Stage 3** | Question generation in JSON batches; one batch per invocation from one subcategory file, repeat until surfaces are covered |
+| `generate-questions.prompt.md` | **Active — Stage 3** | Question generation in JSON batches written directly to deterministic Stage 3 artifact paths; one batch per invocation from one subcategory file, repeat until surfaces are covered |
 | `deprecated/inventory.prompt.md` | **Deprecated** | Superseded by `summarize-sources.prompt.md` |
 | `deprecated/generate-test.prompt.md` | **Deprecated** | Monolithic prompt — superseded by the 3-stage pipeline |
 
@@ -47,7 +47,7 @@ User reviews subcategory files, adjusts if needed
         │  Reads one subcategory file (sole input)
         │  Generates one coverage-first JSON batch + adversarial
         │  feedback validation
-        │  Output: {subcategory}-{batch}.json
+        │  Output: stage3-question-batches/<subject>/<subcategory>/batch-###.json
         ▼
 [Quiz Editor — human review]   ← mandatory validation gate
         │  Human marks: Pendiente / Revisar / Lista
@@ -59,6 +59,13 @@ Moodle import
 ```
 
 Each stage is run manually by the user. Stages 1 and 3 are parallelizable (independent invocations); Stage 1 fan-out can also be orchestrated through the `summarize-all-sources` skill. Stage 2 is still a single merge pass. If a repo is too large or heterogeneous for one faithful Stage 1 document, split it by coherent topic area before continuing; a monolithic lossy summary is invalid.
+
+### Stage 3 Artifact Guardrails
+
+- Write Stage 3 outputs to a deterministic subject-scoped folder such as `stage3-question-batches/<subject>/<subcategory>/batch-001.json` so repeated runs remain inspectable and resumable.
+- Derive `<subject>` from the parent folder under `stage2-subcategories/` and derive `<subcategory>` from the input filename with the `subcategory-` prefix removed.
+- Never overwrite an existing batch file implicitly. Repeated runs should create the next free `batch-###.json` in that same subcategory folder unless the user explicitly requests a specific batch number.
+- Stage 3 learner-facing text must be self-contained. `question_text`, `general_feedback`, and `answers[].feedback` must not refer to "the material", "the notes", "the notebook", slides, or similar external anchors; source attribution belongs in `source_ref`, not in learner-facing text.
 
 ### Stage 1 Operational Guardrails
 

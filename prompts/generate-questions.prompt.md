@@ -1,6 +1,6 @@
 ---
 description: >
-  Generate multiple-choice exam questions for ONE subcategory in editor-native JSON format. Run after the merge step, one subcategory file at a time, and repeat in batches when the subcategory exposes more question surfaces than fit in one safe output window. Input: a self-contained subcategory file produced by merge-summaries.prompt.md. Output: a JSON file ready to open directly in the quiz editor (Ctrl+O).
+  Generate multiple-choice exam questions for ONE subcategory in editor-native JSON format. Run after the merge step, one subcategory file at a time, and repeat in batches when the subcategory exposes more question surfaces than fit in one safe output window. Input: a self-contained subcategory file produced by merge-summaries.prompt.md. Output: write a JSON file directly to a deterministic Stage 3 artifact path, ready to open in the quiz editor (Ctrl+O).
 ---
 
 # Question Generation Agent
@@ -22,6 +22,7 @@ Read the **Subject Profile** from the subcategory file header (the `Question foc
 |-----------|---------|---------|
 | **Output language** | Castellano (Spanish). Technical terms in English in parentheses. | Any language — state it when invoking. Code identifiers, file names, and library names always remain in English. |
 | **Question focus** | `conceptual-only` | `conceptual-only` · `syntax-included`. Must match the setting used during summarisation. |
+<!-- TODO: Question focus have already be defined in step1, so it's not needed here anymore, since this step is taken on the results of step2, isn't it? -->
 
 ---
 
@@ -98,7 +99,13 @@ Generate questions about code constructs, API usage, syntax patterns, and implem
 
 **Content:**
 - Focus on deep comprehension, procedures, and relationships between concepts
-- Questions must be self-contained: include all necessary context in the stem; never reference "the notes", "the notebook", or "class materials"
+- Learner-facing text must be self-contained in `question_text`, `general_feedback`, and `answers[].feedback`: include the needed context directly in the field itself; keep source grounding in `source_ref`, not in learner-facing attribution
+- Forbidden learner-facing anchors include phrases such as `según el material`, `según las notas`, `según el cuaderno`, `del material`, `according to the material`, `according to the notes`, `the material`, `in the notebook`, and equivalent references to notes, notebooks, slides, class materials, or the source file
+- If a draft stem or feedback uses external attribution, rewrite it by embedding the needed fact, distinction, or scenario directly in the learner-facing text
+  - ✅ `¿Cuál es la corrección conceptual más precisa sobre la relación entre AI y machine learning?`
+  - ❌ `¿Cuál es la corrección más precisa según el material?`
+  - ✅ `Correcto. AI es el campo general y machine learning es una subárea que aprende a partir de datos.`
+  - ❌ `Correcto. Esa es la distinción central del material.`
 - Ask directly — avoid preambles that serve as hints for other questions
 - Coverage-first batching: within one output, cover as many distinct high-yield surfaces as possible before writing multiple near-duplicate questions about the same narrow angle
 - Exhaustive coverage of all solid concepts, procedures, scenarios, comparisons, misconceptions, and edge cases across repeated batches
@@ -153,6 +160,8 @@ For every distractor, write its `feedback` field explaining **unambiguously** wh
 
 The feedback for the correct answer must explain *why* it is correct, not just restate it.
 
+All feedback must be self-contained learner-facing text. Explain the correctness or falseness directly from the concept or scenario in the question; do not attribute the explanation to "the material", notes, notebooks, slides, or source files.
+
 ### Phase 3: Coverage Self-Check
 
 Before finalizing the JSON, verify all of the following:
@@ -161,13 +170,26 @@ Before finalizing the JSON, verify all of the following:
 2. The batch covers distinct surfaces rather than repeating the same narrow angle.
 3. The batch includes the highest-yield material available in the selected scope: procedures, scenarios, comparisons, misconceptions, and decision criteria should not be omitted in favor of easy definitional questions.
 4. No question depends on knowledge not stated in the subcategory file.
+5. Run a final learner-facing text pass on every `question_text`, `general_feedback`, and `answers[].feedback`: each field must be self-contained and understandable without the source file, notes, notebook, slides, or class materials.
+6. If any learner-facing field contains a forbidden anchor such as `según el material`, `según las notas`, `según el cuaderno`, `del material`, `according to the material`, `according to the notes`, `the material`, or `in the notebook`, rewrite that field before saving JSON. Preserve the tested concept, difficulty, and `source_ref`; change only the wording needed to embed the context directly.
 </generation_algorithm>
 
 ---
 
 ## Output Format
 
-Output a single valid JSON object conforming to the **editor JSON schema** — see [`docs/editor_json_schema.md`](../docs/editor_json_schema.md) for the full field reference, scoring rationale, and a complete example. No prose before or after the JSON block.
+Write a single valid JSON object conforming to the **editor JSON schema** — see [`docs/editor_json_schema.md`](../docs/editor_json_schema.md) for the full field reference, scoring rationale, and a complete example.
+
+Do not leave the JSON only in chat. Write it directly to disk using this deterministic Stage 3 layout:
+
+- Artifact root: `stage3-question-batches/<subject>/<subcategory-slug>/`
+- `<subject>` = the immediate parent folder of the input subcategory file inside `stage2-subcategories/` (for example, `saa2`)
+- `<subcategory-slug>` = the input filename without the `subcategory-` prefix and without the `.md` suffix
+- File name: the next free `batch-###.json`, starting at `batch-001.json`
+- If the user explicitly requests a batch number, honor it instead of auto-incrementing
+- Create missing directories before writing the file
+
+The saved file must contain raw JSON only, with no Markdown fences and no surrounding prose. After writing the file, respond in chat with a terse confirmation that includes only the saved file path, the number of generated questions, and the covered `SURF-*` IDs.
 
 ```json
 {
@@ -216,4 +238,5 @@ Output a single valid JSON object conforming to the **editor JSON schema** — s
 - Large subcategories are expected to be generated in repeated batches. If the subcategory file contains more eligible `SURF-*` entries than fit in one batch, cover a coherent subset now and continue in later invocations.
 - If a single subcategory remains too large or internally incoherent even after batching, that is a Stage 2 split problem and should be fixed in the merge output rather than by writing a lossy question batch.
 - The JSON must be valid and parseable — no trailing commas, no comments in the final output (the schema example above uses `//` only for illustration).
+- Never overwrite an existing Stage 3 batch file. If the target batch number already exists and the user did not explicitly request overwrite behavior, increment to the next free `batch-###.json`.
 - Shuffle the correct answer into a non-predictable position across questions. Do not always place it first or last.

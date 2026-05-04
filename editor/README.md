@@ -8,8 +8,15 @@ Desktop editor for Moodle XML quiz files using PyQt6. Previous versions (v1 Stre
 - **Category organization**: Filter by category tree
 - **Three-state workflow**: "Pendiente" / "Revisar" / "Lista" (approved for exam)
 - **Difficulty flag**: Mark approved questions as "Fácil" for difficulty-filtered export
+- **Theme selection**: Switch between system, light, and dark themes from `Vista -> Tema`; the choice is persisted between sessions
 - **Full undo/redo**: Native Qt QUndoStack
 - **HTML preview**: View rendered HTML, edit raw
+
+## Appearance
+
+Use `Vista -> Tema` to switch between `Sistema`, `Claro`, and `Oscuro`.
+The editor remembers the last selected theme through `QSettings` and restores it on the next launch.
+Dark mode now applies explicit readable colors to question editors and answer/distractor cards instead of relying on whatever palette the host desktop provides.
 
 ## Running
 

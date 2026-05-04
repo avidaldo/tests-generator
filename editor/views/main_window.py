@@ -11,12 +11,13 @@ from PyQt6.QtWidgets import (
     QLabel, QGroupBox, QScrollArea, QGridLayout, QApplication
 )
 from PyQt6.QtCore import Qt, QModelIndex, QSortFilterProxyModel, QSettings, QTimer
-from PyQt6.QtGui import QAction, QUndoStack, QKeySequence, QFont, QWheelEvent
+from PyQt6.QtGui import QAction, QActionGroup, QUndoStack, QKeySequence, QFont, QPalette, QWheelEvent
 
 from models.quiz_model import QuizModel
 from models.question import QuestionStatus
 from models.undo_commands import DeleteQuestionCommand
 from views.question_detail import QuestionDetailPanel
+from views.theme import THEME_OPTIONS, THEME_SYSTEM, apply_app_theme
 from file_io.xml_parser import parse_multiple_files
 from file_io.xml_writer import generate_xml
 from file_io.state_io import save_state, load_state
@@ -69,7 +70,12 @@ class StatusFilterProxyModel(QSortFilterProxyModel):
 class MainWindow(QMainWindow):
     """Main application window."""
 
-    def __init__(self):
+    def __init__(
+        self,
+        theme_mode: str = THEME_SYSTEM,
+        system_palette: QPalette | None = None,
+        system_style_name: str | None = None,
+    ):
         super().__init__()
         self.setWindowTitle("Moodle Quiz Editor v3")
         self.setMinimumSize(1000, 700)
@@ -96,6 +102,12 @@ class MainWindow(QMainWindow):
         # Settings for state persistence
         self._settings = QSettings()
         self._current_state_file: Path | None = None
+        self._theme_mode = theme_mode
+        app = QApplication.instance()
+        current_palette = app.palette() if app is not None else QPalette()
+        self._system_palette = QPalette(system_palette) if system_palette is not None else QPalette(current_palette)
+        self._system_style_name = system_style_name or (app.style().objectName() if app is not None else "Fusion")
+        self._theme_actions: dict[str, QAction] = {}
 
         # Autosave: backup file path (in user's home or current dir)
         self._autosave_file = Path.home() / ".moodle_editor_autosave.json"
@@ -118,6 +130,7 @@ class MainWindow(QMainWindow):
         self._setup_menu()
         self._setup_toolbar()
         self._setup_shortcuts()
+        self._apply_theme_mode(self._theme_mode, persist=False)
         self._update_stats()
         self._apply_font_size()  # Apply saved font size
 
@@ -246,6 +259,8 @@ class MainWindow(QMainWindow):
         export_easy_action.triggered.connect(self._export_xml_easy)
         file_menu.addAction(export_easy_action)
 
+        quit_action = QAction("Salir", self)
+        quit_action.setShortcut(QKeySequence.StandardKey.Quit)
         quit_action.triggered.connect(self.close)
         file_menu.addAction(quit_action)
 
@@ -284,6 +299,20 @@ class MainWindow(QMainWindow):
         reset_zoom_action.setShortcut("Ctrl+0")
         reset_zoom_action.triggered.connect(self._reset_zoom)
         view_menu.addAction(reset_zoom_action)
+
+        view_menu.addSeparator()
+
+        theme_menu = view_menu.addMenu("Tema")
+        theme_action_group = QActionGroup(self)
+        theme_action_group.setExclusive(True)
+
+        for theme_mode, label in THEME_OPTIONS:
+            action = QAction(label, self)
+            action.setCheckable(True)
+            action.triggered.connect(lambda checked, mode=theme_mode: self._set_theme_mode(mode))
+            theme_action_group.addAction(action)
+            theme_menu.addAction(action)
+            self._theme_actions[theme_mode] = action
 
     def _setup_toolbar(self):
         toolbar = QToolBar("Principal")
@@ -508,60 +537,67 @@ class MainWindow(QMainWindow):
         except Exception:
             pass  # Silent fail for autosave
 
+    def _clear_autosave(self):
+        """Remove the crash-recovery autosave after a clean decision."""
+        self._settings.remove("autosave_file")
+        try:
+            self._autosave_file.unlink(missing_ok=True)
+        except OSError:
+            pass
+
+    def _restore_state_file(self, source_file: Path, current_state_file: Path | None):
+        """Restore editor questions from a JSON state file."""
+        questions = load_state(source_file)
+        self._model.clear()
+        self._model.add_questions(questions)
+        self._current_state_file = current_state_file
+        self._refresh_category_tree()
+        self._update_stats()
+        self._status_bar.showMessage(
+            f"Restauradas {len(questions)} preguntas", 3000
+        )
+
     def _auto_load_last_state(self):
-        """Check for autosave or last state file and offer to load it."""
-        # First check autosave file (most recent backup)
+        """Restore the last saved state automatically and only prompt for crash recovery."""
         autosave_exists = self._autosave_file.exists()
         last_state = self._settings.value("last_state_file", "")
         last_state_exists = last_state and Path(last_state).exists()
+        last_state_file = Path(last_state) if last_state_exists else None
 
-        if autosave_exists or last_state_exists:
-            # Determine which file to suggest
-            if autosave_exists and last_state_exists:
-                # Compare modification times
-                autosave_mtime = self._autosave_file.stat().st_mtime
-                state_mtime = Path(last_state).stat().st_mtime
-                if autosave_mtime > state_mtime:
-                    suggested_file = self._autosave_file
-                    label = "copia de seguridad automática"
-                else:
-                    suggested_file = Path(last_state)
-                    label = last_state
-            elif autosave_exists:
-                suggested_file = self._autosave_file
-                label = "copia de seguridad automática"
-            else:
-                suggested_file = Path(last_state)
-                label = last_state
-
+        if autosave_exists and (
+            not last_state_file or self._autosave_file.stat().st_mtime > last_state_file.stat().st_mtime
+        ):
             reply = QMessageBox.question(
                 self,
                 "Restaurar sesión",
-                f"¿Desea restaurar la última sesión?\n\n({label})",
+                "¿Desea restaurar la copia de seguridad automática más reciente?",
                 QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
                 QMessageBox.StandardButton.Yes
             )
             if reply == QMessageBox.StandardButton.Yes:
                 try:
-                    questions = load_state(suggested_file)
-                    self._model.clear()
-                    self._model.add_questions(questions)
-                    if last_state_exists:
-                        self._current_state_file = Path(last_state)
-                    self._refresh_category_tree()
-                    self._update_stats()
-                    self._status_bar.showMessage(
-                        f"Restauradas {len(questions)} preguntas", 3000
-                    )
+                    self._restore_state_file(self._autosave_file, last_state_file)
                 except Exception as e:
                     QMessageBox.warning(self, "Aviso", f"No se pudo restaurar la sesión: {e}")
+            else:
+                self._clear_autosave()
+                if last_state_file:
+                    try:
+                        self._restore_state_file(last_state_file, last_state_file)
+                    except Exception as e:
+                        QMessageBox.warning(self, "Aviso", f"No se pudo restaurar la sesión: {e}")
+            return
+
+        if last_state_file:
+            try:
+                self._restore_state_file(last_state_file, last_state_file)
+            except Exception as e:
+                QMessageBox.warning(self, "Aviso", f"No se pudo restaurar la sesión: {e}")
 
     def closeEvent(self, event):
         """Handle window close event - prompt to save state."""
-        # Always do a final autosave
-        self._do_autosave()
-
         if not self._model.questions:
+            self._clear_autosave()
             event.accept()
             return
 
@@ -609,6 +645,7 @@ class MainWindow(QMainWindow):
                     event.ignore()
                     return
 
+            self._clear_autosave()
         event.accept()
 
     def _apply_font_size(self):
@@ -648,6 +685,27 @@ class MainWindow(QMainWindow):
         self._apply_font_size()
         self._settings.setValue("font_size", self._base_font_size)
         self._status_bar.showMessage("Zoom: 10pt (default)", 1000)
+
+    def _sync_theme_actions(self):
+        for theme_mode, action in self._theme_actions.items():
+            action.blockSignals(True)
+            action.setChecked(theme_mode == self._theme_mode)
+            action.blockSignals(False)
+
+    def _apply_theme_mode(self, theme_mode: str, persist: bool):
+        app = QApplication.instance()
+        if app is not None:
+            apply_app_theme(app, theme_mode, self._system_palette, self._system_style_name)
+        self._detail_panel.set_theme_mode(theme_mode)
+        self._sync_theme_actions()
+        if persist:
+            self._settings.setValue("theme_mode", theme_mode)
+            theme_label = dict(THEME_OPTIONS)[theme_mode]
+            self._status_bar.showMessage(f"Tema: {theme_label}", 1500)
+
+    def _set_theme_mode(self, theme_mode: str):
+        self._theme_mode = theme_mode
+        self._apply_theme_mode(theme_mode, persist=True)
 
     def wheelEvent(self, event: QWheelEvent):
         """Handle Ctrl+Scroll for font scaling."""

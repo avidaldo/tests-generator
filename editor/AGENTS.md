@@ -116,9 +116,21 @@ Imports from: `models.question`
 Top-level window with toolbar, question list, filter sidebar, detail panel.
 
 - `StatusFilterProxyModel(QSortFilterProxyModel)`: Filters by status, category, and easy-only mode.
-- `MainWindow(QMainWindow)`: Owns all UI, orchestrates model ↔ views.
+- `MainWindow(QMainWindow)`: Owns all UI, orchestrates model ↔ views, persists view settings, and applies the user-selected theme.
 
-Imports from: `models.*`, `views.question_detail`, `file_io.*`
+Imports from: `models.*`, `views.question_detail`, `views.theme`, `file_io.*`
+
+### `views/theme.py`
+
+Shared view-layer theme helpers.
+
+- Theme ids: `system`, `light`, `dark`
+- `THEME_OPTIONS`: menu labels for theme selection
+- `apply_app_theme(app, theme_mode, system_palette, system_style_name)`
+- `effective_theme_variant(theme_mode, palette=None)`
+- Style builders for QTextEdit, QLineEdit, muted labels, and answer cards
+
+Imports from: Qt only
 
 ### `views/question_detail.py`
 
@@ -127,8 +139,9 @@ Detail editing panel for a single question.
 - `AnswerWidget(QFrame)`: Displays/edits one answer. Signals: `delete_requested`, `text_changed`, `feedback_changed`.
 - `QuestionDetailPanel(QWidget)`: Edits question fields. Signals: `question_changed`, `delete_question_requested`.
   - `set_question(question: Question | None)`
+  - `set_theme_mode(theme_mode: str)`
 
-Imports from: `models.question`, `models.quiz_model`, `models.undo_commands`
+Imports from: `models.question`, `models.quiz_model`, `models.undo_commands`, `views.theme`
 
 ## Adding a New Component
 

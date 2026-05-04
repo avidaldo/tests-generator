@@ -3,8 +3,6 @@ Question Detail Panel - View and edit questions with answers.
 Always-editable fields, 3-state workflow: PENDIENTE → REVISAR → LISTA
 """
 
-from functools import partial
-
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel,
     QTextEdit, QPlainTextEdit, QPushButton, QLineEdit,
@@ -20,6 +18,15 @@ from models.undo_commands import (
     ToggleStatusCommand, EditQuestionFieldCommand,
     DeleteAnswerCommand, EditAnswerCommand, ToggleEasyCommand
 )
+from views.theme import (
+    THEME_SYSTEM,
+    build_answer_editor_style,
+    build_answer_frame_style,
+    build_line_edit_style,
+    build_muted_label_style,
+    build_text_edit_style,
+    effective_theme_variant,
+)
 
 
 class AnswerWidget(QFrame):
@@ -30,39 +37,18 @@ class AnswerWidget(QFrame):
     feedback_changed = pyqtSignal(int, str)  # answer index, new feedback
 
     def __init__(self, index: int, text: str, fraction: str, is_correct: bool,
-                 feedback: str = "", show_feedback: bool = True, parent=None):
+                 feedback: str = "", show_feedback: bool = True,
+                 theme_mode: str = THEME_SYSTEM, parent=None):
         super().__init__(parent)
         self._index = index
         self._text = text
         self._feedback = feedback
+        self._is_correct = is_correct
+        self._theme_mode = theme_mode
         self._is_updating = False
 
         self.setFrameShape(QFrame.Shape.StyledPanel)
         self.setLineWidth(1)
-
-        # Color based on correct/incorrect - dark text for readability
-        if is_correct:
-            self.setStyleSheet("""
-                QFrame {
-                    border: 2px solid #2E7D32;
-                    background-color: #E8F5E9;
-                }
-                QTextEdit {
-                    color: #1B5E20;
-                    background-color: #F1F8E9;
-                    border: 1px solid #81C784;
-                }
-            """)
-        else:
-            self.setStyleSheet("""
-                QFrame {
-                    border: 1px solid #ccc;
-                    background-color: #FAFAFA;
-                }
-                QTextEdit {
-                    border: 1px solid #ddd;
-                }
-            """)
 
         layout = QVBoxLayout(self)
         layout.setContentsMargins(8, 8, 8, 8)
@@ -119,6 +105,21 @@ class AnswerWidget(QFrame):
         # Show/hide feedback based on toggle
         self._feedback_label.setVisible(show_feedback)
         self._feedback_edit.setVisible(show_feedback)
+        self._apply_styles()
+
+    def _apply_styles(self):
+        if not hasattr(self, "_text_edit") or not hasattr(self, "_feedback_edit"):
+            return
+        theme_variant = effective_theme_variant(self._theme_mode)
+        font_size = self.font().pointSize() if self.font().pointSize() > 0 else None
+        self.setStyleSheet(build_answer_frame_style(theme_variant, self._is_correct))
+        self._text_edit.setStyleSheet(build_answer_editor_style(theme_variant, self._is_correct, font_size))
+        self._feedback_edit.setStyleSheet(build_text_edit_style(theme_variant, font_size))
+        self._feedback_label.setStyleSheet(build_muted_label_style(theme_variant))
+
+    def set_theme_mode(self, theme_mode: str):
+        self._theme_mode = theme_mode
+        self._apply_styles()
 
     def _adjust_text_height(self, text_edit: QTextEdit):
         """Adjust text edit height to fit content exactly."""
@@ -165,14 +166,15 @@ class AnswerWidget(QFrame):
     def setFont(self, font: QFont):
         """Override to apply font to QTextEdit documents."""
         super().setFont(font)
+        if not hasattr(self, "_text_edit") or not hasattr(self, "_feedback_edit"):
+            return
         font_size = font.pointSize()
         # Apply to text edits - their documents need font set explicitly
         self._text_edit.setFont(font)
         self._text_edit.document().setDefaultFont(font)
-        self._text_edit.setStyleSheet(f"font-size: {font_size}pt;")
         self._feedback_edit.setFont(font)
         self._feedback_edit.document().setDefaultFont(font)
-        self._feedback_edit.setStyleSheet(f"font-size: {font_size}pt;")
+        self._apply_styles()
         # Refresh heights
         self._adjust_text_height(self._text_edit)
         self._adjust_text_height(self._feedback_edit)
@@ -194,6 +196,7 @@ class QuestionDetailPanel(QWidget):
         self._answer_widgets: list[AnswerWidget] = []
         self._is_updating = False
         self._show_feedback = True  # Toggle state for feedback visibility
+        self._theme_mode = THEME_SYSTEM
 
         self._setup_ui()
 
@@ -253,12 +256,10 @@ class QuestionDetailPanel(QWidget):
 
         self._category_edit = QLineEdit()
         self._category_edit.setPlaceholderText("Categoría (ej: $course$/Tema1/Subtema)")
-        self._category_edit.setStyleSheet("color: #333;")
         self._category_edit.editingFinished.connect(self._on_category_changed)
         cat_row.addWidget(self._category_edit, 1)
 
         self._source_label = QLabel("")
-        self._source_label.setStyleSheet("color: #666;")
         cat_row.addWidget(self._source_label)
 
         layout.addLayout(cat_row)
@@ -314,6 +315,25 @@ class QuestionDetailPanel(QWidget):
         layout.addWidget(self._answers_group, 1)
 
         layout.addStretch()
+        self._apply_theme_styles()
+
+    def _apply_theme_styles(self):
+        theme_variant = effective_theme_variant(self._theme_mode)
+        font_size = self.font().pointSize() if self.font().pointSize() > 0 else None
+        if hasattr(self, "_question_edit"):
+            self._question_edit.setStyleSheet(build_text_edit_style(theme_variant, font_size))
+        if hasattr(self, "_feedback_edit"):
+            self._feedback_edit.setStyleSheet(build_text_edit_style(theme_variant, font_size))
+        if hasattr(self, "_category_edit"):
+            self._category_edit.setStyleSheet(build_line_edit_style(theme_variant, font_size))
+        if hasattr(self, "_source_label"):
+            self._source_label.setStyleSheet(build_muted_label_style(theme_variant))
+        for widget in self._answer_widgets:
+            widget.set_theme_mode(self._theme_mode)
+
+    def set_theme_mode(self, theme_mode: str):
+        self._theme_mode = theme_mode
+        self._apply_theme_styles()
 
     def setFont(self, font: QFont):
         """Override to apply font to all QTextEdit documents."""
@@ -321,6 +341,7 @@ class QuestionDetailPanel(QWidget):
         # Apply to all QTextEdit widgets
         for text_edit in self.findChildren(QTextEdit):
             self._apply_font_to_text_edit(text_edit, font)
+        self._apply_theme_styles()
 
         # Refresh heights after font change
         if hasattr(self, '_question_edit'):
@@ -336,8 +357,8 @@ class QuestionDetailPanel(QWidget):
         text_edit.setFont(font)
         doc = text_edit.document()
         doc.setDefaultFont(font)
-        # Force re-render with new font by using stylesheet
-        text_edit.setStyleSheet(f"font-size: {font.pointSize()}pt;")
+        theme_variant = effective_theme_variant(self._theme_mode)
+        text_edit.setStyleSheet(build_text_edit_style(theme_variant, font.pointSize()))
 
     def _adjust_textedit_height(self, text_edit: QTextEdit, min_height: int = 30, max_height: int = 600):
         """Dynamically adjust QTextEdit height based on content."""
@@ -468,7 +489,8 @@ class QuestionDetailPanel(QWidget):
                 fraction=ans.fraction,
                 is_correct=ans.is_correct,
                 feedback=self._clean_html(ans.feedback),
-                show_feedback=self._show_feedback
+                show_feedback=self._show_feedback,
+                theme_mode=self._theme_mode,
             )
             # Apply current font to the new widget
             widget.setFont(self.font())

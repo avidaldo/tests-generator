@@ -74,7 +74,7 @@ The agent proposes a subcategory taxonomy — review and adjust, then it produce
 
 Open `prompts/generate-questions.prompt.md` as a prompt. Provide one subcategory `.md` file from Step 2.
 
-The agent generates one coverage-first JSON batch from the file's full content, including scenario-based and cross-subcategory relationship questions. Output is a JSON file — save it (e.g. `ml-normalisation-b01.json`). Repeat on the same subcategory with additional `SURF-*` scopes when you want more coverage than fits in one batch.
+The agent generates one coverage-first JSON batch from the file's full content, including scenario-based and cross-subcategory relationship questions, and writes it directly to a deterministic Stage 3 artifact path such as `stage3-question-batches/saa2/ai-foundations-and-learning-paradigms/batch-001.json`. Repeat on the same subcategory with additional `SURF-*` scopes when you want more coverage than fits in one batch; the next run should create the next free batch file in that same subfolder.
 
 > **One subcategory per invocation** — each gets a fresh context window, no drift.
 > **One batch per invocation** — keep each output within a safe reviewable window, then continue with more surfaces as needed.

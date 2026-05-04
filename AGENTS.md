@@ -60,6 +60,7 @@ For multi-repo subjects, the optional [`summarize-all-sources` skill](.github/sk
 Stage 1 operational policy in this repo:
 
 - Prefer deterministic artifact paths such as `stage1-summaries/<subject>/summary-<unit>.md`.
+- Prefer deterministic Stage 3 artifact paths such as `stage3-question-batches/<subject>/<subcategory>/batch-001.json`.
 - Keep a manifest or checkpoint file for each Stage 1 subject run.
 - Fan out in small batches and validate each written artifact against [docs/summary_format.md](docs/summary_format.md) before launching more units or starting Stage 2.
 

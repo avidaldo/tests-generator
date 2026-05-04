@@ -40,7 +40,7 @@ The user will provide one or more directory paths or file paths. These may point
 
 ### Files to ignore
 
-- Non-text files, data files, images, and files under `data/`, `.git/`, `__pycache__/`, `node_modules/`, `.venv/`.
+- Non-text files, data files, images, and files under `data/`, `.git/`, `__pycache__/`, `node_modules/`, `.venv/`, `pyproject.toml`, `uv.lock`, and other typical boilerplate or configuration files.
 - Files that are purely boilerplate (setup scripts, configuration, CI workflows).
 
 ## Scaling Rule
