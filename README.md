@@ -10,7 +10,7 @@ Prompt-based system for generating multiple-choice exam questions from course ma
 
 Active workflow: [`prompts/summarize-sources.prompt.md`](prompts/summarize-sources.prompt.md) → [`prompts/merge-summaries.prompt.md`](prompts/merge-summaries.prompt.md) → [`prompts/generate-questions.prompt.md`](prompts/generate-questions.prompt.md)
 
-See [`prompts/AGENTS.md`](prompts/AGENTS.md) for the full pipeline diagram, design rationale, and deprecated prompts.
+See [`prompts/AGENTS.md`](prompts/AGENTS.md) for the full pipeline diagram, design rationale, and deprecated prompts. See [`docs/pipeline_execution_modes.md`](docs/pipeline_execution_modes.md) for when to use the regular prompt-by-prompt lane versus the Stage 1 and Stage 3 bulk skills, and for the user-owned artifact path contract.
 
 ### Quiz Editor (`editor/`)
 
@@ -77,6 +77,8 @@ Open `prompts/generate-questions.prompt.md` as a prompt. Provide one subcategory
 
 The agent generates one coverage-first JSON batch from the file's full content, including scenario-based and cross-subcategory relationship questions, and writes it directly to a user-owned Stage 3 location such as `/path/to/exam-artifacts/saa2/stage3/ai-foundations-and-learning-paradigms/batch-001.json`. Repeat on the same subcategory with additional `SURF-*` scopes when you want more coverage than fits in one batch; the next run should create the next free batch file in that same subfolder.
 
+Preferred for delegated or background breadth-first runs across many subcategories: invoke the [`.github/skills/generate-question-batches/SKILL.md`](.github/skills/generate-question-batches/SKILL.md) workflow. It creates at most one new batch per subcategory per pass and keeps checkpointed progress under the Stage 3 root.
+
 > **One subcategory per invocation** — each gets a fresh context window, no drift.
 > **One batch per invocation** — keep each output within a safe reviewable window, then continue with more surfaces as needed.
 
@@ -132,6 +134,7 @@ pip install PyQt6 lxml
 - [Distractor Design & Psychometric Techniques](docs/distractor_design.md)
 - [Summary Document Format](docs/summary_format.md)
 - [Editor JSON Schema](docs/editor_json_schema.md)
+- [Pipeline Execution Modes](docs/pipeline_execution_modes.md)
 - [Editor Architecture](editor/AGENTS.md)
 - [Results Privacy Policy](results/AGENTS.md)
 - [Prompt Pipeline Design](prompts/AGENTS.md)
