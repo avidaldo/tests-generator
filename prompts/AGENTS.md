@@ -4,6 +4,8 @@
 
 This folder contains the canonical question-generation prompt files for the repository. VS Code discovers this folder through `chat.promptFilesLocations` in `.vscode/settings.json`. Repository-maintenance launchers live in [../.github/prompts/AGENTS.md](../.github/prompts/AGENTS.md).
 
+For the detailed decision guide on regular versus bulk execution, the user-owned artifact path contract, and when to use the Stage 1 or Stage 3 skills instead of the precise prompt lane, see [docs/pipeline_execution_modes.md](../docs/pipeline_execution_modes.md).
+
 | File | Status | Description |
 | ---- | ------ | ----------- |
 | `summarize-sources.prompt.md` | **Active — Stage 1** | Loss-minimizing source extraction from source files; one per repo or coherent topic area; write summaries to user-provided Stage 1 paths or roots |
@@ -17,6 +19,8 @@ This folder contains the canonical question-generation prompt files for the repo
 ### Pipeline Overview
 
 Optional helper for Stage 1 fan-out: [`.github/skills/summarize-all-sources/SKILL.md`](../.github/skills/summarize-all-sources/SKILL.md) can orchestrate one isolated `summarize-sources.prompt.md` run per material path, then return one summary artifact per path.
+
+Optional helper for advanced Stage 3 breadth-first runs: [`.github/skills/generate-question-batches/SKILL.md`](../.github/skills/generate-question-batches/SKILL.md) can traverse multiple subcategory files from one delegated or background run, write at most one new batch per subcategory, and keep checkpointed progress under the user-provided Stage 3 root.
 
 ```text
 User provides repos (list of paths)
@@ -42,7 +46,7 @@ User collects all summary files
         ▼
 User reviews subcategory files, adjusts if needed
         │
-        ▼  ── one invocation per subcategory file (parallelizable) ──
+        ▼  ── one invocation per subcategory file (parallelizable; optional `generate-question-batches` orchestration for breadth-first delegated runs) ──
 [Stage 3: generate-questions.prompt.md]
         │  Reads one subcategory file (sole input)
         │  Generates one coverage-first JSON batch + adversarial
@@ -58,7 +62,7 @@ User reviews subcategory files, adjusts if needed
 Moodle import
 ```
 
-Each stage is run manually by the user. Stages 1 and 3 are parallelizable (independent invocations); Stage 1 fan-out can also be orchestrated through the `summarize-all-sources` skill. Stage 2 is still a single merge pass. Each prompt should ask for the relevant input or output path when the user did not already provide it. If a repo is too large or heterogeneous for one faithful Stage 1 document, split it by coherent topic area before continuing; a monolithic lossy summary is invalid.
+Each stage is run manually by the user. Stages 1 and 3 are parallelizable (independent invocations); Stage 1 fan-out can also be orchestrated through the `summarize-all-sources` skill, and Stage 3 breadth-first delegated runs can be orchestrated through the `generate-question-batches` skill. Stage 2 is still a single merge pass. Each prompt should ask for the relevant input or output path when the user did not already provide it. If a repo is too large or heterogeneous for one faithful Stage 1 document, split it by coherent topic area before continuing; a monolithic lossy summary is invalid.
 
 ### Stage 3 Artifact Guardrails
 
@@ -66,6 +70,7 @@ Each stage is run manually by the user. Stages 1 and 3 are parallelizable (indep
 - When the user provides a Stage 3 output root, derive a deterministic per-subcategory folder beneath it using the input filename with the `subcategory-` prefix removed, then write `batch-###.json` there.
 - Never overwrite an existing batch file implicitly. Repeated runs should create the next free `batch-###.json` in that same subcategory folder unless the user explicitly requests a specific batch number.
 - Stage 3 learner-facing text must be self-contained. `question_text`, `general_feedback`, and `answers[].feedback` must not refer to "the material", "the notes", "the notebook", slides, or similar external anchors; source attribution belongs in `source_ref`, not in learner-facing text.
+- Stage 3 concept, taxonomy, hierarchy, and misconception-correction stems should be direct by default. Use scenario framing only when the concrete context materially changes the reasoning, diagnosis, trade-off, or procedural choice being tested.
 
 ### Stage 1 Operational Guardrails
 

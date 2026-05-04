@@ -51,11 +51,13 @@ This repository contains tools and prompts for generating, editing, and analyzin
 
 ## Prompt Pipeline
 
-See [`prompts/AGENTS.md`](prompts/AGENTS.md) for the active prompt inventory, pipeline diagram, design rationale, and file responsibilities.
+See [`prompts/AGENTS.md`](prompts/AGENTS.md) for the active prompt inventory, pipeline diagram, design rationale, and file responsibilities. See [`docs/pipeline_execution_modes.md`](docs/pipeline_execution_modes.md) for the execution-mode decision guide and the user-owned artifact path contract.
 
 Active workflow: `summarize-sources.prompt.md` (loss-minimizing Stage 1 extraction, one per repo or coherent topic area; split large corpora first) → `merge-summaries.prompt.md` (subcategory files with concept IDs, question surfaces, and cross-cutting context) → `generate-questions.prompt.md` (one subcategory batch per invocation) → editor review → XML export.
 
 For multi-repo subjects, the optional [`summarize-all-sources` skill](.github/skills/summarize-all-sources/SKILL.md) can fan out Stage 1 into one isolated summarization per path before the merge step.
+
+For delegated or background Stage 3 breadth-first runs, the optional [`generate-question-batches` skill](.github/skills/generate-question-batches/SKILL.md) can traverse multiple subcategory files and create at most one new batch per subcategory while keeping checkpointed progress under a user-provided Stage 3 root.
 
 Stage 1 operational policy in this repo:
 
@@ -84,6 +86,7 @@ Each step is run manually. See the [Usage guide in README.md](README.md#usage-ge
 ## VS Code Customization Layer
 
 - The optional [`customization-audit` skill](.github/skills/customization-audit/SKILL.md) compares this repo's `.github` customization files against current VS Code customization docs and reports drift or deprecated patterns.
+- The optional [`generate-question-batches` skill](.github/skills/generate-question-batches/SKILL.md) provides the advanced Stage 3 bulk lane for delegated or background question generation across multiple subcategories.
 - The detailed customization inventory now lives in [`.github/AGENTS.md`](.github/AGENTS.md).
 - The human-oriented customization guide now lives in [`.github/README.md`](.github/README.md).
 - Maintenance prompt policy now lives in [`.github/prompts/AGENTS.md`](.github/prompts/AGENTS.md).

@@ -42,6 +42,7 @@ This folder contains the VS Code and Copilot customization layer for repository 
 ### Current Skills
 
 - `customization-audit` — fetches current VS Code customization docs and audits this repo's `.github` customization files for deprecated patterns, missing recommended fields, and newly available primitives.
+- `generate-question-batches` — runs the advanced Stage 3 bulk lane across multiple subcategory files, creating at most one new batch per subcategory while keeping checkpointed progress under a user-provided Stage 3 root.
 - `summarize-all-sources` — fans out `summarize-sources.prompt.md` across multiple material paths and returns one summary per path.
 - `notebook-hygiene` — installs the full four-layer notebook output enforcement stack.
 - `editor-export` — exports reviewed editor JSON state to Moodle XML with explicit status control.

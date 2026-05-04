@@ -113,7 +113,9 @@ Generate questions about code constructs, API usage, syntax patterns, and implem
   - ❌ `¿Cuál es la corrección más precisa según el material?`
   - ✅ `Correcto. AI es el campo general y machine learning es una subárea que aprende a partir de datos.`
   - ❌ `Correcto. Esa es la distinción central del material.`
-- Ask directly — avoid preambles that serve as hints for other questions
+- Ask directly by default for definitions, distinctions, taxonomy, hierarchy, and misconception-correction questions
+- Use scenarios only when the concrete situation materially changes the reasoning, diagnosis, trade-off, or procedural choice being tested
+- If removing a classroom, debate, named-speaker, or other narrative wrapper leaves the tested concept, answer logic, and difficulty unchanged, remove the wrapper as decorative framing
 - Coverage-first batching: within one output, cover as many distinct high-yield surfaces as possible before writing multiple near-duplicate questions about the same narrow angle
 - Exhaustive coverage of all solid concepts, procedures, scenarios, comparisons, misconceptions, and edge cases across repeated batches
 </design_principles>
@@ -147,7 +149,19 @@ For each selected concept or surface, identify exploitable angles before writing
 
 ### Phase 1: Question Design
 
-Design scenarios that require connecting multiple concepts. Questions may be long if context is needed to establish a non-trivial scenario.
+Choose the lightest stem that still tests the intended reasoning.
+
+- For definitions, distinctions, taxonomy, hierarchy, and misconception-correction questions, ask directly by default instead of wrapping the stem in decorative narration.
+- Use a scenario when the concrete facts of the situation materially affect the correct answer, the diagnosis, the trade-off, or the procedural choice.
+- Questions may be long when that context is necessary to establish a non-trivial scenario, decision, diagnosis, or procedure.
+- If removing the narrative wrapper leaves the tested concept, answer logic, and difficulty unchanged, the wrapper is decorative and should be removed.
+
+Examples:
+
+- ✅ Direct concept stem: `¿Cuál es la corrección conceptual más precisa sobre la relación entre AI y machine learning?`
+- ❌ Decorative wrapper: `En un debate de clase, alguien afirma: "Machine learning y AI son lo mismo". ¿Qué corrección conceptual es la más precisa?`
+- ✅ Legitimate scenario: `Una empresa llama "AGI" a un asistente que convence a jueces humanos en entrevistas breves, pero falla fuera del diálogo. ¿Por qué esa conclusión es demasiado fuerte?`
+- ❌ Decorative named speaker: `La profesora Laura abre la clase diciendo que un sistema muy avanzado ya es AGI. ¿Qué opción la corrige mejor?`
 
 Apply distractor strategies from [docs/distractor_design.md](../docs/distractor_design.md). Use variety across questions — do not rely on a single strategy.
 
@@ -179,6 +193,7 @@ Before finalizing the JSON, verify all of the following:
 4. No question depends on knowledge not stated in the subcategory file.
 5. Run a final learner-facing text pass on every `question_text`, `general_feedback`, and `answers[].feedback`: each field must be self-contained and understandable without the source file, notes, notebook, slides, or class materials.
 6. If any learner-facing field contains a forbidden anchor such as `según el material`, `según las notas`, `según el cuaderno`, `del material`, `according to the material`, `according to the notes`, `the material`, or `in the notebook`, rewrite that field before saving JSON. Preserve the tested concept, difficulty, and `source_ref`; change only the wording needed to embed the context directly.
+7. For every definition, distinction, taxonomy, hierarchy, or misconception-correction question, check whether the stem still works with the narrative wrapper removed. If it does, save the direct version instead of the wrapped one.
 </generation_algorithm>
 
 ---

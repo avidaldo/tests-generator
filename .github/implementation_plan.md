@@ -1,10 +1,10 @@
 # Implementation Plan
 
-> Updated: 2026-05-04 (refresh 27)
-> Branch: decomposed
+> Updated: 2026-05-04 (refresh 28 + local sync)
+> Branch: batch/p40-direct-stage3-stems-20260504
 > Status: active
-> Refresh 27 summary: confirmed again that no new live `TODO:`, `ARCH:`, `DESIGN:`, `FIXME:`, or `HACK:` markers exist outside planning and documentation references, reconsidered the old dual thin-launcher plan in light of the existing Stage 1 skill and the delegated Stage 3 requirement, and retargeted P38-P39 toward a skill-backed Stage 1 bulk workflow plus an optional single-call Stage 3 bulk lane.
-> Local sync 2026-05-04: completed P37 by replacing repo-owned Stage 1-3 path assumptions with a user-provided path/root contract, removing the stale Stage 3 `Question focus` override, syncing the prompt and project docs to the new contract, and moving the current SAA2 generated artifacts out of this repo into `../PIA-SAA/examenSAA/SAA2/`.
+> Refresh 28 summary: reconfirmed that no new live `TODO:`, `ARCH:`, `DESIGN:`, `FIXME:`, or `HACK:` markers exist outside planning and documentation references, verified that the current uncommitted worktree still matches the already-recorded P38-P40 and P39 completions on this branch, and found no new approved or clarification work to queue.
+> Local sync 2026-05-04: completed P39 by adding `docs/pipeline_execution_modes.md` as the durable execution-mode guide, keeping `README.md` concise, syncing `AGENTS.md` and `prompts/AGENTS.md` to the same workflow model, and validating both the documentation coverage and the final lint state.
 
 ## Working Agreements
 
@@ -34,15 +34,11 @@
 
 ## Planned Work
 
-- P40 — Tighten Stage 3 stem-authoring guidance so concept and taxonomy questions are direct by default, while scenarios remain allowed only when the concrete context materially affects the reasoning, diagnosis, trade-off, or procedural choice being tested. Update the Stage 3 prompt and canonical prompt-pipeline summary only; do not retroactively rewrite existing generated JSON batches in this item.
-- P38 — Replace the old dual thin-launcher idea with the actual bulk-execution architecture: keep Stage 1 bulk on the existing `summarize-all-sources` skill, and add an optional single-call Stage 3 bulk generation lane suitable for delegated/background runs. Keep the existing single-unit prompts as the normal precise workflow.
-- P39 — Add detailed project-facing documentation for the updated workflow and decisions: regular vs bulk execution, Stage 1 bulk via the existing skill, the new delegated Stage 3 bulk lane, the user-provided path contract, and the rationale for keeping precise prompts as the default while exposing orchestration only where it adds real value. Keep `README.md` concise, update `prompts/AGENTS.md` as the canonical pipeline summary, and add a durable detailed doc under `docs/`.
+- No approved unblocked items remain.
 
 ## Next Sequence
 
-1. Implement P40 with `.github/prompts/implement-plan-item.prompt.md`.
-2. Refresh the plan after P40 lands, then take P38.
-3. Refresh the plan after P38 lands, then take P39.
+1. Refresh the plan when new approved work appears.
 
 ## Item Details
 
@@ -71,6 +67,12 @@
 - Dependency: depends on P37 and P38 so the doc reflects the final implemented workflow rather than an intermediate state.
 
 ## Recently Completed
+
+- P39 — 2026-05-04. Added `docs/pipeline_execution_modes.md` as the durable project-facing guide for regular versus bulk execution, the Stage 1 and Stage 3 bulk lanes, and the user-owned artifact path contract; kept `README.md` concise by linking to that detail instead of duplicating it; synced `AGENTS.md` and `prompts/AGENTS.md`; and validated both the content coverage and final markdown lint state.
+
+- P38 — 2026-05-04. Added `.github/skills/generate-question-batches/SKILL.md` as the Stage 3 bulk lane for delegated and background breadth-first runs, kept Stage 1 bulk on `summarize-all-sources`, synced `.github/AGENTS.md`, `.github/README.md`, `AGENTS.md`, and `prompts/AGENTS.md`, and validated the new lane against the approved P38 acceptance criteria.
+
+- P40 — 2026-05-04. Tightened `prompts/generate-questions.prompt.md` so Stage 3 asks concept, taxonomy, hierarchy, and misconception-correction questions directly by default; added explicit positive and negative examples distinguishing legitimate scenarios from decorative wrappers; added a final directness self-check; synced `prompts/AGENTS.md`; and validated the new behavior against the AI Foundations and Learning Paradigms subcategory.
 
 - P37 — 2026-05-04. Replaced the repo-owned Stage 1-3 artifact-path contract with a user-provided path/root contract across `prompts/summarize-sources.prompt.md`, `prompts/merge-summaries.prompt.md`, `prompts/generate-questions.prompt.md`, `prompts/AGENTS.md`, `README.md`, and `AGENTS.md`; removed the stale Stage 3 `Question focus` override/TODO; aligned the docs so generated subject artifacts are no longer described as living canonically inside this repository; and moved the current SAA2 artifacts into `../PIA-SAA/examenSAA/SAA2/` while ignoring the legacy local artifact paths.
 - P36 — 2026-05-04. Extended `prompts/generate-questions.prompt.md` so Stage 3 learner-facing feedback forbids external-document anchors, added a final learner-facing-text validation pass, synced `prompts/AGENTS.md`, and repaired the remaining three feedback strings in `stage3-question-batches/saa2/ai-foundations-and-learning-paradigms/batch-001.json`. Validation confirmed no remaining forbidden material anchors under `stage3-question-batches/**`.
