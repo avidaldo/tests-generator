@@ -54,7 +54,8 @@ User reviews subcategory files, adjusts if needed
         │  Output: <user-stage3-root>/<subcategory>/batch-###.json
         ▼
 [Quiz Editor — human review]   ← mandatory validation gate
-        │  Human marks: Pendiente / Revisar / Lista
+        │  Imports one or more Stage 3 batches into one Stage 4
+        │  review-session JSON; human marks: Pendiente / Revisar / Lista
         ▼
 [resources/json_to_moodle_xml.py]  ← deterministic script
         │  Output: Moodle XML (Lista questions only)
@@ -84,9 +85,9 @@ Each stage is run manually by the user. Stages 1 and 3 are parallelizable (indep
 
 Repository-maintenance launchers are documented separately in [../.github/prompts/AGENTS.md](../.github/prompts/AGENTS.md). This file is only for the quiz-generation pipeline.
 
-**Intermediate format**: JSON conforming to [`docs/editor_json_schema.md`](../docs/editor_json_schema.md) — the canonical schema shared between the prompt output and the editor import (`editor/file_io/state_io.py`).
+**Intermediate format**: JSON conforming to [`docs/editor_json_schema.md`](../docs/editor_json_schema.md) — the canonical schema for both the immutable Stage 3 batch envelope and the editor-owned Stage 4 review-session envelope used by `editor/file_io/state_io.py`.
 
-- Direct editor import — no conversion step
+- Direct Stage 3 import into the editor, then Stage 4 review-session save/load with no conversion step
 - Adversarial filter preserved via required `feedback` fields per distractor
 - ~30 lines/question vs. ~60–80 for XML → roughly 2× throughput improvement
 
@@ -217,9 +218,11 @@ Stage 2 is the first point where the taxonomy is stable enough to record those s
 
 The editor is the human-in-the-loop validation gate. It catches domain errors the adversarial filter cannot self-detect, selects the best questions when there is redundancy, adjusts difficulty, and controls what actually reaches students.
 
+The editor now owns a separate Stage 4 review-session artifact so multiple Stage 3 batches can be reviewed together without mutating the original generation outputs.
+
 ### Why JSON as Intermediate Format
 
-Direct editor import (zero conversion), adversarial filter preserved via required `feedback` fields, ~30 lines/question vs. ~60–80 for XML, source traceability via `source_ref`. Plain GIFT was rejected because the absence of feedback fields removes the adversarial filter entirely.
+Direct Stage 3 import into the editor, editor-owned Stage 4 review-session persistence, adversarial filter preserved via required `feedback` fields, ~30 lines/question vs. ~60–80 for XML, and source traceability via `source_ref`. Plain GIFT was rejected because the absence of feedback fields removes the adversarial filter entirely.
 
 ---
 

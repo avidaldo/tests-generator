@@ -1,97 +1,164 @@
-"""
-State I/O - Save and load editor state as JSON.
-"""
+"""Save and load Stage 4 review-session JSON."""
 
 import json
 from pathlib import Path
-from dataclasses import asdict
 
 from models.question import Question, Answer, QuestionStatus
+from models.review_session import (
+    REVIEW_SESSION_ARTIFACT_TYPE,
+    REVIEW_SESSION_VERSION,
+    ImportedSource,
+    ReviewSession,
+)
+
+
+def _serialize_question(question: Question) -> dict:
+    return {
+        "id": question.id,
+        "name": question.name,
+        "question_text": question.question_text,
+        "general_feedback": question.general_feedback,
+        "category_path": question.category_path,
+        "status": question.status.value,
+        "default_grade": question.default_grade,
+        "penalty": question.penalty,
+        "single": question.single,
+        "shuffle_answers": question.shuffle_answers,
+        "answer_numbering": question.answer_numbering,
+        "correct_feedback": question.correct_feedback,
+        "partially_correct_feedback": question.partially_correct_feedback,
+        "incorrect_feedback": question.incorrect_feedback,
+        "source_file": question.source_file,
+        "source_ref": question.source_ref,
+        "origin_kind": question.origin_kind,
+        "origin_path": question.origin_path,
+        "origin_question_id": question.origin_question_id,
+        "is_easy": question.is_easy,
+        "answers": [
+            {
+                "text": answer.text,
+                "fraction": answer.fraction,
+                "feedback": answer.feedback,
+                "format": answer.format,
+            }
+            for answer in question.answers
+        ],
+    }
+
+
+def _serialize_imported_source(imported_source: ImportedSource) -> dict:
+    return {
+        "origin_kind": imported_source.origin_kind,
+        "origin_path": imported_source.origin_path,
+        "label": imported_source.label,
+    }
+
+
+def _infer_origin_kind(question_data: dict, filepath: Path) -> str:
+    if question_data.get("origin_kind"):
+        return question_data["origin_kind"]
+    if "source_file" in question_data or "correct_feedback" in question_data:
+        return "legacy_state"
+    return "stage3_batch"
+
+
+def _deserialize_question(question_data: dict, filepath: Path) -> Question:
+    answers = [
+        Answer(
+            text=answer["text"],
+            fraction=answer["fraction"],
+            feedback=answer.get("feedback", ""),
+            format=answer.get("format", "html"),
+        )
+        for answer in question_data.get("answers", [])
+    ]
+
+    status_str = question_data.get("status", "pendiente")
+    try:
+        status = QuestionStatus(status_str)
+    except ValueError:
+        status = QuestionStatus.PENDIENTE
+
+    origin_kind = _infer_origin_kind(question_data, filepath)
+    origin_path = question_data.get("origin_path", "")
+    if not origin_path and origin_kind == "stage3_batch":
+        origin_path = str(filepath)
+
+    source_ref = question_data.get("source_ref", "")
+    source_file = question_data.get("source_file", "")
+    if not source_file and origin_path:
+        source_file = Path(origin_path).name
+
+    return Question(
+        id=question_data["id"],
+        name=question_data["name"],
+        question_text=question_data["question_text"],
+        general_feedback=question_data.get("general_feedback", ""),
+        category_path=question_data.get("category_path", ""),
+        answers=answers,
+        status=status,
+        default_grade=question_data.get("default_grade", "1.0000000"),
+        penalty=question_data.get("penalty", "0.0000000"),
+        single=question_data.get("single", "true"),
+        shuffle_answers=question_data.get("shuffle_answers", "true"),
+        answer_numbering=question_data.get("answer_numbering", "abc"),
+        correct_feedback=question_data.get("correct_feedback", "<p>Correcto.</p>"),
+        partially_correct_feedback=question_data.get("partially_correct_feedback", "<p>Parcialmente correcto.</p>"),
+        incorrect_feedback=question_data.get("incorrect_feedback", "<p>Incorrecto.</p>"),
+        source_file=source_file,
+        source_ref=source_ref,
+        origin_kind=origin_kind,
+        origin_path=origin_path,
+        origin_question_id=question_data.get("origin_question_id", question_data.get("id", "")),
+        is_easy=bool(question_data.get("is_easy", False)),
+    )
+
+
+def save_review_session(review_session: ReviewSession, filepath: Path) -> None:
+    """Save a Stage 4 review session to a JSON file."""
+    data = {
+        "artifact_type": REVIEW_SESSION_ARTIFACT_TYPE,
+        "version": review_session.version,
+        "imported_sources": [
+            _serialize_imported_source(imported_source)
+            for imported_source in review_session.imported_sources
+        ],
+        "questions": [_serialize_question(question) for question in review_session.questions],
+    }
+    filepath.write_text(json.dumps(data, indent=2, ensure_ascii=False), encoding="utf-8")
+
+
+def load_review_session(filepath: Path) -> ReviewSession:
+    """Load a review session or legacy question-state file from JSON."""
+    data = json.loads(filepath.read_text(encoding="utf-8"))
+
+    questions = [_deserialize_question(question_data, filepath) for question_data in data.get("questions", [])]
+
+    imported_sources = [
+        ImportedSource(
+            origin_kind=imported_source.get("origin_kind", ""),
+            origin_path=imported_source.get("origin_path", ""),
+            label=imported_source.get("label", ""),
+        )
+        for imported_source in data.get("imported_sources", [])
+    ]
+
+    review_session = ReviewSession(
+        questions=questions,
+        imported_sources=imported_sources,
+        artifact_type=data.get("artifact_type", REVIEW_SESSION_ARTIFACT_TYPE),
+        version=data.get("version", REVIEW_SESSION_VERSION),
+    )
+    if review_session.imported_sources:
+        return review_session
+    return ReviewSession.from_questions(review_session.questions)
 
 
 def save_state(questions: list[Question], filepath: Path) -> None:
     """Save the current state to a JSON file."""
-    data = {
-        "version": "1.0",
-        "questions": []
-    }
-
-    for q in questions:
-        q_data = {
-            "id": q.id,
-            "name": q.name,
-            "question_text": q.question_text,
-            "general_feedback": q.general_feedback,
-            "category_path": q.category_path,
-            "status": q.status.value,
-            "default_grade": q.default_grade,
-            "penalty": q.penalty,
-            "single": q.single,
-            "shuffle_answers": q.shuffle_answers,
-            "answer_numbering": q.answer_numbering,
-            "correct_feedback": q.correct_feedback,
-            "partially_correct_feedback": q.partially_correct_feedback,
-            "incorrect_feedback": q.incorrect_feedback,
-            "source_file": q.source_file,
-            "source_ref": q.source_file,  # alias: concept-ID reference used by newer prompt versions
-            "is_easy": q.is_easy,
-            "answers": [
-                {
-                    "text": a.text,
-                    "fraction": a.fraction,
-                    "feedback": a.feedback,
-                    "format": a.format,
-                }
-                for a in q.answers
-            ]
-        }
-        data["questions"].append(q_data)
-
-    filepath.write_text(json.dumps(data, indent=2, ensure_ascii=False), encoding="utf-8")
+    save_review_session(ReviewSession.from_questions(questions), filepath)
 
 
 def load_state(filepath: Path) -> list[Question]:
     """Load state from a JSON file."""
-    data = json.loads(filepath.read_text(encoding="utf-8"))
-
-    questions = []
-    for q_data in data.get("questions", []):
-        answers = [
-            Answer(
-                text=a["text"],
-                fraction=a["fraction"],
-                feedback=a.get("feedback", ""),
-                format=a.get("format", "html"),
-            )
-            for a in q_data.get("answers", [])
-        ]
-
-        # Map status string to enum
-        status_str = q_data.get("status", "pendiente")
-        try:
-            status = QuestionStatus(status_str)
-        except ValueError:
-            status = QuestionStatus.PENDIENTE
-
-        question = Question(
-            id=q_data["id"],
-            name=q_data["name"],
-            question_text=q_data["question_text"],
-            general_feedback=q_data.get("general_feedback", ""),
-            category_path=q_data.get("category_path", ""),
-            answers=answers,
-            status=status,
-            default_grade=q_data.get("default_grade", "1.0000000"),
-            penalty=q_data.get("penalty", "0.0000000"),  # adaptive-mode field; 0 for standard single-attempt exams
-            single=q_data.get("single", "true"),
-            shuffle_answers=q_data.get("shuffle_answers", "true"),
-            answer_numbering=q_data.get("answer_numbering", "abc"),
-            correct_feedback=q_data.get("correct_feedback", "<p>Correcto.</p>"),
-            partially_correct_feedback=q_data.get("partially_correct_feedback", "<p>Parcialmente correcto.</p>"),
-            incorrect_feedback=q_data.get("incorrect_feedback", "<p>Incorrecto.</p>"),
-            source_file=q_data.get("source_ref", q_data.get("source_file", "")),  # prefer source_ref (concept IDs) over legacy source_file
-            is_easy=bool(q_data.get("is_easy", False)),
-        )
-        questions.append(question)
-
-    return questions
+    return load_review_session(filepath).questions

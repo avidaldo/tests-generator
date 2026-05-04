@@ -6,6 +6,7 @@ Dataclasses for Question, Answer, and Category.
 
 from dataclasses import dataclass, field
 from enum import Enum
+from pathlib import Path
 import uuid
 
 
@@ -45,7 +46,7 @@ class Question:
 
     # Moodle-specific fields
     default_grade: str = "1.0000000"
-    penalty: str = "0.5000000"
+    penalty: str = "0.0000000"
     single: str = "true"
     shuffle_answers: str = "true"
     answer_numbering: str = "abc"
@@ -53,6 +54,10 @@ class Question:
     partially_correct_feedback: str = "<p>Parcialmente correcto.</p>"
     incorrect_feedback: str = "<p>Incorrecto.</p>"
     source_file: str = ""
+    source_ref: str = ""
+    origin_kind: str = ""
+    origin_path: str = ""
+    origin_question_id: str = ""
     is_easy: bool = False
 
     @staticmethod
@@ -71,6 +76,22 @@ class Question:
     @property
     def wrong_count(self) -> int:
         return len(self.answers) - self.correct_count
+
+    @property
+    def source_label(self) -> str:
+        if self.origin_path:
+            return Path(self.origin_path).name
+        if self.source_file:
+            return self.source_file
+        return self.source_ref
+
+    @property
+    def import_key(self) -> tuple[str, str]:
+        if self.origin_path and self.origin_question_id:
+            return (self.origin_path, self.origin_question_id)
+        if self.origin_path:
+            return (self.origin_path, self.id)
+        return ("", self.name)
 
 
 @dataclass

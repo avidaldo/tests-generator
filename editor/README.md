@@ -1,16 +1,28 @@
 # Moodle Quiz Editor
 
-Desktop editor for Moodle XML quiz files using PyQt6. Previous versions (v1 Streamlit, v2 Textual TUI) are in `deprecated/` for reference.
+Desktop editor for Stage 4 human review of generated quiz questions using PyQt6. The primary input is one or more Stage 3 batch JSON files, saved into one editor-owned review-session JSON, and exported to Moodle XML at the end of the process. Legacy XML import remains available for older banks. Previous versions (v1 Streamlit, v2 Textual TUI) are in `deprecated/` for reference.
 
 ## Features
 
-- **Multi-file import**: Load questions from multiple XML files
+- **Stage 3 batch import**: Load one or more generated JSON batch files directly into the editor
+- **Stage 3 folder import**: Load every recursive `batch-*.json` file under a selected Stage 3 root
+- **Review-session save/load**: Persist the consolidated Stage 4 working set as JSON
+- **Legacy XML import**: Bring older Moodle XML banks into the same review workflow when needed
 - **Category organization**: Filter by category tree
 - **Three-state workflow**: "Pendiente" / "Revisar" / "Lista" (approved for exam)
 - **Difficulty flag**: Mark approved questions as "Fácil" for difficulty-filtered export
 - **Theme selection**: Switch between system, light, and dark themes from `Vista -> Tema`; the choice is persisted between sessions
 - **Full undo/redo**: Native Qt QUndoStack
 - **HTML preview**: View rendered HTML, edit raw
+
+## Primary Workflow
+
+1. Start a new review session in the editor.
+2. Import one or more Stage 3 batch JSON files with `Ctrl+O`, or import a whole Stage 3 root recursively with `Archivo -> Importar carpeta Stage 3...`.
+3. Review and edit questions, then save the consolidated review session as JSON.
+4. Export only the approved `Lista` questions to Moodle XML.
+
+Use `Archivo -> Abrir sesión de revisión...` to reopen a saved Stage 4 session. Use `Archivo -> Importar XML...` only when working with older XML banks.
 
 ## Appearance
 
@@ -29,8 +41,8 @@ uv run python editor/main.py
 
 | Key | Action |
 |-----|--------|
-| `Ctrl+O` | Open XML files |
-| `Ctrl+S` | Save state |
+| `Ctrl+O` | Import Stage 3 batch JSON |
+| `Ctrl+S` | Save review session |
 | `Ctrl+Z` | Undo |
 | `Ctrl+Shift+Z` | Redo |
 | `Delete` | Delete question |

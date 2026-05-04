@@ -419,7 +419,7 @@ class QuestionDetailPanel(QWidget):
         self._name_label.setText(q.name)
         self._category_edit.setText(q.category_path or "")
         self._category_edit.setEnabled(True)
-        self._source_label.setText(f"📄 {q.source_file or 'Nuevo'}")
+        self._source_label.setText(self._format_source_label(q))
 
         # Enable buttons
         self._delete_question_btn.setEnabled(True)
@@ -469,6 +469,23 @@ class QuestionDetailPanel(QWidget):
         self._refresh_answers()
 
         self._is_updating = False
+
+    def _format_source_label(self, question: Question) -> str:
+        origin_labels = {
+            "stage3_batch": "Stage 3",
+            "xml_import": "XML",
+            "legacy_state": "Legacy",
+        }
+        parts: list[str] = []
+        if question.origin_kind:
+            parts.append(origin_labels.get(question.origin_kind, question.origin_kind))
+        if question.source_label:
+            parts.append(question.source_label)
+        if question.source_ref and question.source_ref not in parts:
+            parts.append(question.source_ref)
+        if not parts:
+            return ""
+        return f"📄 {' | '.join(parts)}"
 
     def _clear_answers(self):
         self._answer_widgets.clear()

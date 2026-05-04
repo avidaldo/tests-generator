@@ -1,10 +1,9 @@
 # Implementation Plan
 
-> Updated: 2026-05-04 (refresh 28 + local sync)
-> Branch: batch/p40-direct-stage3-stems-20260504
+> Updated: 2026-05-05 (local sync)
+> Branch: decomposed
 > Status: active
-> Refresh 28 summary: reconfirmed that no new live `TODO:`, `ARCH:`, `DESIGN:`, `FIXME:`, or `HACK:` markers exist outside planning and documentation references, verified that the current uncommitted worktree still matches the already-recorded P38-P40 and P39 completions on this branch, and found no new approved or clarification work to queue.
-> Local sync 2026-05-04: completed P39 by adding `docs/pipeline_execution_modes.md` as the durable execution-mode guide, keeping `README.md` concise, syncing `AGENTS.md` and `prompts/AGENTS.md` to the same workflow model, and validating both the documentation coverage and the final lint state.
+> Local sync 2026-05-05: started the Stage 4 review-session architecture implementation by adding explicit review-session JSON persistence, Stage 3 batch import as the primary editor ingress, stable import provenance fields, source-aware duplicate suppression, recursive Stage 3 folder import, secondary legacy XML import metadata, and the first round of schema and workflow documentation sync.
 
 ## Working Agreements
 
@@ -67,6 +66,8 @@
 - Dependency: depends on P37 and P38 so the doc reflects the final implemented workflow rather than an intermediate state.
 
 ## Recently Completed
+
+- P41 — 2026-05-05. Started the Stage 4 review-session architecture: added `editor/models/review_session.py`, changed `editor/file_io/state_io.py` to persist a dedicated review-session JSON envelope while staying backward-compatible with old JSON and raw Stage 3 batch imports, made Stage 3 batch JSON the primary `Ctrl+O` editor import path, added recursive Stage 3 folder import over deterministic `batch-*.json` discovery, added provenance display plus stable duplicate suppression, aligned penalty defaults with the documented `0.0000000` contract, and synced the schema plus the core editor/project workflow docs.
 
 - P39 — 2026-05-04. Added `docs/pipeline_execution_modes.md` as the durable project-facing guide for regular versus bulk execution, the Stage 1 and Stage 3 bulk lanes, and the user-owned artifact path contract; kept `README.md` concise by linking to that detail instead of duplicating it; synced `AGENTS.md` and `prompts/AGENTS.md`; and validated both the content coverage and final markdown lint state.
 

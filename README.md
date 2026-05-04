@@ -14,7 +14,7 @@ See [`prompts/AGENTS.md`](prompts/AGENTS.md) for the full pipeline diagram, desi
 
 ### Quiz Editor (`editor/`)
 
-Desktop application (PyQt) for viewing and editing Moodle XML question banks. Generated questions are created with 6 distractors each, since the distractor design strategy is to generate more than needed and then review. The editor allows reviewing, editing, and categorizing questions before export. It supports undo/redo, drag-and-drop reordering, and category management.
+Desktop application (PyQt) for Stage 4 review of generated question batches. The primary workflow imports one or more Stage 3 JSON batches into a consolidated review session, then exports approved questions to Moodle XML. Legacy XML import remains available for older banks. Generated questions are created with 6 distractors each, since the distractor design strategy is to generate more than needed and then review. The editor allows reviewing, editing, and categorizing questions before export. It supports undo/redo, drag-and-drop reordering, and category management.
 
 See: [`editor/README.md`](editor/README.md)
 
@@ -88,7 +88,7 @@ Preferred for delegated or background breadth-first runs across many subcategori
 uv run python editor/main.py
 ```
 
-Open the JSON file (`Ctrl+O`). Review each question:
+Start a new review session, import one or more Stage 3 batch JSON files with `Ctrl+O`, or import a whole Stage 3 root recursively with `Archivo -> Importar carpeta Stage 3...`, and save the consolidated review session as JSON. XML import remains available from `Archivo -> Importar XML...` for legacy banks. Review each question:
 
 - **Pendiente** → not yet reviewed
 - **Revisar** → needs changes
@@ -97,7 +97,7 @@ Open the JSON file (`Ctrl+O`). Review each question:
 ### Step 5: Export to Moodle XML
 
 ```bash
-python resources/json_to_moodle_xml.py ml-normalisation.json ml-normalisation.xml
+python resources/json_to_moodle_xml.py review-session.json exam.xml
 ```
 
 Only questions marked `lista` are exported. Import the XML into Moodle.

@@ -30,7 +30,7 @@ This repository contains tools and prompts for generating, editing, and analyzin
 | `.github/prompts/` | Repository-maintenance prompt launchers for the SDD loop | [`.github/prompts/AGENTS.md`](.github/prompts/AGENTS.md) |
 | `.github/instructions/` | VS Code file-scoped instruction adapters (`.instructions.md`) | [`AGENTS.md`](AGENTS.md) |
 | `.github/` | VS Code customization layer: agents, prompts, hooks, and living customization docs | [`.github/AGENTS.md`](.github/AGENTS.md) |
-| `editor/` | PyQt-based Moodle XML quiz editor | [`editor/AGENTS.md`](editor/AGENTS.md) |
+| `editor/` | PyQt-based Stage 4 review editor with secondary legacy XML import | [`editor/AGENTS.md`](editor/AGENTS.md) |
 | `results/` | Exam result analysis notebooks | [`results/AGENTS.md`](results/AGENTS.md) |
 | `docs/` | Domain knowledge and project-facing documentation; see [`docs/editor_json_schema.md`](docs/editor_json_schema.md), [`docs/summary_format.md`](docs/summary_format.md), [`docs/adversarial_logic_filters.md`](docs/adversarial_logic_filters.md), and [`docs/distractor_design.md`](docs/distractor_design.md) | — |
 | `resources/` | Utility scripts (XML conversion, merging) | [`.github/instructions/resources.instructions.md`](.github/instructions/resources.instructions.md) |
@@ -53,7 +53,7 @@ This repository contains tools and prompts for generating, editing, and analyzin
 
 See [`prompts/AGENTS.md`](prompts/AGENTS.md) for the active prompt inventory, pipeline diagram, design rationale, and file responsibilities. See [`docs/pipeline_execution_modes.md`](docs/pipeline_execution_modes.md) for the execution-mode decision guide and the user-owned artifact path contract.
 
-Active workflow: `summarize-sources.prompt.md` (loss-minimizing Stage 1 extraction, one per repo or coherent topic area; split large corpora first) → `merge-summaries.prompt.md` (subcategory files with concept IDs, question surfaces, and cross-cutting context) → `generate-questions.prompt.md` (one subcategory batch per invocation) → editor review → XML export.
+Active workflow: `summarize-sources.prompt.md` (loss-minimizing Stage 1 extraction, one per repo or coherent topic area; split large corpora first) → `merge-summaries.prompt.md` (subcategory files with concept IDs, question surfaces, and cross-cutting context) → `generate-questions.prompt.md` (one subcategory batch per invocation) → editor review session → XML export.
 
 For multi-repo subjects, the optional [`summarize-all-sources` skill](.github/skills/summarize-all-sources/SKILL.md) can fan out Stage 1 into one isolated summarization per path before the merge step.
 
@@ -72,7 +72,7 @@ Each step is run manually. See the [Usage guide in README.md](README.md#usage-ge
 
 - Sync Python dependencies with `uv sync`.
 - Run the editor with `uv run python editor/main.py`.
-- Export reviewed JSON state to Moodle XML with `python resources/json_to_moodle_xml.py <input.json> <output.xml>`.
+- Export a reviewed Stage 4 review-session JSON to Moodle XML with `python resources/json_to_moodle_xml.py <input.json> <output.xml>`.
 - Verify the notebook output filter is active with `nbstripout --status`.
 
 ## Planning Workflow

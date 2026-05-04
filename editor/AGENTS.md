@@ -56,8 +56,16 @@ Data classes for quiz content.
 
 - `QuestionStatus(Enum)`: `PENDIENTE`, `REVISAR`, `LISTA`
 - `Answer(dataclass)`: Single answer option (`text`, `fraction`, `feedback`, `format`). Property: `is_correct`.
-- `Question(dataclass)`: Full question with answers, category, status, and `is_easy` flag (difficulty). Static: `generate_id()`. Properties: `category_name`, `correct_count`, `wrong_count`.
+- `Question(dataclass)`: Full question with answers, category, status, `is_easy`, and provenance fields (`source_ref`, `origin_kind`, `origin_path`, `origin_question_id`). Static: `generate_id()`. Properties: `category_name`, `correct_count`, `wrong_count`, `source_label`, `import_key`.
 - `Category(dataclass)`: Category path and info. Property: `name`.
+
+### `models/review_session.py`
+
+Session-level models for the Stage 4 workflow.
+
+- `ImportedSource(dataclass)`: Summary of one imported source artifact.
+- `ReviewSession(dataclass)`: Editor-owned review session containing `questions` and `imported_sources`.
+- Constants: `REVIEW_SESSION_ARTIFACT_TYPE`, `REVIEW_SESSION_VERSION`
 
 ### `models/quiz_model.py`
 
@@ -100,14 +108,24 @@ Moodle XML serialization.
 
 Imports from: `models.question`
 
+### `file_io/stage3_batch_finder.py`
+
+Recursive Stage 3 batch discovery.
+
+- `discover_stage3_batch_files(root_dir: Path) -> list[Path]`
+
+Imports from: stdlib only
+
 ### `file_io/state_io.py`
 
-Autosave / state persistence (JSON-based).
+Stage 4 review-session persistence and backward-compatible JSON import.
 
 - `save_state(questions: list[Question], filepath: Path)`
 - `load_state(filepath: Path) -> list[Question]`
+- `save_review_session(review_session: ReviewSession, filepath: Path)`
+- `load_review_session(filepath: Path) -> ReviewSession`
 
-**Import contract**: the JSON format is defined in [`docs/editor_json_schema.md`](../docs/editor_json_schema.md). That document is the canonical source of truth for field names, types, required values, and editor-populated defaults. Update it whenever the schema changes; do not rely solely on reading this file or `state_io.py`.
+**Import contract**: the JSON format is defined in [`docs/editor_json_schema.md`](../docs/editor_json_schema.md). That document is the canonical source of truth for the Stage 3 batch envelope, the Stage 4 review-session envelope, field names, types, required values, provenance semantics, and editor-populated defaults. Update it whenever the schema changes; do not rely solely on reading this file or `state_io.py`.
 
 Imports from: `models.question`
 
@@ -116,7 +134,7 @@ Imports from: `models.question`
 Top-level window with toolbar, question list, filter sidebar, detail panel.
 
 - `StatusFilterProxyModel(QSortFilterProxyModel)`: Filters by status, category, and easy-only mode.
-- `MainWindow(QMainWindow)`: Owns all UI, orchestrates model ↔ views, persists view settings, and applies the user-selected theme.
+- `MainWindow(QMainWindow)`: Owns the Stage 4 review-session workflow, including Stage 3 JSON file import, recursive Stage 3 folder import, review-session save/load, secondary XML import, export, autosave, and theme application.
 
 Imports from: `models.*`, `views.question_detail`, `views.theme`, `file_io.*`
 
@@ -137,7 +155,7 @@ Imports from: Qt only
 Detail editing panel for a single question.
 
 - `AnswerWidget(QFrame)`: Displays/edits one answer. Signals: `delete_requested`, `text_changed`, `feedback_changed`.
-- `QuestionDetailPanel(QWidget)`: Edits question fields. Signals: `question_changed`, `delete_question_requested`.
+- `QuestionDetailPanel(QWidget)`: Edits question fields and shows provenance for the selected question. Signals: `question_changed`, `delete_question_requested`.
   - `set_question(question: Question | None)`
   - `set_theme_mode(theme_mode: str)`
 
