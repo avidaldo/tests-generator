@@ -1,6 +1,6 @@
 ---
 description: >
-  Read course materials (.md, .ipynb, .py) from one or more directories and produce a loss-minimizing Stage 1 extraction document. Preserve all testable content — concepts, explanations, procedures, scenarios, comparisons, decision criteria, misconceptions, quantitative anchors, and edge cases — while removing only irrelevant code syntax and boilerplate. Run once per repository or coherent topic area. The output feeds into the merge step.
+  Read course materials (.md, .ipynb, .py) from one or more directories and produce a loss-minimizing Stage 1 extraction document. Preserve all testable content — concepts, explanations, procedures, scenarios, comparisons, decision criteria, misconceptions, quantitative anchors, and edge cases — while removing only irrelevant code syntax and boilerplate. Run once per repository or coherent topic area. Write each summary to a user-provided Stage 1 output path or root; if that location is missing, ask before proceeding.
 ---
 
 # Source Summarisation Agent
@@ -26,11 +26,26 @@ Before starting, confirm the following parameters with the user. If the user has
 - **`conceptual-only`** (default): Preserve all explanatory content. For code: read code cells to understand *which concepts they demonstrate* and *what the results illustrate*, but do not extract syntax, API calls, or implementation details as testable content.
 - **`syntax-included`**: Preserve everything `conceptual-only` does, **plus** code constructs, API usage patterns, syntax rules, and implementation details as additional testable content.
 
+## Stage 1 Artifact Path
+
+Before proceeding, confirm where the Stage 1 summary or summaries should be written. If the user already provided either a Stage 1 output root or explicit output file path(s), proceed without asking. If not, **ask before proceeding**.
+
+- If the user provides a **Stage 1 output root**, derive deterministic filenames under that root using the pattern `summary-<repo-or-topic-slug>.md`.
+- If the user provides an **explicit output file path** for the current unit, honor it.
+- If multiple unrelated units are processed in one run, each unit still needs its own summary file.
+
 ---
 
 ## Input
 
 The user will provide one or more directory paths or file paths. These may point to **external repositories** outside the current workspace.
+
+The user should also provide either:
+
+- a **Stage 1 output root** for this subject run, or
+- **explicit output file path(s)** for the summary file or files to write.
+
+If the needed Stage 1 output location is missing, ask before proceeding.
 
 ### File types to process
 
@@ -196,3 +211,13 @@ Before finalizing, check all of the following:
 - Every explicit process, comparison, scenario, misconception, quantitative anchor, decision criterion, and edge case found in the source appears somewhere in the extraction.
 - Code-only but conceptually relevant content has been converted into faithful explanatory notes.
 - The output would let a later stage generate exhaustive questions **without reopening the original files**.
+
+## Output Delivery
+
+Write each Stage 1 summary directly to disk.
+
+- If the user gave an explicit output file path for the current unit, use it.
+- Otherwise, require a user-provided Stage 1 output root and save the file as `summary-<repo-or-topic-slug>.md` inside that root.
+- If neither an explicit file path nor a Stage 1 output root was provided, ask before writing.
+- The saved file must contain raw Markdown only, with no surrounding commentary.
+- After writing, respond in chat with a terse confirmation listing only the saved path or paths.

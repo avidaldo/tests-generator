@@ -1,6 +1,6 @@
 ---
 description: >
-  Merge raw Stage 1 extraction files from multiple repositories into organized subcategory files. Each output file must remain self-contained, coverage-safe, and rich enough to feed the question generation prompt without reopening the original sources. Run once after all repositories or topic areas have been extracted.
+  Merge raw Stage 1 extraction files from multiple repositories into organized subcategory files. Each output file must remain self-contained, coverage-safe, and rich enough to feed the question generation prompt without reopening the original sources. Run once after all repositories or topic areas have been extracted. Write the resulting subcategory files to a user-provided Stage 2 output root or explicit output paths; if that location is missing, ask before proceeding.
 ---
 
 # Summary Merge Agent
@@ -22,6 +22,8 @@ Before starting, confirm the following parameters with the user. If the user has
 | **Question focus** | `conceptual-only` | `conceptual-only` · `syntax-included`. Must match the setting used during summarisation. |
 | **Category root** | *(ask the user)* | The Moodle category root path, e.g. `$course$/top/MachineLearning`. |
 
+Also confirm where the Stage 2 subcategory files should be written. If the user already provided either a Stage 2 output root or explicit file paths for the approved subcategories, proceed without asking. If not, **ask before proceeding**.
+
 ---
 
 ## Input
@@ -30,7 +32,8 @@ The user provides:
 
 1. **One or more content summary files** produced by `summarize-sources.prompt.md`. Each contains rich content — definitions, explanations, processes, cases, examples, comparisons — from one repository or topic area, plus a cross-references section.
 2. **Category root path** for the Moodle question bank.
-3. Optionally, **guidance on subcategory granularity** — e.g. "keep subcategories broad" or "split preprocessing into normalisation and feature engineering."
+3. **A Stage 2 output root** for the generated subcategory files, or explicit file paths for those files.
+4. Optionally, **guidance on subcategory granularity** — e.g. "keep subcategories broad" or "split preprocessing into normalisation and feature engineering."
 
 ---
 
@@ -164,10 +167,17 @@ Brief summaries of concepts from other subcategories that relate to this one. Th
 
 ## Output Delivery
 
+Write each approved subcategory file directly to disk.
+
+- If the user provided explicit output file paths for the approved subcategories, honor them.
+- Otherwise, require a user-provided Stage 2 output root and save each file beneath it as `subcategory-<slug>.md`.
+- If the Stage 2 output location is missing, ask before writing.
+- The saved files must contain raw Markdown only, with no surrounding commentary.
+
 List all produced files with their names:
 
 ```markdown
-## Files produced
+After writing the files, report the produced paths in the delivery table.
 
 | # | File | Concepts | Question surfaces | Category path |
 |---|------|----------|-------------------|---------------|

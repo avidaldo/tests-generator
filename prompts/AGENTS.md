@@ -6,9 +6,9 @@ This folder contains the canonical question-generation prompt files for the repo
 
 | File | Status | Description |
 | ---- | ------ | ----------- |
-| `summarize-sources.prompt.md` | **Active — Stage 1** | Loss-minimizing source extraction from source files; one per repo or coherent topic area; split large corpora before extraction |
+| `summarize-sources.prompt.md` | **Active — Stage 1** | Loss-minimizing source extraction from source files; one per repo or coherent topic area; write summaries to user-provided Stage 1 paths or roots |
 | `merge-summaries.prompt.md` | **Active — Stage 2** | Organizes raw extraction files into subcategory files with concept IDs, question surfaces, and cross-cutting context |
-| `generate-questions.prompt.md` | **Active — Stage 3** | Question generation in JSON batches written directly to deterministic Stage 3 artifact paths; one batch per invocation from one subcategory file, repeat until surfaces are covered |
+| `generate-questions.prompt.md` | **Active — Stage 3** | Question generation in JSON batches written directly to user-provided Stage 3 paths or roots; one batch per invocation from one subcategory file, repeat until surfaces are covered |
 | `deprecated/inventory.prompt.md` | **Deprecated** | Superseded by `summarize-sources.prompt.md` |
 | `deprecated/generate-test.prompt.md` | **Deprecated** | Monolithic prompt — superseded by the 3-stage pipeline |
 
@@ -28,7 +28,7 @@ User provides repos (list of paths)
         │  comparisons, decision criteria, misconceptions,
         │  quantitative anchors, edge cases)
         │  Strips only irrelevant code syntax and boilerplate
-        │  Output: summary-{repo-or-topic}.md  (one per coherent input unit)
+        │  Output: summary-{repo-or-topic}.md under a user-provided Stage 1 root
         ▼
 User collects all summary files
         │
@@ -38,7 +38,7 @@ User collects all summary files
         │  User reviews and adjusts subcategory names/boundaries
         │  Assigns concept IDs; records question surfaces; adds
         │  "Related context" for cross-cutting concepts
-        │  Output: subcategory-{name}.md  (one per subcategory, self-contained)
+        │  Output: subcategory-{name}.md under a user-provided Stage 2 root
         ▼
 User reviews subcategory files, adjusts if needed
         │
@@ -47,7 +47,7 @@ User reviews subcategory files, adjusts if needed
         │  Reads one subcategory file (sole input)
         │  Generates one coverage-first JSON batch + adversarial
         │  feedback validation
-        │  Output: stage3-question-batches/<subject>/<subcategory>/batch-###.json
+        │  Output: <user-stage3-root>/<subcategory>/batch-###.json
         ▼
 [Quiz Editor — human review]   ← mandatory validation gate
         │  Human marks: Pendiente / Revisar / Lista
@@ -58,19 +58,20 @@ User reviews subcategory files, adjusts if needed
 Moodle import
 ```
 
-Each stage is run manually by the user. Stages 1 and 3 are parallelizable (independent invocations); Stage 1 fan-out can also be orchestrated through the `summarize-all-sources` skill. Stage 2 is still a single merge pass. If a repo is too large or heterogeneous for one faithful Stage 1 document, split it by coherent topic area before continuing; a monolithic lossy summary is invalid.
+Each stage is run manually by the user. Stages 1 and 3 are parallelizable (independent invocations); Stage 1 fan-out can also be orchestrated through the `summarize-all-sources` skill. Stage 2 is still a single merge pass. Each prompt should ask for the relevant input or output path when the user did not already provide it. If a repo is too large or heterogeneous for one faithful Stage 1 document, split it by coherent topic area before continuing; a monolithic lossy summary is invalid.
 
 ### Stage 3 Artifact Guardrails
 
-- Write Stage 3 outputs to a deterministic subject-scoped folder such as `stage3-question-batches/<subject>/<subcategory>/batch-001.json` so repeated runs remain inspectable and resumable.
-- Derive `<subject>` from the parent folder under `stage2-subcategories/` and derive `<subcategory>` from the input filename with the `subcategory-` prefix removed.
+- Require either a user-provided Stage 3 output root or an explicit output file path before writing.
+- When the user provides a Stage 3 output root, derive a deterministic per-subcategory folder beneath it using the input filename with the `subcategory-` prefix removed, then write `batch-###.json` there.
 - Never overwrite an existing batch file implicitly. Repeated runs should create the next free `batch-###.json` in that same subcategory folder unless the user explicitly requests a specific batch number.
 - Stage 3 learner-facing text must be self-contained. `question_text`, `general_feedback`, and `answers[].feedback` must not refer to "the material", "the notes", "the notebook", slides, or similar external anchors; source attribution belongs in `source_ref`, not in learner-facing text.
 
 ### Stage 1 Operational Guardrails
 
-- Write Stage 1 artifacts to a deterministic subject-scoped folder such as `stage1-summaries/<subject>/summary-<repo-or-topic>.md` so partial progress is inspectable and resumable.
-- Keep a lightweight manifest in that folder tracking every Stage 1 unit with an explicit status such as `pending`, `running`, `done`, or `needs-fix`.
+- Require either a user-provided Stage 1 output root or explicit output file paths before writing summaries.
+- When the user provides a Stage 1 output root, write deterministic filenames such as `summary-<repo-or-topic>.md` beneath that root so partial progress is inspectable and resumable.
+- Keep a lightweight manifest in that same user-provided Stage 1 root tracking every Stage 1 unit with an explicit status such as `pending`, `running`, `done`, or `needs-fix`.
 - Fan out in small batches, typically 2 to 4 Stage 1 units at a time. Do not dispatch the full corpus before validating the first outputs.
 - After each batch, validate every produced summary against [docs/summary_format.md](../docs/summary_format.md). In this repo the practical minimum is: exact H1 headings `# File Inventory`, `# Content`, `# Cross-References`; a valid inventory table; and no fenced code blocks.
 - Stop the batch on the first invalid summary. Repair or rerun that unit, then revalidate before launching more Stage 1 work.
@@ -86,12 +87,14 @@ Repository-maintenance launchers are documented separately in [../.github/prompt
 
 ### Subject Profile
 
-All three prompts accept a **Subject Profile** — parameters the user can override at invocation time:
+The prompts accept a small **Subject Profile**, but not every parameter belongs in every stage:
 
 | Parameter | Prompts | Default | Options |
 | --------- | ------- | ------- | ------- |
-| **Question focus** | All three | `conceptual-only` | `conceptual-only` · `syntax-included` |
+| **Question focus** | `summarize-sources`, `merge-summaries` | `conceptual-only` | `conceptual-only` · `syntax-included` |
 | **Output language** | `generate-questions` only | Castellano (Spanish), technical terms in English in parentheses | Any language |
+
+`generate-questions.prompt.md` inherits **Question focus** from the Stage 2 subcategory file header instead of exposing a local override.
 
 Output language is set only at the question-generation stage (`generate-questions.prompt.md`). Summarisation and merge stages preserve the source material's language.
 

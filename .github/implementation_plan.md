@@ -1,10 +1,10 @@
 # Implementation Plan
 
-> Updated: 2026-05-04 (refresh 24 + local sync)
+> Updated: 2026-05-04 (refresh 25 + local sync)
 > Branch: decomposed
 > Status: active
-> Refresh 24 summary: queued P36 to extend the self-contained Stage 3 rule from stems to learner-facing feedback and repair the remaining Stage 3 artifact text that still refers to “the material”.
-> Local sync 2026-05-04: completed P36 by extending the self-contained rule to learner-facing feedback, syncing `prompts/AGENTS.md`, and repairing the remaining Stage 3 feedback text that still referred to source material.
+> Refresh 25 summary: resolved the Stage 1 and Stage 3 bulk-launcher scope, replaced repo-owned stage artifact roots with a user-provided root-path contract, decided that Stage 3 should stop exposing `Question focus` as a local override, and queued P37-P39 for the resulting workflow and documentation changes.
+> Local sync 2026-05-04: completed P37 by replacing repo-owned Stage 1-3 path assumptions with a user-provided path/root contract, removing the stale Stage 3 `Question focus` override, syncing the prompt and project docs to the new contract, and moving the current SAA2 generated artifacts out of this repo into `../PIA-SAA/examenSAA/SAA2/`.
 
 ## Working Agreements
 
@@ -28,21 +28,38 @@
 | Q9 | resolved | `prompts/merge-summaries.prompt.md:55` | Can subcategory weighting be reformulated in terms of expected question yield rather than concept count? Would a separate scenario-generation agent or doc help cover concept-poor areas? | Resolved 2026-04-29: keep bundled inside P4. Final outcome 2026-05-03: use explicit question surfaces as the yield heuristic inside merge; no separate scenario-generation layer for now. |
 | Q10 | resolved | `.github/instructions/customization-authoring.instructions.md:18` | Should a dedicated VS Code documentation audit skill be built that periodically fetches the official customization docs and suggests improvements to this repo's customization files? | Resolved 2026-04-29: build it → P19 |
 | Q11 | resolved | `.github/agents/todo-planner.agent.md:14` | Is the explicit handoff prompt needed given that `sdd-implementer` already has instructions — would the agent instructions alone be sufficient? | Resolved 2026-04-29: keep it — handoff prompt seeds next-step context into the new chat state; complements, not replaces, target agent instructions → P21 |
+| Q12 | resolved | `prompts/AGENTS.md`, `.github/skills/summarize-all-sources/SKILL.md` | Should bulk orchestration become prompt-invocable for both Stage 1 and Stage 3, or only for Stage 3? | Resolved 2026-05-04: add thin bulk launchers for both Stage 1 and Stage 3 while keeping the single-unit prompts as the normal workflow. |
+| Q13 | resolved | `prompts/summarize-sources.prompt.md`, `prompts/merge-summaries.prompt.md`, `prompts/generate-questions.prompt.md` | Should quiz-pipeline inputs and outputs continue defaulting to repo-owned `stage*` folders, or should each run use user-provided paths instead? | Resolved 2026-05-04: stop assuming repo-owned artifact roots; ask for the relevant input/output path or root when missing, then derive deterministic filenames under that user-provided root. |
+| Q14 | resolved | `prompts/generate-questions.prompt.md:25` | Should Stage 3 keep `Question focus` as a local override/fallback, or rely entirely on the Stage 2 subcategory header? | Resolved 2026-05-04: remove the Stage 3 override and treat the Stage 2 subcategory header as the single source of truth. |
 
 ## Planned Work
 
-No approved items currently queued.
+- P38 — Add thin bulk prompt launchers for both Stage 1 and Stage 3 while keeping the existing single-unit prompts as the normal precise workflow. Stage 1 bulk should front the existing `summarize-all-sources` orchestration. Stage 3 bulk should front a new fan-out helper that generates at most one new batch per subcategory wave and stops at the editor review gate. Depends on P37 so every launcher uses the new path contract.
+- P39 — Add detailed project-facing documentation for the updated workflow and decisions: regular vs bulk execution, when to use each lane, the new user-provided path contract, and the rationale for keeping prompts prompt-first while moving orchestration behind thin launchers. Keep `README.md` concise, update `prompts/AGENTS.md` as the canonical pipeline summary, and add a durable detailed doc under `docs/`.
 
 ## Next Sequence
 
-1. Refresh the plan before starting another implementation step.
+1. Implement P38 with `.github/prompts/implement-plan-item.prompt.md`.
+2. Refresh the plan after P38 lands, then take P39.
 
 ## Item Details
 
-No active item details. Refresh the plan before queuing more implementation work.
+### P38 — Thin Bulk Prompt Launchers
+
+- Scope: add prompt-first bulk entry points for Stage 1 and Stage 3 without replacing the existing precise single-unit prompts.
+- Stage 1: add a thin prompt launcher over the existing `summarize-all-sources` skill so users do not need to invoke the skill directly for the common bulk case.
+- Stage 3: add a thin bulk launcher over a new Stage 3 helper. The helper should fan out across subcategories only in the first pass, create at most one new batch per subcategory wave, and stop for human editor review before any further generation.
+- Dependency: P37 first, so the bulk launchers do not encode the soon-to-be-removed repo-owned artifact roots.
+
+### P39 — Detailed Workflow Documentation
+
+- Scope: add a durable project-facing workflow doc under `docs/`, keep `README.md` concise, and sync `AGENTS.md` plus `prompts/AGENTS.md` to the same execution model.
+- Content: document regular vs bulk execution, recommended usage criteria, the user-provided path contract, and the decision to keep prompts as the primary UX while exposing orchestration through thin launchers.
+- Dependency: depends on P37 and P38 so the doc reflects the final implemented workflow rather than an intermediate state.
 
 ## Recently Completed
 
+- P37 — 2026-05-04. Replaced the repo-owned Stage 1-3 artifact-path contract with a user-provided path/root contract across `prompts/summarize-sources.prompt.md`, `prompts/merge-summaries.prompt.md`, `prompts/generate-questions.prompt.md`, `prompts/AGENTS.md`, `README.md`, and `AGENTS.md`; removed the stale Stage 3 `Question focus` override/TODO; aligned the docs so generated subject artifacts are no longer described as living canonically inside this repository; and moved the current SAA2 artifacts into `../PIA-SAA/examenSAA/SAA2/` while ignoring the legacy local artifact paths.
 - P36 — 2026-05-04. Extended `prompts/generate-questions.prompt.md` so Stage 3 learner-facing feedback forbids external-document anchors, added a final learner-facing-text validation pass, synced `prompts/AGENTS.md`, and repaired the remaining three feedback strings in `stage3-question-batches/saa2/ai-foundations-and-learning-paradigms/batch-001.json`. Validation confirmed no remaining forbidden material anchors under `stage3-question-batches/**`.
 - P35 — 2026-05-04. Hardened `prompts/generate-questions.prompt.md` so Stage 3 `question_text` forbids external-document anchors with explicit Spanish and English examples plus a final stem-only validation pass, synced `prompts/AGENTS.md`, and repaired the five offending stems in `stage3-question-batches/saa2/ai-foundations-and-learning-paradigms/batch-001.json`. Scope remained limited to stems; feedback phrasing was left unchanged.
 - P34 — 2026-05-04. Changed Stage 3 question generation to write batches directly to deterministic `stage3-question-batches/<subject>/<subcategory>/batch-###.json` paths, synced `README.md`, `prompts/AGENTS.md`, and `AGENTS.md`, and removed the manual save-from-chat expectation from the workflow.
@@ -85,6 +102,10 @@ No active item details. Refresh the plan before queuing more implementation work
 - P7 — 2026-04-29. Removed legacy planner surfaces; documented active hook, handoff, and terminology model in `customization_architecture.md`.
 
 ## Recently Resolved
+
+- 2026-05-04 - Bulk orchestration should become prompt-invocable for both Stage 1 and Stage 3, but the normal workflow remains prompt-first and single-unit for precise runs.
+- 2026-05-04 - The quiz pipeline should stop assuming that generated artifacts live inside this repository. Users provide the relevant input/output path or root, and prompts may derive deterministic filenames only beneath that user-owned location.
+- 2026-05-04 - Stage 3 should no longer expose `Question focus` as a local override. The Stage 2 subcategory header is now the agreed single source of truth.
 
 - 2026-04-30 - Resolved P9 direction: if hook-context debug logging is added, it must be opt-in behind an env var or flag. Default planner-hook behavior stays stdout-only.
 

@@ -10,3 +10,9 @@ __pycache__/
 *.pyo
 .venv/
 
+# Generated quiz artifacts now live in subject-owned roots outside this repo.
+/stage1-summaries/*
+!/stage1-summaries/README.md
+/stage2-subcategories/
+/stage3-question-batches/
+

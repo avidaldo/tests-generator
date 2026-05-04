@@ -51,30 +51,31 @@ Open `prompts/summarize-sources.prompt.md` as a prompt. Provide:
 Preferred for multi-repo or multi-folder subjects: invoke the [`.github/skills/summarize-all-sources/SKILL.md`](.github/skills/summarize-all-sources/SKILL.md) workflow. It fans out one isolated Stage 1 summarization per path and still returns one summary artifact per path.
 
 - **Subject Profile overrides** (optional) — if not stated in the message, the agent will ask.
+- **Stage 1 output location** — provide either a subject-owned Stage 1 output root or an explicit output file path for the current unit. If you omit it, the agent should ask before writing.
 
-Each Stage 1 run produces a loss-minimizing extraction file preserving all explanations, processes, cases, comparisons, decision criteria, misconceptions, and examples. Save each output as a `.md` file in a deterministic subject-scoped artifact folder, for example `stage1-summaries/ml/summary-preprocessing.md`.
+Each Stage 1 run produces a loss-minimizing extraction file preserving all explanations, processes, cases, comparisons, decision criteria, misconceptions, and examples. Save each output as a `.md` file in a user-owned artifact location, for example `/path/to/exam-artifacts/ml/stage1/summary-preprocessing.md`.
 
 > **Tip — multiple repos**: Prefer the `summarize-all-sources` skill when you already have a list of paths. It keeps one clean context window per path and still yields one summary file per repo or topic area.
 > **Rule — large repos**: If the source material is very large or heterogeneous, split by coherent topic area before extraction. Do not accept a repo-level synopsis as a valid Stage 1 output.
 
 Recommended Stage 1 operating procedure:
 
-- Keep a simple manifest in the same subject folder, for example `stage1-summaries/ml/manifest.md`, with one row per Stage 1 unit and a status such as `pending`, `running`, `done`, or `needs-fix`.
+- Keep a simple manifest in the same Stage 1 root, for example `/path/to/exam-artifacts/ml/stage1/manifest.md`, with one row per Stage 1 unit and a status such as `pending`, `running`, `done`, or `needs-fix`.
 - Fan out only 2 to 4 Stage 1 units at a time. Validate the first batch before launching more work.
 - After each batch, run the lightweight checks from [docs/summary_format.md](docs/summary_format.md). In practice this usually means exact H1 section headings, a valid inventory table, and no fenced code blocks.
 - If one summary fails validation, stop and repair that file before continuing. Do not send unvalidated Stage 1 artifacts into the merge step.
 
 ### Step 2: Merge summaries into subcategory files
 
-Open `prompts/merge-summaries.prompt.md` as a prompt. Provide all summary files from Step 1 and the Moodle category root path (e.g. `$course$/top/MachineLearning`).
+Open `prompts/merge-summaries.prompt.md` as a prompt. Provide all summary files from Step 1, the Moodle category root path (e.g. `$course$/top/MachineLearning`), and a Stage 2 output root for the generated subcategory files.
 
-The agent proposes a subcategory taxonomy — review and adjust, then it produces **one `.md` file per subcategory**. Each file is self-contained and includes concept IDs, a "Related context" section enabling cross-subcategory questions, and explicit `SURF-*` question surfaces to drive exhaustive downstream generation.
+The agent proposes a subcategory taxonomy — review and adjust, then it produces **one `.md` file per subcategory** in that Stage 2 output location. Each file is self-contained and includes concept IDs, a "Related context" section enabling cross-subcategory questions, and explicit `SURF-*` question surfaces to drive exhaustive downstream generation.
 
 ### Step 3: Generate question batches (one subcategory at a time)
 
-Open `prompts/generate-questions.prompt.md` as a prompt. Provide one subcategory `.md` file from Step 2.
+Open `prompts/generate-questions.prompt.md` as a prompt. Provide one subcategory `.md` file from Step 2 and either a Stage 3 output root or an explicit batch file path.
 
-The agent generates one coverage-first JSON batch from the file's full content, including scenario-based and cross-subcategory relationship questions, and writes it directly to a deterministic Stage 3 artifact path such as `stage3-question-batches/saa2/ai-foundations-and-learning-paradigms/batch-001.json`. Repeat on the same subcategory with additional `SURF-*` scopes when you want more coverage than fits in one batch; the next run should create the next free batch file in that same subfolder.
+The agent generates one coverage-first JSON batch from the file's full content, including scenario-based and cross-subcategory relationship questions, and writes it directly to a user-owned Stage 3 location such as `/path/to/exam-artifacts/saa2/stage3/ai-foundations-and-learning-paradigms/batch-001.json`. Repeat on the same subcategory with additional `SURF-*` scopes when you want more coverage than fits in one batch; the next run should create the next free batch file in that same subfolder.
 
 > **One subcategory per invocation** — each gets a fresh context window, no drift.
 > **One batch per invocation** — keep each output within a safe reviewable window, then continue with more surfaces as needed.

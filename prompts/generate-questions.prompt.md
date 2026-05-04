@@ -1,6 +1,6 @@
 ---
 description: >
-  Generate multiple-choice exam questions for ONE subcategory in editor-native JSON format. Run after the merge step, one subcategory file at a time, and repeat in batches when the subcategory exposes more question surfaces than fit in one safe output window. Input: a self-contained subcategory file produced by merge-summaries.prompt.md. Output: write a JSON file directly to a deterministic Stage 3 artifact path, ready to open in the quiz editor (Ctrl+O).
+  Generate multiple-choice exam questions for ONE subcategory in editor-native JSON format. Run after the merge step, one subcategory file at a time, and repeat in batches when the subcategory exposes more question surfaces than fit in one safe output window. Input: a self-contained subcategory file produced by merge-summaries.prompt.md. Output: write a JSON file directly to a user-provided Stage 3 path or root, ready to open in the quiz editor (Ctrl+O).
 ---
 
 # Question Generation Agent
@@ -14,15 +14,15 @@ Before generating, consult [Adversarial Filters And Distractor Design](../docs/a
 
 ## Subject Profile
 
-Read the **Subject Profile** from the subcategory file header (the `Question focus` and `Output language` fields). If the file does not include these fields, use the defaults below. The user can override any parameter at invocation time.
+Read **Question focus** from the subcategory file header. Do not ask the user to re-confirm it or override it at this stage; Stage 2 is the single source of truth for that setting.
+
+Set **Output language** at this stage. If the user already stated it in their invocation message, proceed without asking. If they did not specify it, use the default below.
 
 > **Note**: Output language is set only at this stage. Earlier pipeline stages (summarisation and merge) preserve the source material's language. Set it here to match your target exam language.
 
 | Parameter | Default | Options |
 |-----------|---------|---------|
 | **Output language** | Castellano (Spanish). Technical terms in English in parentheses. | Any language — state it when invoking. Code identifiers, file names, and library names always remain in English. |
-| **Question focus** | `conceptual-only` | `conceptual-only` · `syntax-included`. Must match the setting used during summarisation. |
-<!-- TODO: Question focus have already be defined in step1, so it's not needed here anymore, since this step is taken on the results of step2, isn't it? -->
 
 ---
 
@@ -51,7 +51,14 @@ The user provides **one subcategory file** — a self-contained Markdown documen
 - **Question surfaces** (`SURF-*`) describing distinct high-yield angles that should be converted into questions
 - **Related context** — brief summaries of concepts from other subcategories that enable cross-subcategory questions
 
-All the information needed to generate questions is in this file. No additional files or inputs are required (unless the user wants to override Subject Profile parameters).
+The user should also provide either:
+
+- a **Stage 3 output root** for this subject run, or
+- an **explicit output file path** for the batch to write.
+
+If the Stage 3 output location is missing, ask before proceeding.
+
+All the information needed to generate questions is in this file. No additional source files are required.
 
 **Scope**: Generate questions only from the content present in the subcategory file. Do not add external knowledge beyond what the file contains. The "Related context" section is valid material for questions — use it to create questions that test understanding of relationships between this subcategory's concepts and related concepts from other subcategories. Treat `SURF-*` entries as the preferred coverage units when they exist.
 
@@ -180,14 +187,13 @@ Before finalizing the JSON, verify all of the following:
 
 Write a single valid JSON object conforming to the **editor JSON schema** — see [`docs/editor_json_schema.md`](../docs/editor_json_schema.md) for the full field reference, scoring rationale, and a complete example.
 
-Do not leave the JSON only in chat. Write it directly to disk using this deterministic Stage 3 layout:
+Do not leave the JSON only in chat. Write it directly to disk using this Stage 3 path contract:
 
-- Artifact root: `stage3-question-batches/<subject>/<subcategory-slug>/`
-- `<subject>` = the immediate parent folder of the input subcategory file inside `stage2-subcategories/` (for example, `saa2`)
-- `<subcategory-slug>` = the input filename without the `subcategory-` prefix and without the `.md` suffix
-- File name: the next free `batch-###.json`, starting at `batch-001.json`
-- If the user explicitly requests a batch number, honor it instead of auto-incrementing
-- Create missing directories before writing the file
+- If the user provides an **explicit output file path**, use it verbatim.
+- If the user provides a **Stage 3 output root**, derive a per-subcategory folder inside it using `<subcategory-slug> =` the input filename without the `subcategory-` prefix and without the `.md` suffix, then write the next free `batch-###.json` in that folder, starting at `batch-001.json`.
+- If the user explicitly requests a batch number while using a Stage 3 output root, honor it instead of auto-incrementing.
+- Create missing directories before writing the file.
+- If the output location is missing, ask before writing.
 
 The saved file must contain raw JSON only, with no Markdown fences and no surrounding prose. After writing the file, respond in chat with a terse confirmation that includes only the saved file path, the number of generated questions, and the covered `SURF-*` IDs.
 
@@ -238,5 +244,5 @@ The saved file must contain raw JSON only, with no Markdown fences and no surrou
 - Large subcategories are expected to be generated in repeated batches. If the subcategory file contains more eligible `SURF-*` entries than fit in one batch, cover a coherent subset now and continue in later invocations.
 - If a single subcategory remains too large or internally incoherent even after batching, that is a Stage 2 split problem and should be fixed in the merge output rather than by writing a lossy question batch.
 - The JSON must be valid and parseable — no trailing commas, no comments in the final output (the schema example above uses `//` only for illustration).
-- Never overwrite an existing Stage 3 batch file. If the target batch number already exists and the user did not explicitly request overwrite behavior, increment to the next free `batch-###.json`.
+- Never overwrite an existing Stage 3 batch file. If the user gave a Stage 3 output root, increment to the next free `batch-###.json` when needed. If the user gave an explicit output file path that already exists and did not explicitly request overwrite behavior, ask before writing.
 - Shuffle the correct answer into a non-predictable position across questions. Do not always place it first or last.
