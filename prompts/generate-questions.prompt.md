@@ -16,13 +16,19 @@ Before generating, consult [Adversarial Filters And Distractor Design](../docs/a
 
 Read **Question focus** from the subcategory file header. Do not ask the user to re-confirm it or override it at this stage; Stage 2 is the single source of truth for that setting.
 
-Set **Output language** at this stage. If the user already stated it in their invocation message, proceed without asking. If they did not specify it, use the default below.
+Set **Output language** at this stage using this rule:
 
-> **Note**: Output language is set only at this stage. Earlier pipeline stages (summarisation and merge) preserve the source material's language. Set it here to match your target exam language.
+1. If the user already stated an output language in their invocation message, use it and do not ask again.
+2. Otherwise, infer a provisional default from the subcategory file language (source corpus language).
+3. Do not silently lock in that provisional default as the final exam language. Ask one short confirmation that states the inferred default explicitly and offers Spanish as the usual Stage 3 target.
+
+> **Note**: The subcategory file language reflects the source corpus and is only the default for this stage. Set the final exam output language here.
+
+> **Translation policy**: If generation requires translation, keep a technical, field-realistic register. Terms that are commonly used in English in professional technical contexts should remain in English. If one of those terms is translated, include the English term in parentheses on first mention and whenever clarity benefits from it.
 
 | Parameter | Default | Options |
 |-----------|---------|---------|
-| **Output language** | Castellano (Spanish). Technical terms in English in parentheses. | Any language — state it when invoking. Code identifiers, file names, and library names always remain in English. |
+| **Output language** | Provisional default: same language as the input subcategory file (source corpus language). If unspecified, ask for confirmation before generating and explicitly offer Castellano (Spanish) as the usual Stage 3 target. | Any language — state it when invoking. Code identifiers, file names, and library names always remain in English. For translated output, keep domain-standard technical terms in English, or include the English term in parentheses when a local translation is used. |
 
 ---
 
@@ -60,6 +66,8 @@ If the Stage 3 output location is missing, ask before proceeding.
 
 All the information needed to generate questions is in this file. No additional source files are required.
 
+If the subcategory file is missing required sections (category path, concepts, question surfaces, or related context), stop generation and return a concise error listing the missing sections.
+
 **Scope**: Generate questions only from the content present in the subcategory file. Do not add external knowledge beyond what the file contains. The "Related context" section is valid material for questions — use it to create questions that test understanding of relationships between this subcategory's concepts and related concepts from other subcategories. Treat `SURF-*` entries as the preferred coverage units when they exist.
 
 ---
@@ -69,7 +77,7 @@ All the information needed to generate questions is in this file. No additional 
 ### When `conceptual-only` (default)
 
 <conceptual_focus>
-Generate only questions about conceptual understanding. Questions answerable by consulting documentation or an IDE are useless for evaluating real knowledge.
+When `Question focus` is `conceptual-only`, generate only questions about conceptual understanding. In this mode, do not generate items whose correctness depends mainly on recalling syntax or API details that are directly look-upable in documentation or an IDE.
 
 **Generate:**
 - Mathematical or statistical concepts (normalización, varianza, sobreajuste, sesgo-varianza...)
@@ -126,6 +134,13 @@ Generate questions about code constructs, API usage, syntax patterns, and implem
 
 <generation_algorithm>
 Work through this algorithm before writing any question.
+
+Execution order (always follow this sequence):
+
+1. Complete Phase 0 and produce a coverage map for this batch.
+2. Complete Phase 1 and draft questions from that map.
+3. Complete Phase 2 and replace any distractor that fails validation.
+4. Complete Phase 3 and only then write the final JSON.
 
 ### Phase 0: Content Deconstruction
 

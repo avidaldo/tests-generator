@@ -39,7 +39,7 @@ This repository contains tools and prompts for generating, editing, and analyzin
 ## Language Convention
 
 - **Development language:** English — all code, documentation, instructions, agent prompts, and filenames are written in English.
-- **Test output language:** Set at question-generation time via the **Output language** parameter in the `generate-questions.prompt.md` Subject Profile. Default is **Castellano** (Spanish) with technical terms in English in parentheses. Summarisation and merge stages preserve the source material's language.
+- **Test output language:** Set at question-generation time via the **Output language** parameter in the `generate-questions.prompt.md` Subject Profile. Default is the **source corpus language** (inferred from the Stage 2 subcategory file). When the user did not specify a language, Stage 3 should explicitly offer **Castellano** (Spanish) as the usual target before generating. Summarisation and merge stages preserve the source material's language. For translated Stage 3 output, keep domain-standard technical terms in English, or include the English term in parentheses when translated.
 - **Sample files:** `samples/` XMLs contain Spanish content as examples of expected output — their content is intentionally Spanish.
 - **Result notebooks:** Analysis notebooks (`results/`) are in English. Column names from the raw Spanish CSV export are kept as-is in code.
 

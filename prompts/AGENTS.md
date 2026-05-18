@@ -98,11 +98,13 @@ The prompts accept a small **Subject Profile**, but not every parameter belongs 
 | Parameter | Prompts | Default | Options |
 | --------- | ------- | ------- | ------- |
 | **Question focus** | `summarize-sources`, `merge-summaries` | `conceptual-only` | `conceptual-only` · `syntax-included` |
-| **Output language** | `generate-questions` only | Castellano (Spanish), technical terms in English in parentheses | Any language |
+| **Output language** | `generate-questions` only | Source corpus language (inferred from the subcategory file); if unspecified, explicitly offer Castellano (Spanish) as the usual Stage 3 target | Any language; for translated output, keep domain-standard technical terms in English or include the English term in parentheses |
 
 `generate-questions.prompt.md` inherits **Question focus** from the Stage 2 subcategory file header instead of exposing a local override.
 
 Output language is set only at the question-generation stage (`generate-questions.prompt.md`). Summarisation and merge stages preserve the source material's language.
+
+When translation is required at Stage 3, use a technical register aligned with real field usage: keep terms that are commonly used in English in technical contexts in English, or include the English term in parentheses when translated.
 
 Each prompt asks the user to confirm these settings if they weren't stated in the invocation message.
 
