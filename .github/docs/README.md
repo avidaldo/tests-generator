@@ -16,5 +16,5 @@ This folder contains durable design rationale and decision records for the repos
 
 ## Current Documents
 
-- [customization_architecture.md](customization_architecture.md) — rationale for the prompt, agent, hook, and documentation split.
+- [customization_architecture.md](customization_architecture.md) — rationale for the prompt, agent, skill, hook, and documentation split.
 - [agentic_enforcement_layers.md](agentic_enforcement_layers.md) — case study for multi-layer enforcement design.

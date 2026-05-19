@@ -8,13 +8,14 @@ This folder contains the repository's VS Code and Copilot customization layer. I
 - Use [`implement-plan-item.prompt.md`](prompts/implement-plan-item.prompt.md) to implement exactly one approved plan item.
 - Use [`run-batch-maintenance.prompt.md`](prompts/run-batch-maintenance.prompt.md) only when you explicitly want the advanced unattended lane for approved and unblocked items; it stops on unresolved decisions instead of replacing the safe loop.
 - Use [`skills/generate-question-batches/SKILL.md`](skills/generate-question-batches/SKILL.md) when you want the advanced Stage 3 bulk lane for multiple subcategory files with checkpointed progress.
+- Use [`skills/finish-question-coverage/SKILL.md`](skills/finish-question-coverage/SKILL.md) when an approved Stage 2 scope already exists and you want an advanced Stage 3 lane that keeps generating successive batches until tracked `SURF-*` coverage is exhausted.
 - `todo-planner`, `sdd-implementer`, and `batch-maintainer` remain visible as advanced or secondary entry points, but the prompts are the preferred UX.
 - Use [`skills/customization-audit/SKILL.md`](skills/customization-audit/SKILL.md) when you need a periodic drift audit against the current VS Code customization docs.
 
 ## Canonical Files
 
 - [AGENTS.md](AGENTS.md) — customization-layer policy and inventory.
-- [docs/customization_architecture.md](docs/customization_architecture.md) — rationale for the prompt, agent, hook, and documentation split.
+- [docs/customization_architecture.md](docs/customization_architecture.md) — rationale for the prompt, agent, skill, hook, and documentation split.
 - [implementation_plan.md](implementation_plan.md) — active plan and decision log for maintenance work.
 - [docs/agentic_enforcement_layers.md](docs/agentic_enforcement_layers.md) — case study and rationale for multi-layer enforcement.
 - [docs/README.md](docs/README.md) — index for durable customization rationale and future decision records.

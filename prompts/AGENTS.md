@@ -11,6 +11,7 @@ For the detailed decision guide on regular versus bulk execution, the user-owned
 | `summarize-sources.prompt.md` | **Active — Stage 1** | Loss-minimizing source extraction from source files; one per repo or coherent topic area; write summaries to user-provided Stage 1 paths or roots |
 | `merge-summaries.prompt.md` | **Active — Stage 2** | Organizes raw extraction files into subcategory files with concept IDs, question surfaces, and cross-cutting context |
 | `generate-questions.prompt.md` | **Active — Stage 3** | Question generation in JSON batches written directly to user-provided Stage 3 paths or roots; one batch per invocation from one subcategory file, repeat until surfaces are covered |
+| `finish-stage3-coverage.prompt.md` | **Active — Stage 3 launcher** | Preferred user-facing one-step launcher for approved-scope exhaustive Stage 3 runs; reuses the exhaustive coverage workflow and keeps a manifest under the Stage 3 root |
 | `deprecated/inventory.prompt.md` | **Deprecated** | Superseded by `summarize-sources.prompt.md` |
 | `deprecated/generate-test.prompt.md` | **Deprecated** | Monolithic prompt — superseded by the 3-stage pipeline |
 
@@ -21,6 +22,10 @@ For the detailed decision guide on regular versus bulk execution, the user-owned
 Optional helper for Stage 1 fan-out: [`.github/skills/summarize-all-sources/SKILL.md`](../.github/skills/summarize-all-sources/SKILL.md) can orchestrate one isolated `summarize-sources.prompt.md` run per material path, then return one summary artifact per path.
 
 Optional helper for advanced Stage 3 breadth-first runs: [`.github/skills/generate-question-batches/SKILL.md`](../.github/skills/generate-question-batches/SKILL.md) can traverse multiple subcategory files from one delegated or background run, write at most one new batch per subcategory, and keep checkpointed progress under the user-provided Stage 3 root.
+
+Optional helper for advanced Stage 3 exhaustive runs over an approved Stage 2 scope: [`.github/skills/finish-question-coverage/SKILL.md`](../.github/skills/finish-question-coverage/SKILL.md) can continue with successive batches until tracked `SURF-*` coverage is exhausted while keeping a coverage manifest under the user-provided Stage 3 root.
+
+Preferred user-facing launcher for that exhaustive Stage 3 lane: [`finish-stage3-coverage.prompt.md`](finish-stage3-coverage.prompt.md). It keeps the project-facing entrypoint in root `prompts/` while reusing the existing exhaustive skill as the implementation layer.
 
 ```text
 User provides repos (list of paths)
@@ -46,7 +51,7 @@ User collects all summary files
         ▼
 User reviews subcategory files, adjusts if needed
         │
-        ▼  ── one invocation per subcategory file (parallelizable; optional `generate-question-batches` orchestration for breadth-first delegated runs) ──
+        ▼  ── one invocation per subcategory file (parallelizable; optional `generate-question-batches` orchestration for one breadth-first wave; optional `finish-stage3-coverage.prompt.md` launcher for approved-scope exhaustive Stage 3 runs) ──
 [Stage 3: generate-questions.prompt.md]
         │  Reads one subcategory file (sole input)
         │  Generates one coverage-first JSON batch + adversarial
@@ -63,7 +68,7 @@ User reviews subcategory files, adjusts if needed
 Moodle import
 ```
 
-Each stage is run manually by the user. Stages 1 and 3 are parallelizable (independent invocations); Stage 1 fan-out can also be orchestrated through the `summarize-all-sources` skill, and Stage 3 breadth-first delegated runs can be orchestrated through the `generate-question-batches` skill. Stage 2 is still a single merge pass. Each prompt should ask for the relevant input or output path when the user did not already provide it. If a repo is too large or heterogeneous for one faithful Stage 1 document, split it by coherent topic area before continuing; a monolithic lossy summary is invalid.
+Each stage is run manually by the user. Stages 1 and 3 are parallelizable (independent invocations); Stage 1 fan-out can also be orchestrated through the `summarize-all-sources` skill, Stage 3 breadth-first delegated runs can be orchestrated through the `generate-question-batches` skill, and Stage 3 exhaustive approved-scope runs can be launched through `finish-stage3-coverage.prompt.md` while reusing the `finish-question-coverage` skill underneath. Stage 2 is still a single merge pass. Each prompt should ask for the relevant input or output path when the user did not already provide it. If a repo is too large or heterogeneous for one faithful Stage 1 document, split it by coherent topic area before continuing; a monolithic lossy summary is invalid.
 
 ### Stage 3 Artifact Guardrails
 
@@ -235,6 +240,7 @@ Direct Stage 3 import into the editor, editor-owned Stage 4 review-session persi
 | `prompts/summarize-sources.prompt.md` | Stage 1: rich content extraction from source files |
 | `prompts/merge-summaries.prompt.md` | Stage 2: taxonomy organization, deduplication, cross-cutting context |
 | `prompts/generate-questions.prompt.md` | Stage 3: question generation from subcategory files |
+| `prompts/finish-stage3-coverage.prompt.md` | Preferred user-facing launcher for exhaustive Stage 3 runs over an approved Stage 2 scope |
 | `docs/adversarial_logic_filters.md` | Adversarial filter mechanism and prompting meta-techniques |
 | `docs/distractor_design.md` | Distractor strategies, anti-bias rules, psychometric item quality |
 | `resources/json_to_moodle_xml.py` | Export script: JSON → Moodle XML, status-filtered |

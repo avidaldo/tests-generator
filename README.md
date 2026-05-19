@@ -10,7 +10,7 @@ Prompt-based system for generating multiple-choice exam questions from course ma
 
 Active workflow: [`prompts/summarize-sources.prompt.md`](prompts/summarize-sources.prompt.md) → [`prompts/merge-summaries.prompt.md`](prompts/merge-summaries.prompt.md) → [`prompts/generate-questions.prompt.md`](prompts/generate-questions.prompt.md)
 
-See [`prompts/AGENTS.md`](prompts/AGENTS.md) for the full pipeline diagram, design rationale, and deprecated prompts. See [`docs/pipeline_execution_modes.md`](docs/pipeline_execution_modes.md) for when to use the regular prompt-by-prompt lane versus the Stage 1 and Stage 3 bulk skills, and for the user-owned artifact path contract.
+See [`prompts/AGENTS.md`](prompts/AGENTS.md) for the full pipeline diagram, design rationale, and deprecated prompts. See [`docs/pipeline_execution_modes.md`](docs/pipeline_execution_modes.md) for when to use the regular prompt-by-prompt lane versus the Stage 1 and Stage 3 orchestration skills, and for the user-owned artifact path contract.
 
 ### Quiz Editor (`editor/`)
 
@@ -73,11 +73,15 @@ The agent proposes a subcategory taxonomy — review and adjust, then it produce
 
 ### Step 3: Generate question batches (one subcategory at a time)
 
-Open `prompts/generate-questions.prompt.md` as a prompt. Provide one subcategory `.md` file from Step 2 and either a Stage 3 output root or an explicit batch file path.
+Open `prompts/generate-questions.prompt.md` as a prompt when you want one subcategory at a time. Provide one subcategory `.md` file from Step 2 and either a Stage 3 output root or an explicit batch file path.
 
 The agent generates one coverage-first JSON batch from the file's full content, including scenario-based and cross-subcategory relationship questions, and writes it directly to a user-owned Stage 3 location such as `/path/to/exam-artifacts/saa2/stage3/ai-foundations-and-learning-paradigms/batch-001.json`. Repeat on the same subcategory with additional `SURF-*` scopes when you want more coverage than fits in one batch; the next run should create the next free batch file in that same subfolder.
 
 Preferred for delegated or background breadth-first runs across many subcategories: invoke the [`.github/skills/generate-question-batches/SKILL.md`](.github/skills/generate-question-batches/SKILL.md) workflow. It creates at most one new batch per subcategory per pass and keeps checkpointed progress under the Stage 3 root.
+
+Preferred single-step autopilot for an already approved Stage 2 scope: open [`prompts/finish-stage3-coverage.prompt.md`](prompts/finish-stage3-coverage.prompt.md). It is the project-facing launcher for exhaustive Stage 3 runs and keeps generating successive batches until tracked `SURF-*` coverage is exhausted.
+
+The underlying implementation lane for that launcher remains [`.github/skills/finish-question-coverage/SKILL.md`](.github/skills/finish-question-coverage/SKILL.md). It is still Stage-3-only: it does not invent missing Stage 2 files, and it relies on a coverage manifest under the Stage 3 root.
 
 > **One subcategory per invocation** — each gets a fresh context window, no drift.
 > **One batch per invocation** — keep each output within a safe reviewable window, then continue with more surfaces as needed.

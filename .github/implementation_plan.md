@@ -1,9 +1,9 @@
 # Implementation Plan
 
-> Updated: 2026-05-05 (local sync)
+> Updated: 2026-05-19 (local sync)
 > Branch: decomposed
 > Status: active
-> Local sync 2026-05-05: started the Stage 4 review-session architecture implementation by adding explicit review-session JSON persistence, Stage 3 batch import as the primary editor ingress, stable import provenance fields, source-aware duplicate suppression, recursive Stage 3 folder import, secondary legacy XML import metadata, and the first round of schema and workflow documentation sync.
+> Local sync 2026-05-19: added an advanced Stage 3 exhaustive-coverage skill for approved Stage 2 scopes, clarified the distinction from the one-wave breadth-first Stage 3 skill, and synced the project docs, customization inventories, and durable customization rationale.
 
 ## Working Agreements
 
@@ -67,6 +67,8 @@
 
 ## Recently Completed
 
+- P42 — 2026-05-19. Added `.github/skills/finish-question-coverage/SKILL.md` as an advanced Stage 3 exhaustive-coverage lane for approved Stage 2 scopes; kept it distinct from the existing one-wave breadth-first `generate-question-batches` skill; synced `.github/AGENTS.md`, `.github/README.md`, `.github/docs/customization_architecture.md`, `.github/docs/README.md`, `AGENTS.md`, `docs/pipeline_execution_modes.md`, `prompts/AGENTS.md`, `README.md`, and the existing Stage 3 bulk skill docs; and validated the new skill frontmatter plus required section structure plus the final markdown/doc cleanup.
+
 - P41 — 2026-05-05. Started the Stage 4 review-session architecture: added `editor/models/review_session.py`, changed `editor/file_io/state_io.py` to persist a dedicated review-session JSON envelope while staying backward-compatible with old JSON and raw Stage 3 batch imports, made Stage 3 batch JSON the primary `Ctrl+O` editor import path, added recursive Stage 3 folder import over deterministic `batch-*.json` discovery, added provenance display plus stable duplicate suppression, aligned penalty defaults with the documented `0.0000000` contract, and synced the schema plus the core editor/project workflow docs.
 
 - P39 — 2026-05-04. Added `docs/pipeline_execution_modes.md` as the durable project-facing guide for regular versus bulk execution, the Stage 1 and Stage 3 bulk lanes, and the user-owned artifact path contract; kept `README.md` concise by linking to that detail instead of duplicating it; synced `AGENTS.md` and `prompts/AGENTS.md`; and validated both the content coverage and final markdown lint state.
@@ -118,6 +120,8 @@
 - P7 — 2026-04-29. Removed legacy planner surfaces; documented active hook, handoff, and terminology model in `customization_architecture.md`.
 
 ## Recently Resolved
+
+- 2026-05-19 - Repeated Stage 3 batching until coverage is exhausted should be a separate advanced skill over an approved Stage 2 scope. It should not overload the existing one-wave breadth-first Stage 3 bulk lane, and it should not pretend to replace missing Stage 2 taxonomy work.
 
 - 2026-05-04 - Stage 3 concept, taxonomy, and hierarchy questions should be asked directly by default. Classroom, debate, or named-speaker wrappers are decorative when removing them leaves the reasoning unchanged; scenarios remain valid only when the concrete context materially affects the answer. This fix applies to future generation behavior, not retroactive JSON cleanup.
 - 2026-05-04 - The old plan to add thin public bulk launchers for both Stage 1 and Stage 3 was reconsidered. Stage 1 bulk should stay on the existing `summarize-all-sources` skill with better documentation, while Stage 3 still needs an optional single-call delegated bulk lane in addition to the normal single-unit workflow.

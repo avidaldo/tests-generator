@@ -126,6 +126,7 @@ For purely static rules, a markdown instruction in the agent file is simpler and
 - `sdd-implementer` is a custom agent because implementation behavior is persistent, plan-driven, and intentionally limited to one approved item per run.
 - `.github/prompts/run-batch-maintenance.prompt.md` is a prompt because it is still just a lightweight launcher. The unattended queue behavior belongs in the bound agent, not in prompt-body orchestration.
 - `batch-maintainer` is a custom agent because unattended queue execution needs a durable workflow contract, stop conditions, and target-aware isolation guidance that should remain reusable across local, delegated, and cloud-oriented runs.
+- `summarize-all-sources`, `generate-question-batches`, and `finish-question-coverage` stay as skills because they are optional orchestration helpers around the canonical quiz-generation prompts, not replacements for those prompts. They package reusable bulk behavior, checkpointing rules, and resume contracts that would make the precise prompt files less clear if folded back into prompt bodies.
 - The maintenance prompts bind directly to visible custom agents because that is the cleanest mechanically supported design in this VS Code setup.
 - Visible agents are acceptable here as advanced or secondary entry points. The prompts remain the preferred UX, but not the only surface.
 - The separate `todo-analysis` skill was removed because it did not have a real second consumer. Inlining it into `todo-planner` reduced indirection without losing workflow clarity.
@@ -146,6 +147,8 @@ For purely static rules, a markdown instruction in the agent file is simpler and
 | Planner guard rails | `.github/hooks/src/todo_planner_context.py`, `.github/hooks/src/todo_planner_write_guard.py` | Agent-scoped context injection and write restriction for planner sessions |
 | Prompt/customization drift reminder | `.github/hooks/prompt-doc-drift-check.json`, `.github/hooks/src/prompt_doc_drift_check.py` | Reminds when prompt/customization changes are not reflected in the root docs |
 | Living-docs reminder | `.github/hooks/living-docs-drift-check.json`, `.github/hooks/src/living_docs_drift_check.py` | Reminds when source edits have no matching plan or documentation updates |
+
+Quiz-generation orchestration skills intentionally stay outside this maintenance mapping table because they are project workflow helpers rather than part of the SDD maintenance loop. Their discovery surfaces are the project inventory files and the execution-mode guide.
 
 ## Design Decisions Recorded On 2026-04-29
 

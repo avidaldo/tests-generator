@@ -59,6 +59,8 @@ For multi-repo subjects, the optional [`summarize-all-sources` skill](.github/sk
 
 For delegated or background Stage 3 breadth-first runs, the optional [`generate-question-batches` skill](.github/skills/generate-question-batches/SKILL.md) can traverse multiple subcategory files and create at most one new batch per subcategory while keeping checkpointed progress under a user-provided Stage 3 root.
 
+For approved Stage 2 scopes that need repeated successive Stage 3 batches until tracked `SURF-*` coverage is exhausted, the preferred user-facing surface is [`prompts/finish-stage3-coverage.prompt.md`](prompts/finish-stage3-coverage.prompt.md). It reuses the optional [`finish-question-coverage` skill](.github/skills/finish-question-coverage/SKILL.md) as the execution lane while keeping a coverage manifest under the user-provided Stage 3 root.
+
 Stage 1 operational policy in this repo:
 
 - Prompts should ask for missing input/output paths instead of assuming artifacts live under this repository.
@@ -86,6 +88,7 @@ Each step is run manually. See the [Usage guide in README.md](README.md#usage-ge
 ## VS Code Customization Layer
 
 - The optional [`customization-audit` skill](.github/skills/customization-audit/SKILL.md) compares this repo's `.github` customization files against current VS Code customization docs and reports drift or deprecated patterns.
+- The optional [`finish-question-coverage` skill](.github/skills/finish-question-coverage/SKILL.md) provides the advanced Stage 3 exhaustive-coverage lane for approved Stage 2 scopes that need repeated successive batches.
 - The optional [`generate-question-batches` skill](.github/skills/generate-question-batches/SKILL.md) provides the advanced Stage 3 bulk lane for delegated or background question generation across multiple subcategories.
 - The detailed customization inventory now lives in [`.github/AGENTS.md`](.github/AGENTS.md).
 - The human-oriented customization guide now lives in [`.github/README.md`](.github/README.md).

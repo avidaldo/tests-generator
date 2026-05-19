@@ -17,6 +17,7 @@ Stage 1 and Stage 3 can benefit from orchestration because they naturally decomp
 | Merge validated Stage 1 summaries into subcategories | [`prompts/merge-summaries.prompt.md`](../prompts/merge-summaries.prompt.md) | Stage 2 remains a single deliberate taxonomy pass |
 | One subcategory for Stage 3, or any run where you want tight surface control | [`prompts/generate-questions.prompt.md`](../prompts/generate-questions.prompt.md) | Keeps one fresh context window per subcategory and one reviewable batch per invocation |
 | Many subcategories for Stage 3 in a delegated or background breadth-first pass | [`.github/skills/generate-question-batches/SKILL.md`](../.github/skills/generate-question-batches/SKILL.md) | Advances multiple subcategories safely, at most one new batch per subcategory, with checkpointed progress |
+| An approved Stage 2 scope for Stage 3 where you want one-step exhaustive coverage until tracked `SURF-*` units are exhausted | [`prompts/finish-stage3-coverage.prompt.md`](../prompts/finish-stage3-coverage.prompt.md) | Gives the user one visible launcher in the project prompt layer while reusing the exhaustive coverage workflow and manifest discipline underneath |
 
 ## Artifact Path Contract
 
@@ -38,7 +39,7 @@ Implications of this contract:
 
 The regular lane is prompt-first and intentionally narrow. It is the right default when the user wants tight control, when the scope is small enough to inspect directly, or when the next step depends on human review before more work is justified.
 
-The bulk lanes are advanced and opt-in. They exist for breadth-first unattended progress over many independent units, not for replacing the review points or for hiding complexity behind a single vague command.
+The bulk lanes are advanced and opt-in. They exist for unattended progress where orchestration materially helps, whether that means breadth-first movement across many independent units or repeated Stage 3 batching over an already approved Stage 2 scope. They are not a replacement for review points, and they should not hide complexity behind a single vague command.
 
 ### Stage 1 Bulk
 
@@ -64,6 +65,21 @@ Use [`.github/skills/generate-question-batches/SKILL.md`](../.github/skills/gene
 
 This lane is intentionally breadth-first. If one subcategory needs repeated batching with exact `SURF-*` control, the regular [`generate-questions.prompt.md`](../prompts/generate-questions.prompt.md) invocation is usually the better tool.
 
+### Stage 3 Exhaustive Coverage
+
+The preferred user-facing surface is [`prompts/finish-stage3-coverage.prompt.md`](../prompts/finish-stage3-coverage.prompt.md). It launches the exhaustive Stage 3 lane for an already approved Stage 2 scope while reusing [`.github/skills/finish-question-coverage/SKILL.md`](../.github/skills/finish-question-coverage/SKILL.md) as the implementation workflow. That underlying workflow should:
+
+- require an approved Stage 2 scope rather than inventing missing taxonomy,
+- keep a coverage manifest under the user-provided Stage 3 root,
+- track which `SURF-*` entries each validated batch was meant to cover,
+- treat legacy batches without a manifest as existing artifacts but not as automatically tracked coverage,
+- continue wave by wave until the selected subcategories are `done`, `needs-fix`, `blocked-upstream`, or `skipped`, and
+- stop on the first invalid artifact instead of silently pushing ahead.
+
+Advanced users can still invoke the skill directly, but the prompt launcher is the simpler project-facing entrypoint because it keeps exhaustive Stage 3 discoverable next to the canonical Stage 1–3 prompts.
+
+This lane is still Stage-3-only. It does not replace Stage 2, and it does not make the editor review gate optional.
+
 ## Why Precise Prompts Stay The Default
 
 The prompt-per-stage workflow remains the default because it preserves the strongest review boundaries:
@@ -73,4 +89,4 @@ The prompt-per-stage workflow remains the default because it preserves the stron
 - Stage 3 keeps one subcategory per precise run, which reduces drift and keeps JSON batches reviewable.
 - The editor remains the mandatory human validation gate before Moodle XML export.
 
-Bulk orchestration is exposed only where it adds real value: Stage 1 fan-out across many independent material paths, and Stage 3 breadth-first progress across many independent subcategories. Outside those cases, a bulk surface adds more ambiguity than value.
+Bulk orchestration is exposed only where it adds real value: Stage 1 fan-out across many independent material paths, Stage 3 breadth-first progress across many independent subcategories, and Stage 3 exhaustive coverage across an already approved Stage 2 scope. Outside those cases, a bulk surface adds more ambiguity than value.

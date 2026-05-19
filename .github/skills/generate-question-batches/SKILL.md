@@ -14,6 +14,8 @@ This skill orchestrates Stage 3 of the quiz pipeline across multiple subcategory
 - Run delegated or background Stage 3 work while keeping progress inspectable and resumable.
 - Create at most one new JSON batch per subcategory in a single bulk pass before human editor review.
 
+If you want repeated successive Stage 3 batches until an approved Stage 2 scope has tracked `SURF-*` coverage exhausted, use [finish-question-coverage](../finish-question-coverage/SKILL.md) instead.
+
 ## Inputs To Confirm
 
 1. The exact Stage 2 subcategory scope.
@@ -48,6 +50,7 @@ This skill orchestrates Stage 3 of the quiz pipeline across multiple subcategory
 ## Guardrails
 
 - Do not replace the normal precise workflow. The default Stage 3 surface remains one invocation of [prompts/generate-questions.prompt.md](../../../prompts/generate-questions.prompt.md) per subcategory.
+- Do not turn this skill into an exhaustive-coverage lane. Its job is one breadth-first wave only; repeated successive batching belongs in [finish-question-coverage](../finish-question-coverage/SKILL.md).
 - Do not write more than one new batch per subcategory in a single bulk pass unless the user explicitly narrows the run to that subcategory and asks for repeated batching.
 - Do not overwrite existing batch files implicitly. Always advance to the next free `batch-###.json` unless the user explicitly requests a specific batch number.
 - Do not continue past the first invalid generated artifact in the current pass. Stop, record the failure, and keep the checkpoint state honest.
