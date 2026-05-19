@@ -12,6 +12,10 @@ from models.review_session import (
 )
 
 
+STAGE3_BATCH_ARTIFACT_KIND = "stage3_batch"
+LEGACY_STATE_ARTIFACT_KIND = "legacy_state"
+
+
 def _serialize_question(question: Question) -> dict:
     return {
         "id": question.id,
@@ -54,12 +58,52 @@ def _serialize_imported_source(imported_source: ImportedSource) -> dict:
     }
 
 
+def _read_json_payload(filepath: Path) -> dict:
+    data = json.loads(filepath.read_text(encoding="utf-8"))
+    if not isinstance(data, dict):
+        raise ValueError("Expected a top-level JSON object.")
+    questions = data.get("questions")
+    if not isinstance(questions, list):
+        raise ValueError("Expected a top-level 'questions' array.")
+    return data
+
+
+def _looks_like_legacy_state(data: dict) -> bool:
+    for question_data in data.get("questions", []):
+        if not isinstance(question_data, dict):
+            continue
+        if question_data.get("origin_kind") == LEGACY_STATE_ARTIFACT_KIND:
+            return True
+        if any(
+            field in question_data
+            for field in (
+                "source_file",
+                "correct_feedback",
+                "partially_correct_feedback",
+                "incorrect_feedback",
+            )
+        ):
+            return True
+    return False
+
+
+def _detect_json_artifact_kind(data: dict) -> str:
+    artifact_type = data.get("artifact_type", "")
+    if artifact_type:
+        if artifact_type == REVIEW_SESSION_ARTIFACT_TYPE:
+            return REVIEW_SESSION_ARTIFACT_TYPE
+        raise ValueError(f"Unsupported artifact_type: {artifact_type}")
+    if _looks_like_legacy_state(data):
+        return LEGACY_STATE_ARTIFACT_KIND
+    return STAGE3_BATCH_ARTIFACT_KIND
+
+
 def _infer_origin_kind(question_data: dict, filepath: Path) -> str:
     if question_data.get("origin_kind"):
         return question_data["origin_kind"]
     if "source_file" in question_data or "correct_feedback" in question_data:
-        return "legacy_state"
-    return "stage3_batch"
+        return LEGACY_STATE_ARTIFACT_KIND
+    return STAGE3_BATCH_ARTIFACT_KIND
 
 
 def _deserialize_question(question_data: dict, filepath: Path) -> Question:
@@ -114,24 +158,7 @@ def _deserialize_question(question_data: dict, filepath: Path) -> Question:
     )
 
 
-def save_review_session(review_session: ReviewSession, filepath: Path) -> None:
-    """Save a Stage 4 review session to a JSON file."""
-    data = {
-        "artifact_type": REVIEW_SESSION_ARTIFACT_TYPE,
-        "version": review_session.version,
-        "imported_sources": [
-            _serialize_imported_source(imported_source)
-            for imported_source in review_session.imported_sources
-        ],
-        "questions": [_serialize_question(question) for question in review_session.questions],
-    }
-    filepath.write_text(json.dumps(data, indent=2, ensure_ascii=False), encoding="utf-8")
-
-
-def load_review_session(filepath: Path) -> ReviewSession:
-    """Load a review session or legacy question-state file from JSON."""
-    data = json.loads(filepath.read_text(encoding="utf-8"))
-
+def _deserialize_review_session(data: dict, filepath: Path) -> ReviewSession:
     questions = [_deserialize_question(question_data, filepath) for question_data in data.get("questions", [])]
 
     imported_sources = [
@@ -152,6 +179,46 @@ def load_review_session(filepath: Path) -> ReviewSession:
     if review_session.imported_sources:
         return review_session
     return ReviewSession.from_questions(review_session.questions)
+
+
+def save_review_session(review_session: ReviewSession, filepath: Path) -> None:
+    """Save a Stage 4 review session to a JSON file."""
+    data = {
+        "artifact_type": REVIEW_SESSION_ARTIFACT_TYPE,
+        "version": review_session.version,
+        "imported_sources": [
+            _serialize_imported_source(imported_source)
+            for imported_source in review_session.imported_sources
+        ],
+        "questions": [_serialize_question(question) for question in review_session.questions],
+    }
+    filepath.write_text(json.dumps(data, indent=2, ensure_ascii=False), encoding="utf-8")
+
+
+def load_review_session(filepath: Path) -> ReviewSession:
+    """Load a saved Stage 4 review session or backward-compatible legacy editor state."""
+    data = _read_json_payload(filepath)
+    artifact_kind = _detect_json_artifact_kind(data)
+    if artifact_kind == STAGE3_BATCH_ARTIFACT_KIND:
+        raise ValueError(
+            "Expected a saved review session JSON, but received a Stage 3 batch JSON. "
+            "Use the Stage 3 import actions instead."
+        )
+    return _deserialize_review_session(data, filepath)
+
+
+def load_stage3_batch(filepath: Path) -> list[Question]:
+    """Load a Stage 3 batch JSON file for import into the current review session."""
+    data = _read_json_payload(filepath)
+    artifact_kind = _detect_json_artifact_kind(data)
+    if artifact_kind != STAGE3_BATCH_ARTIFACT_KIND:
+        if artifact_kind in {REVIEW_SESSION_ARTIFACT_TYPE, LEGACY_STATE_ARTIFACT_KIND}:
+            raise ValueError(
+                "Expected a Stage 3 batch JSON, but received a saved review session JSON. "
+                "Use 'Abrir sesión de revisión...' instead."
+            )
+        raise ValueError(f"Unsupported JSON artifact kind: {artifact_kind}")
+    return _deserialize_review_session(data, filepath).questions
 
 
 def save_state(questions: list[Question], filepath: Path) -> None:

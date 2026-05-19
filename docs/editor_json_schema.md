@@ -19,6 +19,8 @@
 
  Use this envelope for freshly generated batches only. It is the primary import format for the editor and should remain immutable once written.
 
+ Editor contract: the Stage 3 import actions accept this envelope only. If the user selects a saved review-session JSON through the Stage 3 import path, the editor should reject it and ask the user to open it as a review session instead.
+
  | Field | Type | Description |
  | --- | --- | --- |
  | `version` | string | Schema version. Currently always `"1.0"`. |
@@ -37,12 +39,20 @@
 
  Use this envelope for the editor-owned Stage 4 working artifact. The editor may aggregate questions from multiple Stage 3 batch files and XML imports into one review session.
 
+ The `Abrir sesión de revisión...` action accepts this envelope. Older editor-state JSON files without an explicit `artifact_type` remain readable for backward compatibility, but new saves must always use the explicit review-session envelope.
+
  | Field | Type | Description |
  | --- | --- | --- |
  | `artifact_type` | string | Always `"review_session"` for editor-owned sessions. |
  | `version` | string | Schema version. Currently always `"1.0"`. |
  | `imported_sources` | array | Optional session-level provenance summary. See [Imported Source Object](#imported-source-object). |
  | `questions` | array | Ordered list of question objects. Export continues to read this top-level array directly. |
+
+ ## Editor Action Contract
+
+ - `Archivo -> Importar -> Archivos Stage 3...` and `Archivo -> Importar -> Carpeta Stage 3...` accept only the raw Stage 3 batch envelope.
+ - `Archivo -> Abrir sesión de revisión...` accepts the Stage 4 review-session envelope and backward-compatible legacy editor-state JSON, but rejects raw Stage 3 batches.
+ - `Archivo -> Guardar sesión` and `Archivo -> Guardar sesión como...` always write the Stage 4 review-session envelope.
 
  ## Imported Source Object
 

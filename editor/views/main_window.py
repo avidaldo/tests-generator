@@ -21,7 +21,7 @@ from views.theme import THEME_OPTIONS, THEME_SYSTEM, apply_app_theme
 from file_io.stage3_batch_finder import discover_stage3_batch_files
 from file_io.xml_parser import parse_multiple_files
 from file_io.xml_writer import generate_xml
-from file_io.state_io import load_review_session, save_state
+from file_io.state_io import load_review_session, load_stage3_batch, save_state
 
 
 class StatusFilterProxyModel(QSortFilterProxyModel):
@@ -78,7 +78,7 @@ class MainWindow(QMainWindow):
         system_style_name: str | None = None,
     ):
         super().__init__()
-        self.setWindowTitle("Moodle Quiz Editor v3")
+        self.setWindowTitle("Moodle Quiz Editor v3[*]")
         self.setMinimumSize(1000, 700)
 
         # Store normal geometry for restore from maximized
@@ -103,6 +103,8 @@ class MainWindow(QMainWindow):
         # Settings for state persistence
         self._settings = QSettings()
         self._current_state_file: Path | None = None
+        self._session_dirty = False
+        self._suspend_dirty_tracking = False
         self._theme_mode = theme_mode
         app = QApplication.instance()
         current_palette = app.palette() if app is not None else QPalette()
@@ -121,6 +123,9 @@ class MainWindow(QMainWindow):
         self._model.dataChanged.connect(self._schedule_autosave)
         self._model.rowsInserted.connect(self._schedule_autosave)
         self._model.rowsRemoved.connect(self._schedule_autosave)
+        self._model.dataChanged.connect(self._mark_session_dirty)
+        self._model.rowsInserted.connect(self._mark_session_dirty)
+        self._model.rowsRemoved.connect(self._mark_session_dirty)
 
         # Font scaling (Ctrl+Scroll)
         self._base_font_size = self._settings.value("font_size", 10, type=int)
@@ -215,6 +220,7 @@ class MainWindow(QMainWindow):
         self._detail_panel = QuestionDetailPanel(self._model, self._undo_stack)
         self._detail_panel.question_changed.connect(self._update_stats)
         self._detail_panel.question_changed.connect(self._schedule_autosave)
+        self._detail_panel.question_changed.connect(self._mark_session_dirty)
         self._detail_panel.question_changed.connect(self._refresh_category_tree)
         self._detail_panel.delete_question_requested.connect(self._delete_selected)
 
@@ -242,35 +248,52 @@ class MainWindow(QMainWindow):
         new_session_action.triggered.connect(self._new_review_session)
         file_menu.addAction(new_session_action)
 
-        import_batch_action = QAction("Importar lotes Stage 3...", self)
-        import_batch_action.setShortcut(QKeySequence.StandardKey.Open)
-        import_batch_action.triggered.connect(self._import_stage3_batches)
-        file_menu.addAction(import_batch_action)
+        open_session_action = QAction("Abrir sesión de revisión...", self)
+        open_session_action.triggered.connect(self._open_review_session)
+        file_menu.addAction(open_session_action)
 
-        import_batch_folder_action = QAction("Importar carpeta Stage 3...", self)
-        import_batch_folder_action.triggered.connect(self._import_stage3_folder)
-        file_menu.addAction(import_batch_folder_action)
-
-        load_action = QAction("Abrir sesión de revisión...", self)
-        load_action.triggered.connect(self._load_state)
-        file_menu.addAction(load_action)
-
-        open_action = QAction("Importar XML...", self)
-        open_action.triggered.connect(self._open_files)
-        file_menu.addAction(open_action)
-
-        save_action = QAction("Guardar sesión...", self)
+        save_action = QAction("Guardar sesión", self)
         save_action.setShortcut(QKeySequence.StandardKey.Save)
-        save_action.triggered.connect(self._save_state)
+        save_action.triggered.connect(self._save_review_session)
         file_menu.addAction(save_action)
 
-        export_action = QAction("Exportar XML...", self)
-        export_action.triggered.connect(self._export_xml)
-        file_menu.addAction(export_action)
+        save_as_action = QAction("Guardar sesión como...", self)
+        save_as_action.setShortcut(QKeySequence.StandardKey.SaveAs)
+        save_as_action.triggered.connect(self._save_review_session_as)
+        file_menu.addAction(save_as_action)
 
-        export_easy_action = QAction("Exportar XML (solo fáciles)...", self)
+        file_menu.addSeparator()
+
+        import_menu = file_menu.addMenu("Importar")
+
+        import_batch_action = QAction("Archivos Stage 3...", self)
+        import_batch_action.setShortcut(QKeySequence.StandardKey.Open)
+        import_batch_action.triggered.connect(self._import_stage3_batches)
+        import_menu.addAction(import_batch_action)
+
+        import_batch_folder_action = QAction("Carpeta Stage 3...", self)
+        import_batch_folder_action.triggered.connect(self._import_stage3_folder)
+        import_menu.addAction(import_batch_folder_action)
+
+        legacy_import_menu = import_menu.addMenu("Legado")
+
+        import_xml_action = QAction("Banco XML de Moodle...", self)
+        import_xml_action.triggered.connect(self._import_legacy_xml_files)
+        legacy_import_menu.addAction(import_xml_action)
+
+        file_menu.addSeparator()
+
+        export_menu = file_menu.addMenu("Exportar")
+
+        export_action = QAction("Moodle XML...", self)
+        export_action.triggered.connect(self._export_xml)
+        export_menu.addAction(export_action)
+
+        export_easy_action = QAction("Moodle XML (solo fáciles)...", self)
         export_easy_action.triggered.connect(self._export_xml_easy)
-        file_menu.addAction(export_easy_action)
+        export_menu.addAction(export_easy_action)
+
+        file_menu.addSeparator()
 
         quit_action = QAction("Salir", self)
         quit_action.setShortcut(QKeySequence.StandardKey.Quit)
@@ -331,16 +354,127 @@ class MainWindow(QMainWindow):
         toolbar = QToolBar("Principal")
         self.addToolBar(toolbar)
 
-        toolbar.addAction("Importar JSON", self._import_stage3_batches)
-        toolbar.addAction("Importar carpeta", self._import_stage3_folder)
-        toolbar.addAction("Guardar sesión", self._save_state)
+        toolbar.addAction("Importar Stage 3", self._import_stage3_batches)
+        toolbar.addAction("Carpeta Stage 3", self._import_stage3_folder)
+        toolbar.addAction("Abrir sesión", self._open_review_session)
+        toolbar.addAction("Guardar", self._save_review_session)
 
     def _setup_shortcuts(self):
         pass  # Shortcuts defined in menu actions
 
-    def _open_files(self):
+    def _default_session_dir(self) -> str:
+        if self._current_state_file is not None:
+            return str(self._current_state_file.parent)
+
+        last_state = self._settings.value("last_state_file", "")
+        if last_state:
+            last_state_path = Path(last_state)
+            if last_state_path.exists():
+                return str(last_state_path.parent)
+
+        return ""
+
+    def _replace_loaded_session(
+        self,
+        questions,
+        current_state_file: Path | None,
+        status_message: str,
+        is_dirty: bool = False,
+    ):
+        self._suspend_dirty_tracking = True
+        try:
+            self._undo_stack.clear()
+            self._model.clear()
+            self._model.add_questions(list(questions))
+        finally:
+            self._suspend_dirty_tracking = False
+        self._current_state_file = current_state_file
+        self._detail_panel.set_question(None)
+        self._refresh_category_tree()
+        self._update_stats()
+        self._set_session_dirty(is_dirty)
+        if not is_dirty:
+            self._clear_autosave()
+        self._status_bar.showMessage(status_message, 3000)
+
+    def _set_session_dirty(self, is_dirty: bool):
+        self._session_dirty = is_dirty
+        self.setWindowModified(is_dirty)
+
+    def _mark_session_dirty(self, *args):
+        if self._suspend_dirty_tracking:
+            return
+        self._set_session_dirty(True)
+
+    def _save_review_session_to_path(self, filepath: Path) -> bool:
+        try:
+            save_state(self._model.questions, filepath)
+            self._current_state_file = filepath
+            self._settings.setValue("last_state_file", str(filepath))
+            self._clear_autosave()
+            self._set_session_dirty(False)
+            self._status_bar.showMessage(f"Sesión guardada en {filepath}", 3000)
+            return True
+        except Exception as e:
+            QMessageBox.critical(self, "Error", f"Error al guardar: {e}")
+            return False
+
+    def _save_review_session(self) -> bool:
+        if not self._model.questions:
+            QMessageBox.warning(self, "Aviso", "No hay preguntas para guardar en la sesión.")
+            return False
+
+        if self._current_state_file is not None:
+            return self._save_review_session_to_path(self._current_state_file)
+
+        return self._save_review_session_as()
+
+    def _save_review_session_as(self) -> bool:
+        if not self._model.questions:
+            QMessageBox.warning(self, "Aviso", "No hay preguntas para guardar en la sesión.")
+            return False
+
+        default_path = str(self._current_state_file) if self._current_state_file is not None else self._default_session_dir()
+        file, _ = QFileDialog.getSaveFileName(
+            self,
+            "Guardar sesión de revisión",
+            default_path,
+            "JSON Files (*.json)",
+        )
+        if not file:
+            return False
+
+        filepath = Path(file)
+        if filepath.suffix != ".json":
+            filepath = filepath.with_suffix(".json")
+
+        return self._save_review_session_to_path(filepath)
+
+    def _confirm_session_replacement(self, title: str, prompt: str) -> bool:
+        if not self._session_dirty:
+            return True
+
+        reply = QMessageBox.question(
+            self,
+            title,
+            prompt,
+            QMessageBox.StandardButton.Save | QMessageBox.StandardButton.Discard | QMessageBox.StandardButton.Cancel,
+            QMessageBox.StandardButton.Save,
+        )
+
+        if reply == QMessageBox.StandardButton.Cancel:
+            return False
+        if reply == QMessageBox.StandardButton.Save:
+            return self._save_review_session()
+        self._clear_autosave()
+        return True
+
+    def _import_legacy_xml_files(self):
         files, _ = QFileDialog.getOpenFileNames(
-            self, "Importar archivos XML", "", "XML Files (*.xml)"
+            self,
+            "Importar banco XML legado",
+            self._default_session_dir(),
+            "XML Files (*.xml)",
         )
         if files:
             try:
@@ -361,12 +495,11 @@ class MainWindow(QMainWindow):
                 QMessageBox.critical(self, "Error", f"Error al importar: {e}")
 
     def _import_stage3_batches(self):
-        default_dir = str(self._current_state_file.parent) if self._current_state_file else ""
         files, _ = QFileDialog.getOpenFileNames(
             self,
-            "Importar lotes Stage 3",
-            default_dir,
-            "JSON Files (*.json)",
+            "Importar archivos Stage 3",
+            self._default_session_dir(),
+            "Stage 3 JSON (*.json)",
         )
         if not files:
             return
@@ -374,11 +507,10 @@ class MainWindow(QMainWindow):
         self._import_stage3_paths([Path(file) for file in files], selection_label="archivo(s)")
 
     def _import_stage3_folder(self):
-        default_dir = str(self._current_state_file.parent) if self._current_state_file else ""
         folder = QFileDialog.getExistingDirectory(
             self,
             "Importar carpeta Stage 3",
-            default_dir,
+            self._default_session_dir(),
         )
         if not folder:
             return
@@ -410,10 +542,10 @@ class MainWindow(QMainWindow):
 
         for path in paths:
             try:
-                review_session = load_review_session(path)
-                imported = self._model.add_questions(review_session.questions)
+                questions = load_stage3_batch(path)
+                imported = self._model.add_questions(questions)
                 added_count += imported
-                skipped_count += len(review_session.questions) - imported
+                skipped_count += len(questions) - imported
             except Exception as exc:
                 failed_files.append(f"{path.name}: {exc}")
 
@@ -427,71 +559,49 @@ class MainWindow(QMainWindow):
                 "No se pudieron importar algunos archivos:\n\n" + "\n".join(failed_files),
             )
 
+        failed_count = len(failed_files)
+        failed_summary = f" | {failed_count} archivo(s) rechazado(s)" if failed_count else ""
         self._status_bar.showMessage(
-            f"Importadas {added_count} preguntas JSON de {len(paths)} {selection_label} ({skipped_count} duplicadas omitidas)",
+            f"Importadas {added_count} preguntas Stage 3 desde {len(paths)} {selection_label} ({skipped_count} duplicadas omitidas){failed_summary}",
             5000,
         )
 
     def _new_review_session(self):
-        if self._model.questions:
-            reply = QMessageBox.question(
-                self,
-                "Nueva sesión",
-                "La sesión actual se vaciará. ¿Desea continuar?",
-                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
-                QMessageBox.StandardButton.No,
-            )
-            if reply != QMessageBox.StandardButton.Yes:
-                return
-
-        self._model.clear()
-        self._current_state_file = None
-        self._detail_panel.set_question(None)
-        self._refresh_category_tree()
-        self._update_stats()
-        self._status_bar.showMessage("Nueva sesión de revisión", 3000)
-
-    def _save_state(self):
-        if not self._model.questions:
-            QMessageBox.warning(self, "Aviso", "No hay preguntas para guardar en la sesión.")
+        if not self._confirm_session_replacement(
+            "Nueva sesión",
+            "La sesión actual se reemplazará por una sesión vacía. ¿Desea guardar antes de continuar?",
+        ):
             return
 
-        # Suggest current file or last directory
-        default_dir = str(self._current_state_file) if self._current_state_file else ""
-        file, _ = QFileDialog.getSaveFileName(
-            self, "Guardar sesión de revisión", default_dir, "JSON Files (*.json)"
-        )
-        if file:
-            try:
-                if not file.endswith(".json"):
-                    file += ".json"
-                save_state(self._model.questions, Path(file))
-                self._current_state_file = Path(file)
-                self._settings.setValue("last_state_file", file)
-                self._status_bar.showMessage(f"Sesión guardada en {file}", 3000)
-            except Exception as e:
-                QMessageBox.critical(self, "Error", f"Error al guardar: {e}")
+        self._replace_loaded_session([], None, "Nueva sesión de revisión")
 
-    def _load_state(self):
-        # Suggest last directory
-        default_dir = str(self._current_state_file.parent) if self._current_state_file else ""
+    def _open_review_session(self):
         file, _ = QFileDialog.getOpenFileName(
-            self, "Abrir sesión de revisión", default_dir, "JSON Files (*.json)"
+            self,
+            "Abrir sesión de revisión",
+            self._default_session_dir(),
+            "JSON Files (*.json)",
         )
-        if file:
-            try:
-                review_session = load_review_session(Path(file))
-                self._model.clear()
-                self._model.add_questions(review_session.questions)
-                self._current_state_file = Path(file)
-                self._settings.setValue("last_state_file", file)
-                self._refresh_category_tree()
-                self._update_stats()
-                self._status_bar.showMessage(
-                    f"Abierta sesión con {len(review_session.questions)} preguntas", 3000
-                )
-            except Exception as e:
-                QMessageBox.critical(self, "Error", f"Error al cargar: {e}")
+        if not file:
+            return
+
+        if not self._confirm_session_replacement(
+            "Abrir sesión",
+            "La sesión actual se reemplazará al abrir otro archivo. ¿Desea guardar antes de continuar?",
+        ):
+            return
+
+        try:
+            filepath = Path(file)
+            review_session = load_review_session(filepath)
+            self._settings.setValue("last_state_file", file)
+            self._replace_loaded_session(
+                review_session.questions,
+                filepath,
+                f"Abierta sesión con {len(review_session.questions)} preguntas",
+            )
+        except Exception as e:
+            QMessageBox.critical(self, "Error", f"Error al cargar: {e}")
 
     def _export_xml(self):
         lista_questions = [q for q in self._model.questions if q.status == QuestionStatus.LISTA]
@@ -653,13 +763,12 @@ class MainWindow(QMainWindow):
     def _restore_state_file(self, source_file: Path, current_state_file: Path | None):
         """Restore editor questions from a JSON state file."""
         review_session = load_review_session(source_file)
-        self._model.clear()
-        self._model.add_questions(review_session.questions)
-        self._current_state_file = current_state_file
-        self._refresh_category_tree()
-        self._update_stats()
-        self._status_bar.showMessage(
-            f"Restauradas {len(review_session.questions)} preguntas", 3000
+        is_autosave_restore = source_file == self._autosave_file
+        self._replace_loaded_session(
+            review_session.questions,
+            current_state_file,
+            f"Restauradas {len(review_session.questions)} preguntas",
+            is_dirty=is_autosave_restore,
         )
 
     def _auto_load_last_state(self):
@@ -706,6 +815,11 @@ class MainWindow(QMainWindow):
             event.accept()
             return
 
+        if not self._session_dirty:
+            self._clear_autosave()
+            event.accept()
+            return
+
         reply = QMessageBox.question(
             self,
             "Guardar cambios",
@@ -719,37 +833,10 @@ class MainWindow(QMainWindow):
             return
 
         if reply == QMessageBox.StandardButton.Save:
-            if self._current_state_file:
-                # Save to the current file directly
-                try:
-                    save_state(self._model.questions, self._current_state_file)
-                    self._settings.setValue("last_state_file", str(self._current_state_file))
-                    self._status_bar.showMessage(f"Sesión guardada en {self._current_state_file}", 3000)
-                except Exception as e:
-                    QMessageBox.critical(self, "Error", f"Error al guardar: {e}")
-                    event.ignore()
-                    return
-            else:
-                # Ask for file location
-                file, _ = QFileDialog.getSaveFileName(
-                    self, "Guardar sesión de revisión", "", "JSON Files (*.json)"
-                )
-                if file:
-                    try:
-                        if not file.endswith(".json"):
-                            file += ".json"
-                        save_state(self._model.questions, Path(file))
-                        self._settings.setValue("last_state_file", file)
-                        self._current_state_file = Path(file)
-                    except Exception as e:
-                        QMessageBox.critical(self, "Error", f"Error al guardar: {e}")
-                        event.ignore()
-                        return
-                else:
-                    # User cancelled the save dialog
-                    event.ignore()
-                    return
-
+            if not self._save_review_session():
+                event.ignore()
+                return
+        else:
             self._clear_autosave()
         event.accept()
 

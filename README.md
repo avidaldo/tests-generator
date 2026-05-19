@@ -92,7 +92,7 @@ The underlying implementation lane for that launcher remains [`.github/skills/fi
 uv run python editor/main.py
 ```
 
-Start a new review session, import one or more Stage 3 batch JSON files with `Ctrl+O`, or import a whole Stage 3 root recursively with `Archivo -> Importar carpeta Stage 3...`, and save the consolidated review session as JSON. XML import remains available from `Archivo -> Importar XML...` for legacy banks. Review each question:
+Start a new review session, import one or more generated Stage 3 batch JSON files with `Archivo -> Importar -> Archivos Stage 3...` or `Ctrl+O`, or import a whole Stage 3 root recursively with `Archivo -> Importar -> Carpeta Stage 3...`. Open saved Stage 4 work with `Archivo -> Abrir sesión de revisión...`, save it with `Guardar sesión` or `Guardar sesión como...`, and use `Archivo -> Importar -> Legado -> Banco XML de Moodle...` only for older XML banks. Review each question:
 
 - **Pendiente** → not yet reviewed
 - **Revisar** → needs changes
@@ -100,11 +100,15 @@ Start a new review session, import one or more Stage 3 batch JSON files with `Ct
 
 ### Step 5: Export to Moodle XML
 
+The normal manual path is `Archivo -> Exportar -> Moodle XML...` inside the editor. Only questions marked `lista` are exported.
+
+For scripted conversion of a saved review-session JSON file, you can also use:
+
 ```bash
 python resources/json_to_moodle_xml.py review-session.json exam.xml
 ```
 
-Only questions marked `lista` are exported. Import the XML into Moodle.
+Import the resulting XML into Moodle.
 
 ## Setup
 
@@ -138,6 +142,8 @@ pip install PyQt6 lxml
 - [Distractor Design & Psychometric Techniques](docs/distractor_design.md)
 - [Summary Document Format](docs/summary_format.md)
 - [Editor JSON Schema](docs/editor_json_schema.md)
+- [Editor Workflow](editor/docs/WORKFLOW.md)
+- [Editor Import And Export Guide](editor/docs/IMPORT_EXPORT.md)
 - [Pipeline Execution Modes](docs/pipeline_execution_modes.md)
 - [Editor Architecture](editor/AGENTS.md)
 - [Results Privacy Policy](results/AGENTS.md)

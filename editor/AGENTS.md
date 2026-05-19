@@ -9,7 +9,7 @@ This file is the canonical, tool-agnostic instruction surface for the `editor/` 
 
 - Keep `.github/instructions/editor.instructions.md` as a VS Code routing adapter only, not as a second source of editor policy.
 - Target editor v3 for all new development. Treat `editor/deprecated/` as reference material only.
-- When introducing or materially changing editor components, update this file and `editor/README.md` together.
+- When introducing or materially changing editor components, update this file and `editor/README.md` together. If the change alters the user workflow, sync the detailed user docs in `editor/docs/` too.
 
 ## Architecture Principles
 
@@ -123,7 +123,8 @@ Stage 4 review-session persistence and backward-compatible JSON import.
 - `save_state(questions: list[Question], filepath: Path)`
 - `load_state(filepath: Path) -> list[Question]`
 - `save_review_session(review_session: ReviewSession, filepath: Path)`
-- `load_review_session(filepath: Path) -> ReviewSession`
+- `load_review_session(filepath: Path) -> ReviewSession` — accepts saved Stage 4 review-session JSON and backward-compatible legacy editor-state JSON; rejects raw Stage 3 batches
+- `load_stage3_batch(filepath: Path) -> list[Question]` — accepts only raw Stage 3 batch JSON for append-style import
 
 **Import contract**: the JSON format is defined in [`docs/editor_json_schema.md`](../docs/editor_json_schema.md). That document is the canonical source of truth for the Stage 3 batch envelope, the Stage 4 review-session envelope, field names, types, required values, provenance semantics, and editor-populated defaults. Update it whenever the schema changes; do not rely solely on reading this file or `state_io.py`.
 
@@ -134,7 +135,7 @@ Imports from: `models.question`
 Top-level window with toolbar, question list, filter sidebar, detail panel.
 
 - `StatusFilterProxyModel(QSortFilterProxyModel)`: Filters by status, category, and easy-only mode.
-- `MainWindow(QMainWindow)`: Owns the Stage 4 review-session workflow, including Stage 3 JSON file import, recursive Stage 3 folder import, review-session save/load, secondary XML import, export, autosave, and theme application.
+- `MainWindow(QMainWindow)`: Owns the Stage 4 review-session workflow, including Stage 3 JSON file import, recursive Stage 3 folder import, review-session save/load, dirty-state tracking, Save/Discard/Cancel replacement prompts, secondary XML import, export, autosave, and theme application.
 
 Imports from: `models.*`, `views.question_detail`, `views.theme`, `file_io.*`
 

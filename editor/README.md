@@ -1,39 +1,74 @@
 # Moodle Quiz Editor
 
-Desktop editor for Stage 4 human review of generated quiz questions using PyQt6. The primary input is one or more Stage 3 batch JSON files, saved into one editor-owned review-session JSON, and exported to Moodle XML at the end of the process. Legacy XML import remains available for older banks. Previous versions (v1 Streamlit, v2 Textual TUI) are in `deprecated/` for reference.
+Desktop editor for Stage 4 human review of generated quiz questions using PyQt6. The normal workflow is:
 
-## Features
+1. import generated Stage 3 questions,
+2. review and edit them inside one Stage 4 review session,
+3. save that review session as JSON,
+4. export approved questions to Moodle XML.
 
-- **Stage 3 batch import**: Load one or more generated JSON batch files directly into the editor
-- **Stage 3 folder import**: Load every recursive `batch-*.json` file under a selected Stage 3 root
-- **Review-session save/load**: Persist the consolidated Stage 4 working set as JSON
-- **Legacy XML import**: Bring older Moodle XML banks into the same review workflow when needed
-- **Category organization**: Filter by category tree
-- **Three-state workflow**: "Pendiente" / "Revisar" / "Lista" (approved for exam)
-- **Difficulty flag**: Mark approved questions as "Fácil" for difficulty-filtered export
-- **Theme selection**: Switch between system, light, and dark themes from `Vista -> Tema`; the choice is persisted between sessions
-- **Full undo/redo**: Native Qt QUndoStack
-- **HTML preview**: View rendered HTML, edit raw
+Legacy XML import remains available for older banks, but it is a secondary path. Previous versions (v1 Streamlit, v2 Textual TUI) remain in `deprecated/` for reference.
 
-## Primary Workflow
+## Mental Model
 
-1. Start a new review session in the editor.
-2. Import one or more Stage 3 batch JSON files with `Ctrl+O`, or import a whole Stage 3 root recursively with `Archivo -> Importar carpeta Stage 3...`.
-3. Review and edit questions, then save the consolidated review session as JSON.
-4. Export only the approved `Lista` questions to Moodle XML.
+The editor works with three artifact types that should not be confused:
 
-Use `Archivo -> Abrir sesión de revisión...` to reopen a saved Stage 4 session. Use `Archivo -> Importar XML...` only when working with older XML banks.
+- **Stage 3 batch JSON**: generated question batches. Import them into the current review session.
+- **Stage 4 review-session JSON**: the editor-owned working file. Open it to replace the current session, or save the current session into it.
+- **Moodle XML**: final export format for approved questions.
+
+If you use the wrong action for a JSON file, the editor now rejects it and tells you which action to use instead.
+
+## Main Actions
+
+### Import generated Stage 3 questions
+
+- `Archivo -> Importar -> Archivos Stage 3...`
+- `Archivo -> Importar -> Carpeta Stage 3...`
+
+Both actions **append** questions into the current review session. Folder import is recursive and only reads `batch-*.json` files. Duplicate questions are skipped using the stored provenance keys.
+
+### Open a saved review session
+
+- `Archivo -> Abrir sesión de revisión...`
+
+This action opens one saved Stage 4 session file and **replaces** the questions currently loaded in the editor. If there are unsaved changes, the editor asks whether to **Guardar**, **Descartar**, or **Cancelar** before replacing it.
+
+### Save the current review session
+
+- `Archivo -> Guardar sesión`
+- `Archivo -> Guardar sesión como...`
+
+Use these actions to persist the current Stage 4 working set. `Guardar sesión` reuses the current file when one already exists. `Guardar sesión como...` always asks for a new path.
+
+### Export to Moodle XML
+
+- `Archivo -> Exportar -> Moodle XML...`
+
+This exports only questions marked as `Lista`. The secondary `Moodle XML (solo fáciles)...` action exports only questions marked both `Lista` and `Fácil`.
+
+## Secondary Actions
+
+- `Archivo -> Importar -> Legado -> Banco XML de Moodle...`: import older XML banks into the review workflow.
+- `Nueva sesión de revisión`: clear the current working set after the same confirmation flow, but only when there are unsaved changes.
+
+## Review States
+
+- `Pendiente`: not reviewed yet.
+- `Revisar`: seen, but still needs work.
+- `Lista`: approved for export.
+
+The `Fácil` flag is an optional secondary marker for approved questions.
 
 ## Appearance
 
 Use `Vista -> Tema` to switch between `Sistema`, `Claro`, and `Oscuro`.
 The editor remembers the last selected theme through `QSettings` and restores it on the next launch.
-Dark mode now applies explicit readable colors to question editors and answer/distractor cards instead of relying on whatever palette the host desktop provides.
 
 ## Running
 
 ```bash
-uv sync  # Install dependencies
+uv sync
 uv run python editor/main.py
 ```
 
@@ -41,12 +76,16 @@ uv run python editor/main.py
 
 | Key | Action |
 |-----|--------|
-| `Ctrl+O` | Import Stage 3 batch JSON |
+| `Ctrl+O` | Import Stage 3 files |
 | `Ctrl+S` | Save review session |
+| `Ctrl+Shift+S` | Save review session as |
 | `Ctrl+Z` | Undo |
 | `Ctrl+Shift+Z` | Redo |
 | `Delete` | Delete question |
 
-## Open Work
+## Further Reading
 
-- (P10 completed — difficulty sub-categorization implemented)
+- [Workflow guide](docs/WORKFLOW.md)
+- [Import and export guide](docs/IMPORT_EXPORT.md)
+- [Editor architecture](AGENTS.md)
+- [Shared JSON schema](../docs/editor_json_schema.md)
