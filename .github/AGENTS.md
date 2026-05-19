@@ -58,7 +58,6 @@ This folder contains the VS Code and Copilot customization layer for repository 
 - `notebooks.instructions.md` — applies to `**/*.ipynb`.
 - `prompt-authoring.instructions.md` — applies to `**/*.prompt.md` and `**/*.instructions.md`.
 - `python.instructions.md` — applies to `**/*.py`.
-- `question-design.instructions.md` — applies to `prompts/generate-questions.prompt.md`.
 - `resources.instructions.md` — applies to `resources/**`.
 - `results.instructions.md` — applies to `results/**`.
 - `xml-moodle.instructions.md` — applies to `**/*.xml`.

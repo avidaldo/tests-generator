@@ -147,12 +147,12 @@ Stage 1 handles three file types. Extraction depth depends on **question focus**
 
 ### Domain Knowledge
 
-Psychometric design knowledge is maintained in `docs/` and auto-attached via instructions:
+Psychometric design knowledge is maintained in `docs/` and linked from the generation prompt:
 
-| Document | Content | Auto-attached via |
-| -------- | ------- | ----------------- |
-| [docs/adversarial_logic_filters.md](../docs/adversarial_logic_filters.md) | Adversarial filter mechanism, CoT strategy, prompting meta-techniques | Referenced in generation prompt |
-| [docs/distractor_design.md](../docs/distractor_design.md) | Distractor strategies, anti-bias rules, scenario triangulation, psychometric item quality | `.github/instructions/question-design.instructions.md` |
+| Document | Content | Used via |
+| -------- | ------- | -------- |
+| [docs/adversarial_logic_filters.md](../docs/adversarial_logic_filters.md) | Adversarial filter mechanism, CoT strategy, prompting meta-techniques | Referenced in `generate-questions.prompt.md` |
+| [docs/distractor_design.md](../docs/distractor_design.md) | Distractor strategies, anti-bias rules, scenario triangulation, psychometric item quality | Referenced in `generate-questions.prompt.md` |
 
 ## Canonical Prompt Authoring Rules
 

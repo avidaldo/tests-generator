@@ -93,5 +93,6 @@ Each step is run manually. See the [Usage guide in README.md](README.md#usage-ge
 - The detailed customization inventory now lives in [`.github/AGENTS.md`](.github/AGENTS.md).
 - The human-oriented customization guide now lives in [`.github/README.md`](.github/README.md).
 - Maintenance prompt policy now lives in [`.github/prompts/AGENTS.md`](.github/prompts/AGENTS.md).
+- Stage 3 question-design rules live in [`prompts/generate-questions.prompt.md`](prompts/generate-questions.prompt.md) and the linked domain docs rather than in a prompt-specific `.github/instructions/` adapter.
 - Root `prompts/` remains reserved for the quiz-generation pipeline and stays enabled through `.vscode/settings.json`.
 - Keep this root file focused on project-facing policy and discovery; do not duplicate the full customization inventory here.
