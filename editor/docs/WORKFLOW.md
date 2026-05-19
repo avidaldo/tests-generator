@@ -46,11 +46,15 @@ If there are unsaved changes, the editor asks whether to:
 
 Each imported question starts as `Pendiente`.
 
+Raw Stage 3 batches start with 7 answers total. During Stage 4 review it is valid to prune distractors; a reviewed question with 4 total answers is a normal final state for export, not a workflow error.
+
 Use the three review states consistently:
 
 - `Pendiente`: not reviewed yet.
 - `Revisar`: reviewed, but not acceptable yet.
 - `Lista`: approved for export.
+
+The editor also shows advisory warning markers when the correct answer looks substantially longer or shorter than the distractors after visible-text normalization. These warnings help reviewers catch answer-length bias, but they do not block save or export actions.
 
 Use the `Fácil` flag only as a secondary classification for already approved questions.
 

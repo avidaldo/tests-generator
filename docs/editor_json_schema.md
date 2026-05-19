@@ -8,6 +8,11 @@
  - **Stage 3 batch JSON**: immutable generation output, written by `generate-questions.prompt.md`
  - **Stage 4 review-session JSON**: editor-owned working artifact, written by the editor after one or more Stage 3 imports or legacy XML imports
 
+ Most question fields are shared verbatim between both envelopes, but the answer-count contract is stage-specific:
+
+- **Stage 3** keeps the raw generated set and therefore requires exactly 7 answers: 1 correct option + 6 distractors.
+- **Stage 4** is reviewer-owned and may prune distractors after human review. A common reviewed final shape is 4 answers total: 1 correct option + 3 distractors.
+
  ## Stage 3 Batch JSON
 
  ```json
@@ -99,7 +104,7 @@
  | `origin_kind` | string | editor-managed | Provenance type written by the editor when importing or saving a Stage 4 review session. |
  | `origin_path` | string | editor-managed | Path of the imported source artifact when known. |
  | `origin_question_id` | string | editor-managed | Stable source identifier used by the editor for duplicate suppression across imports. |
- | `answers` | array | yes | Exactly 7 answer objects: 1 correct + 6 distractors. See [Answer Object](#answer-object). |
+| `answers` | array | yes | Stage 3 batches require exactly 7 answer objects: 1 correct + 6 distractors. Stage 4 review-session questions may contain a reviewer-pruned subset, commonly 4 total answers. See [Answer Object](#answer-object). |
 
  ### Editor-populated Moodle fields
 
@@ -136,7 +141,9 @@
 
  ### Answer count
 
- Every question must have exactly 7 answers: 1 correct option and 6 distractors.
+ Stage 3 generation must write exactly 7 answers: 1 correct option and 6 distractors.
+
+ Stage 4 review-session questions may contain fewer answers after human pruning. A typical final export shape is 4 answers total: 1 correct option and 3 distractors.
 
  ## Scoring
 
@@ -149,4 +156,4 @@
 
  ## Export Note
 
- `resources/json_to_moodle_xml.py` reads the top-level `questions` array and ignores review-session metadata such as `artifact_type` and `imported_sources`. This is intentional: Stage 4 review-session JSON is the living artifact, while Moodle XML remains the final export format.
+ `resources/json_to_moodle_xml.py` reads the top-level `questions` array and ignores review-session metadata such as `artifact_type` and `imported_sources`. It exports the reviewed answer array as-is; it does not restore pruned distractors. This is intentional: Stage 4 review-session JSON is the living artifact, while Moodle XML remains the final export format.

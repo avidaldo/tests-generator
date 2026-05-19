@@ -41,7 +41,7 @@ If you want repeated successive Stage 3 batches until an approved Stage 2 scope 
 6. Persist each output immediately.
    Derive the per-subcategory folder from the input filename, write the next free `batch-###.json`, and do not report the unit as complete until the file exists on disk and the manifest is updated.
 7. Validate each written batch before continuing.
-   Re-open the saved JSON and confirm that it parses, each question has exactly 7 answers, every answer has feedback, the learner-facing text is self-contained, and no direct concept stem drifts back into decorative classroom or named-speaker wrappers. If one unit fails validation, stop the pass, mark that unit `needs-fix`, and do not continue to later units until the failure is repaired or consciously deferred.
+   Re-open the saved JSON and confirm that it parses, each question has exactly 7 answers, every answer has feedback, the learner-facing text is self-contained, no direct concept stem drifts back into decorative classroom or named-speaker wrappers, and the correct option is not uniquely longest or shortest by a clear margin when you compare normalized visible option text only. If one unit fails validation, stop the pass, mark that unit `needs-fix`, and do not continue to later units until the failure is repaired or consciously deferred.
 8. Keep partial progress inspectable.
    Update the manifest after every unit with the saved batch path, status, and any note needed to resume safely.
 9. Stop at the Stage 3 boundary.

@@ -67,6 +67,17 @@ Session-level models for the Stage 4 workflow.
 - `ReviewSession(dataclass)`: Editor-owned review session containing `questions` and `imported_sources`.
 - Constants: `REVIEW_SESSION_ARTIFACT_TYPE`, `REVIEW_SESSION_VERSION`
 
+### `models/question_diagnostics.py`
+
+Derived non-blocking diagnostics for reviewed questions.
+
+- `AnswerLengthMetrics(dataclass)`: Visible-text metrics for one answer option.
+- `QuestionDiagnostics(dataclass)`: Question-level warning summary. Property: `has_warnings`.
+- `extract_visible_text(html_text: str) -> str`
+- `analyze_question(question: Question) -> QuestionDiagnostics`
+
+Imports from: `models.question`, stdlib only
+
 ### `models/quiz_model.py`
 
 Qt model holding the question list.
@@ -156,7 +167,7 @@ Imports from: Qt only
 Detail editing panel for a single question.
 
 - `AnswerWidget(QFrame)`: Displays/edits one answer. Signals: `delete_requested`, `text_changed`, `feedback_changed`.
-- `QuestionDetailPanel(QWidget)`: Edits question fields and shows provenance for the selected question. Signals: `question_changed`, `delete_question_requested`.
+- `QuestionDetailPanel(QWidget)`: Edits question fields and shows provenance plus advisory diagnostics for the selected question. Signals: `question_changed`, `delete_question_requested`.
   - `set_question(question: Question | None)`
   - `set_theme_mode(theme_mode: str)`
 

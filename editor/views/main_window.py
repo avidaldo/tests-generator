@@ -15,6 +15,7 @@ from PyQt6.QtGui import QAction, QActionGroup, QUndoStack, QKeySequence, QFont, 
 
 from models.quiz_model import QuizModel
 from models.question import QuestionStatus
+from models.question_diagnostics import analyze_question
 from models.undo_commands import DeleteQuestionCommand
 from views.question_detail import QuestionDetailPanel
 from views.theme import THEME_OPTIONS, THEME_SYSTEM, apply_app_theme
@@ -123,6 +124,7 @@ class MainWindow(QMainWindow):
         self._model.dataChanged.connect(self._schedule_autosave)
         self._model.rowsInserted.connect(self._schedule_autosave)
         self._model.rowsRemoved.connect(self._schedule_autosave)
+        self._model.dataChanged.connect(self._update_stats)
         self._model.dataChanged.connect(self._mark_session_dirty)
         self._model.rowsInserted.connect(self._mark_session_dirty)
         self._model.rowsRemoved.connect(self._mark_session_dirty)
@@ -732,9 +734,12 @@ class MainWindow(QMainWindow):
         revisar = sum(1 for q in self._model.questions if q.status == QuestionStatus.REVISAR)
         pendiente = sum(1 for q in self._model.questions if q.status == QuestionStatus.PENDIENTE)
         easy = sum(1 for q in self._model.questions if q.status == QuestionStatus.LISTA and q.is_easy)
+        warnings = sum(1 for q in self._model.questions if analyze_question(q).has_warnings)
 
         self._stats_label.setText(
-            f"Total: {total} | ⋯ Pendiente: {pendiente} | ↻ Revisar: {revisar} | ✓ Lista: {lista} | ★ Fácil: {easy}"
+            "Total: "
+            f"{total} | ⋯ Pendiente: {pendiente} | ↻ Revisar: {revisar} | "
+            f"✓ Lista: {lista} | ★ Fácil: {easy} | ! Warnings: {warnings}"
         )
 
     def _schedule_autosave(self, *args):

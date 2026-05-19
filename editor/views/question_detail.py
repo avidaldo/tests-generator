@@ -13,6 +13,7 @@ from PyQt6.QtGui import QUndoStack, QFont
 import re
 
 from models.question import Question, QuestionStatus
+from models.question_diagnostics import analyze_question
 from models.quiz_model import QuizModel
 from models.undo_commands import (
     ToggleStatusCommand, EditQuestionFieldCommand,
@@ -269,6 +270,11 @@ class QuestionDetailPanel(QWidget):
         self._status_label.setStyleSheet("padding: 5px;")
         layout.addWidget(self._status_label)
 
+        self._warning_label = QLabel("")
+        self._warning_label.setWordWrap(True)
+        self._warning_label.setVisible(False)
+        layout.addWidget(self._warning_label)
+
         # Separator
         sep = QFrame()
         sep.setFrameShape(QFrame.Shape.HLine)
@@ -328,8 +334,21 @@ class QuestionDetailPanel(QWidget):
             self._category_edit.setStyleSheet(build_line_edit_style(theme_variant, font_size))
         if hasattr(self, "_source_label"):
             self._source_label.setStyleSheet(build_muted_label_style(theme_variant))
+        if hasattr(self, "_warning_label"):
+            self._warning_label.setStyleSheet(self._build_warning_label_style(theme_variant))
         for widget in self._answer_widgets:
             widget.set_theme_mode(self._theme_mode)
+
+    def _build_warning_label_style(self, theme_variant: str) -> str:
+        if theme_variant == "dark":
+            return (
+                "padding: 6px; background-color: #5D4037; color: #FFECB3; "
+                "border: 1px solid #8D6E63; border-radius: 3px;"
+            )
+        return (
+            "padding: 6px; background-color: #FFF4CE; color: #7A4F01; "
+            "border: 1px solid #D6B656; border-radius: 3px;"
+        )
 
     def set_theme_mode(self, theme_mode: str):
         self._theme_mode = theme_mode
@@ -404,6 +423,8 @@ class QuestionDetailPanel(QWidget):
             self._category_edit.setEnabled(False)
             self._source_label.setText("")
             self._status_label.setText("")
+            self._warning_label.clear()
+            self._warning_label.setVisible(False)
             self._question_edit.clear()
             self._feedback_edit.clear()
             self._clear_answers()
@@ -453,6 +474,8 @@ class QuestionDetailPanel(QWidget):
             self._lista_btn.setEnabled(True)
             self._revisar_btn.setEnabled(True)
 
+        self._refresh_warning_label()
+
         # Question text - clean HTML to allow font resizing
         self._question_edit.setHtml(self._clean_html(q.question_text))
         self._apply_font_to_text_edit(self._question_edit, self.font())
@@ -486,6 +509,26 @@ class QuestionDetailPanel(QWidget):
         if not parts:
             return ""
         return f"📄 {' | '.join(parts)}"
+
+    def _refresh_warning_label(self):
+        if not self._current_question:
+            self._warning_label.clear()
+            self._warning_label.setVisible(False)
+            return
+
+        diagnostics = analyze_question(self._current_question)
+        if not diagnostics.has_warnings:
+            self._warning_label.clear()
+            self._warning_label.setVisible(False)
+            return
+
+        warning_text = " ".join(diagnostics.warnings)
+        comparison = (
+            f"Correct: {diagnostics.correct_word_count} words | "
+            f"Distractor median: {diagnostics.distractor_median_word_count:.1f} words"
+        )
+        self._warning_label.setText(f"Warning: {warning_text} {comparison}")
+        self._warning_label.setVisible(True)
 
     def _clear_answers(self):
         self._answer_widgets.clear()
@@ -591,6 +634,7 @@ class QuestionDetailPanel(QWidget):
         cmd = DeleteAnswerCommand(self._model, self._current_question.id, answer_index)
         self._undo_stack.push(cmd)
         self._refresh_answers()
+        self._refresh_warning_label()
         self.question_changed.emit()
 
     def _on_answer_text_changed(self, answer_index: int, new_text: str):
@@ -604,6 +648,7 @@ class QuestionDetailPanel(QWidget):
                     "text", old_text, new_text
                 )
                 self._undo_stack.push(cmd)
+                self._refresh_warning_label()
 
     def _on_answer_feedback_changed(self, answer_index: int, new_feedback: str):
         if self._is_updating or not self._current_question:

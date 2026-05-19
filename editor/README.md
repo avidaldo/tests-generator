@@ -28,6 +28,8 @@ If you use the wrong action for a JSON file, the editor now rejects it and tells
 
 Both actions **append** questions into the current review session. Folder import is recursive and only reads `batch-*.json` files. Duplicate questions are skipped using the stored provenance keys.
 
+Imported Stage 3 batches start with 7 answers total: 1 correct option + 6 distractors. During Stage 4 review it is valid to prune distractors; approved questions often finish with 4 answers total before export.
+
 ### Open a saved review session
 
 - `Archivo -> Abrir sesión de revisión...`
@@ -59,6 +61,10 @@ This exports only questions marked as `Lista`. The secondary `Moodle XML (solo f
 - `Lista`: approved for export.
 
 The `Fácil` flag is an optional secondary marker for approved questions.
+
+## Review Warnings
+
+The editor shows non-blocking warning markers when the correct answer looks substantially longer or shorter than the distractors after visible-text normalization. These warnings are advisory only. They exist to catch a common multiple-choice bias where answer detail, rather than conceptual accuracy, gives away the correct option.
 
 ## Appearance
 

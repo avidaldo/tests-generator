@@ -7,6 +7,7 @@ Wraps question data for use with QListView. Emits signals on changes.
 from PyQt6.QtCore import QAbstractListModel, QModelIndex, Qt
 from PyQt6.QtGui import QColor
 
+from models.question_diagnostics import analyze_question
 from models.question import Question, QuestionStatus
 
 
@@ -33,7 +34,8 @@ class QuizModel(QAbstractListModel):
                 status_icon = "↻"
             else:  # PENDIENTE
                 status_icon = "⋯"
-            return f"{status_icon} {question.name}"
+            warning_prefix = "! " if analyze_question(question).has_warnings else ""
+            return f"{status_icon} {warning_prefix}{question.name}"
 
         elif role == Qt.ItemDataRole.UserRole:
             return question

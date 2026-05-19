@@ -63,6 +63,17 @@ LLM-generated multiple-choice questions exhibit systematic statistical biases. T
 ### Length Bias
 The correct answer must NOT be systematically longer or shorter than distractors. When the correct answer requires a detailed explanation, make distractors equally detailed. When it's brief, keep distractors brief.
 
+Operational rule:
+
+- Compare normalized visible text only. Ignore HTML wrappers, rich-text boilerplate, and formatting tags.
+- Treat unique longest/shortest correct options as suspicious when the length gap is clear enough that detail alone could cue the answer.
+- If the correct option genuinely needs extra nuance, add comparable specificity to distractors instead of leaving the correct option as the only fully developed answer.
+
+Example:
+
+- Weak: Correct option is a full two-clause explanation while every distractor is a short noun phrase.
+- Better: All options are short explanatory statements with comparable specificity; correctness depends on the concept, not on which option looks the most developed.
+
 ### Structural Bias
 Avoid the pattern of 3 similar options + 1 obviously different one. All 7 options should have comparable structure, vocabulary level, and specificity.
 

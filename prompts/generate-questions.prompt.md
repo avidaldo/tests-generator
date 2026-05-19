@@ -198,6 +198,8 @@ The feedback for the correct answer must explain *why* it is correct, not just r
 
 All feedback must be self-contained learner-facing text. Explain the correctness or falseness directly from the concept or scenario in the question; do not attribute the explanation to "the material", notes, notebooks, slides, or source files.
 
+Before finalizing each question, run an answer-length bias pass on the option texts using normalized learner-visible text only. Ignore HTML wrappers, editor boilerplate, and formatting tags. If the correct option is uniquely the longest or shortest by a clear margin, rewrite the answer set so length/detail alone does not signal correctness. If the correct option genuinely needs more detail, expand the distractors to comparable specificity instead of leaving the correct option as the only fully developed answer.
+
 ### Phase 3: Coverage Self-Check
 
 Before finalizing the JSON, verify all of the following:
@@ -209,6 +211,7 @@ Before finalizing the JSON, verify all of the following:
 5. Run a final learner-facing text pass on every `question_text`, `general_feedback`, and `answers[].feedback`: each field must be self-contained and understandable without the source file, notes, notebook, slides, or class materials.
 6. If any learner-facing field contains a forbidden anchor such as `según el material`, `según las notas`, `según el cuaderno`, `del material`, `according to the material`, `according to the notes`, `the material`, or `in the notebook`, rewrite that field before saving JSON. Preserve the tested concept, difficulty, and `source_ref`; change only the wording needed to embed the context directly.
 7. For every definition, distinction, taxonomy, hierarchy, or misconception-correction question, check whether the stem still works with the narrative wrapper removed. If it does, save the direct version instead of the wrapped one.
+8. For every question, compare the answer options using normalized visible text only. Ignore HTML/style wrappers. If the correct option is uniquely the longest or shortest by a clear margin, rebalance the option set before saving the JSON.
 </generation_algorithm>
 
 ---

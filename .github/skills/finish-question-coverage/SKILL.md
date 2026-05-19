@@ -50,7 +50,7 @@ This skill orchestrates repeated Stage 3 runs over an approved Stage 2 scope. Th
 6. Reuse the canonical Stage 3 rules for every batch.
    For each selected scope, apply [prompts/generate-questions.prompt.md](../../../prompts/generate-questions.prompt.md) without inventing a second Stage 3 policy. Respect the inherited Question focus, the user-provided Stage 3 output root, the learner-facing self-containment rules, the direct-stem rules, and the JSON schema contract.
 7. Persist and validate each batch before continuing.
-   Write the next free `batch-###.json`, then re-open it and confirm that it parses, each question has exactly 7 answers, every answer has feedback, the learner-facing text is self-contained, and the manifest records which `SURF-*` entries this batch was meant to cover. If one batch fails validation, stop the run, mark that unit `needs-fix`, and do not continue.
+   Write the next free `batch-###.json`, then re-open it and confirm that it parses, each question has exactly 7 answers, every answer has feedback, the learner-facing text is self-contained, the correct option is not uniquely longest or shortest by a clear margin when you compare normalized visible option text only, and the manifest records which `SURF-*` entries this batch was meant to cover. If one batch fails validation, stop the run, mark that unit `needs-fix`, and do not continue.
 8. Update the manifest after every batch.
    Record the saved batch path, the targeted `SURF-*` entries, validation status, and the next uncovered surfaces so the run stays inspectable and resumable.
 9. Continue wave by wave until the stop condition is met.

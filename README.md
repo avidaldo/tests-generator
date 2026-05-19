@@ -14,7 +14,7 @@ See [`prompts/AGENTS.md`](prompts/AGENTS.md) for the full pipeline diagram, desi
 
 ### Quiz Editor (`editor/`)
 
-Desktop application (PyQt) for Stage 4 review of generated question batches. The primary workflow imports one or more Stage 3 JSON batches into a consolidated review session, then exports approved questions to Moodle XML. Legacy XML import remains available for older banks. Generated questions are created with 6 distractors each, since the distractor design strategy is to generate more than needed and then review. The editor allows reviewing, editing, and categorizing questions before export. It supports undo/redo, drag-and-drop reordering, and category management.
+Desktop application (PyQt) for Stage 4 review of generated question batches. The primary workflow imports one or more Stage 3 JSON batches into a consolidated review session, then exports approved questions to Moodle XML. Legacy XML import remains available for older banks. Stage 3 generation intentionally starts with 6 distractors per question so review has room to prune weak ones; reviewed Stage 4 questions often finish with 3 distractors before export. The editor allows reviewing, editing, and categorizing questions before export. It supports undo/redo, drag-and-drop reordering, and category management.
 
 See: [`editor/README.md`](editor/README.md)
 
@@ -97,6 +97,10 @@ Start a new review session, import one or more generated Stage 3 batch JSON file
 - **Pendiente** → not yet reviewed
 - **Revisar** → needs changes
 - **Lista** → approved for export
+
+Imported Stage 3 questions start with 7 answers total. During Stage 4 review it is valid to prune distractors; a reviewed 4-answer question is a normal final state, not a schema error.
+
+The editor also shows non-blocking warning markers when the correct option looks substantially longer or shorter than the distractors after visible-text normalization. Treat those warnings as review aids, not as export blockers.
 
 ### Step 5: Export to Moodle XML
 
