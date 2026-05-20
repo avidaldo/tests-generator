@@ -21,10 +21,10 @@ If you use the wrong action for a JSON file, the editor now rejects it and tells
 
 ## Main Actions
 
-### Import generated Stage 3 questions
+### Add generated Stage 3 questions
 
-- `Archivo -> Importar -> Archivos Stage 3...`
-- `Archivo -> Importar -> Carpeta Stage 3...`
+- `Archivo -> Añadir -> Archivos Stage 3...`
+- `Archivo -> Añadir -> Carpeta Stage 3...`
 
 Both actions **append** questions into the current review session. Folder import is recursive and only reads `batch-*.json` files. Duplicate questions are skipped using the stored provenance keys.
 
@@ -51,7 +51,7 @@ This exports only questions marked as `Lista`. The secondary `Moodle XML (solo f
 
 ## Secondary Actions
 
-- `Archivo -> Importar -> Legado -> Banco XML de Moodle...`: import older XML banks into the review workflow.
+- `Archivo -> Añadir -> Legado -> Banco XML de Moodle...`: import older XML banks into the review workflow.
 - `Nueva sesión de revisión`: clear the current working set after the same confirmation flow, but only when there are unsaved changes.
 
 ## Review States

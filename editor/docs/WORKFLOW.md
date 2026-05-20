@@ -27,8 +27,8 @@ Use one of these flows:
 
 - Start empty with `Archivo -> Nueva sesión de revisión`
 - Continue saved work with `Archivo -> Abrir sesión de revisión...`
-- Append new generated questions with `Archivo -> Importar -> Archivos Stage 3...`
-- Append a whole Stage 3 root with `Archivo -> Importar -> Carpeta Stage 3...`
+- Append new generated questions with `Archivo -> Añadir -> Archivos Stage 3...`
+- Append a whole Stage 3 root with `Archivo -> Añadir -> Carpeta Stage 3...`
 
 ### When a session is replaced
 
@@ -81,6 +81,6 @@ The secondary `Moodle XML (solo fáciles)...` export requires both:
 
 ## Secondary Legacy Path
 
-`Archivo -> Importar -> Legado -> Banco XML de Moodle...` exists for older XML banks that need to enter the same review flow.
+`Archivo -> Añadir -> Legado -> Banco XML de Moodle...` exists for older XML banks that need to enter the same review flow.
 
 It is intentionally separated from the Stage 3 import path because it is not the normal generated-question workflow.

@@ -92,7 +92,7 @@ The underlying implementation lane for that launcher remains [`.github/skills/fi
 uv run python editor/main.py
 ```
 
-Start a new review session, import one or more generated Stage 3 batch JSON files with `Archivo -> Importar -> Archivos Stage 3...` or `Ctrl+O`, or import a whole Stage 3 root recursively with `Archivo -> Importar -> Carpeta Stage 3...`. Open saved Stage 4 work with `Archivo -> Abrir sesión de revisión...`, save it with `Guardar sesión` or `Guardar sesión como...`, and use `Archivo -> Importar -> Legado -> Banco XML de Moodle...` only for older XML banks. Review each question:
+Start a new review session, add one or more generated Stage 3 batch JSON files with `Archivo -> Añadir -> Archivos Stage 3...` or `Ctrl+O`, or add a whole Stage 3 root recursively with `Archivo -> Añadir -> Carpeta Stage 3...`. Open saved Stage 4 work with `Archivo -> Abrir sesión de revisión...`, save it with `Guardar sesión` or `Guardar sesión como...`, and use `Archivo -> Añadir -> Legado -> Banco XML de Moodle...` only for older XML banks. Review each question:
 
 - **Pendiente** → not yet reviewed
 - **Revisar** → needs changes

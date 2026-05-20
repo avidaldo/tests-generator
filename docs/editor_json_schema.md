@@ -55,7 +55,7 @@
 
  ## Editor Action Contract
 
- - `Archivo -> Importar -> Archivos Stage 3...` and `Archivo -> Importar -> Carpeta Stage 3...` accept only the raw Stage 3 batch envelope.
+- `Archivo -> Añadir -> Archivos Stage 3...` and `Archivo -> Añadir -> Carpeta Stage 3...` accept only the raw Stage 3 batch envelope.
  - `Archivo -> Abrir sesión de revisión...` accepts the Stage 4 review-session envelope and backward-compatible legacy editor-state JSON, but rejects raw Stage 3 batches.
  - `Archivo -> Guardar sesión` and `Archivo -> Guardar sesión como...` always write the Stage 4 review-session envelope.
 

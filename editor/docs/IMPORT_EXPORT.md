@@ -6,10 +6,10 @@ This document explains which action to use for each file type and what effect th
 
 | Goal | Menu action | Accepted input | Effect on current session |
 | ---- | ---- | ---- | ---- |
-| Import generated question files | `Archivo -> Importar -> Archivos Stage 3...` | One or more Stage 3 batch JSON files | Appends questions |
-| Import a generated question folder | `Archivo -> Importar -> Carpeta Stage 3...` | A directory scanned recursively for `batch-*.json` | Appends questions |
+| Add generated question files | `Archivo -> Añadir -> Archivos Stage 3...` | One or more Stage 3 batch JSON files | Appends questions |
+| Add a generated question folder | `Archivo -> Añadir -> Carpeta Stage 3...` | A directory scanned recursively for `batch-*.json` | Appends questions |
 | Open saved editor work | `Archivo -> Abrir sesión de revisión...` | One Stage 4 review-session JSON file, plus backward-compatible legacy editor-state JSON | Replaces questions |
-| Import an older XML bank | `Archivo -> Importar -> Legado -> Banco XML de Moodle...` | One or more Moodle XML files | Appends questions |
+| Add an older XML bank | `Archivo -> Añadir -> Legado -> Banco XML de Moodle...` | One or more Moodle XML files | Appends questions |
 
 ## Stage 3 Import
 
@@ -85,7 +85,7 @@ That secondary export requires questions marked both:
 
 This is the wrong action.
 
-Use `Archivo -> Importar -> Archivos Stage 3...` or `Archivo -> Importar -> Carpeta Stage 3...` instead.
+Use `Archivo -> Añadir -> Archivos Stage 3...` or `Archivo -> Añadir -> Carpeta Stage 3...` instead.
 
 ### Trying to import a saved review session through the Stage 3 import path
 

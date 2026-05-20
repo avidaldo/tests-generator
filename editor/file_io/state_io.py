@@ -202,7 +202,7 @@ def load_review_session(filepath: Path) -> ReviewSession:
     if artifact_kind == STAGE3_BATCH_ARTIFACT_KIND:
         raise ValueError(
             "Expected a saved review session JSON, but received a Stage 3 batch JSON. "
-            "Use the Stage 3 import actions instead."
+            "Use the Stage 3 add actions instead."
         )
     return _deserialize_review_session(data, filepath)
 

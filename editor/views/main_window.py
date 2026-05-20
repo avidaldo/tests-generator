@@ -266,7 +266,7 @@ class MainWindow(QMainWindow):
 
         file_menu.addSeparator()
 
-        import_menu = file_menu.addMenu("Importar")
+        import_menu = file_menu.addMenu("Añadir")
 
         import_batch_action = QAction("Archivos Stage 3...", self)
         import_batch_action.setShortcut(QKeySequence.StandardKey.Open)
@@ -356,8 +356,8 @@ class MainWindow(QMainWindow):
         toolbar = QToolBar("Principal")
         self.addToolBar(toolbar)
 
-        toolbar.addAction("Importar Stage 3", self._import_stage3_batches)
-        toolbar.addAction("Carpeta Stage 3", self._import_stage3_folder)
+        toolbar.addAction("Añadir Stage 3", self._import_stage3_batches)
+        toolbar.addAction("Añadir carpeta", self._import_stage3_folder)
         toolbar.addAction("Abrir sesión", self._open_review_session)
         toolbar.addAction("Guardar", self._save_review_session)
 
@@ -474,7 +474,7 @@ class MainWindow(QMainWindow):
     def _import_legacy_xml_files(self):
         files, _ = QFileDialog.getOpenFileNames(
             self,
-            "Importar banco XML legado",
+            "Añadir banco XML legado a la sesión actual",
             self._default_session_dir(),
             "XML Files (*.xml)",
         )
@@ -488,10 +488,10 @@ class MainWindow(QMainWindow):
 
                 # Build status message
                 if added_count == len(questions):
-                    msg = f"Importadas {added_count} preguntas de {len(files)} archivo(s)"
+                    msg = f"Añadidas {added_count} preguntas a la sesión actual desde {len(files)} archivo(s)"
                 else:
                     skipped = len(questions) - added_count
-                    msg = f"Importadas {added_count} preguntas ({skipped} duplicadas omitidas)"
+                    msg = f"Añadidas {added_count} preguntas a la sesión actual ({skipped} duplicadas omitidas)"
                 self._status_bar.showMessage(msg, 5000)
             except Exception as e:
                 QMessageBox.critical(self, "Error", f"Error al importar: {e}")
@@ -499,7 +499,7 @@ class MainWindow(QMainWindow):
     def _import_stage3_batches(self):
         files, _ = QFileDialog.getOpenFileNames(
             self,
-            "Importar archivos Stage 3",
+            "Añadir archivos Stage 3 a la sesión actual",
             self._default_session_dir(),
             "Stage 3 JSON (*.json)",
         )
@@ -511,7 +511,7 @@ class MainWindow(QMainWindow):
     def _import_stage3_folder(self):
         folder = QFileDialog.getExistingDirectory(
             self,
-            "Importar carpeta Stage 3",
+            "Añadir carpeta Stage 3 a la sesión actual",
             self._default_session_dir(),
         )
         if not folder:
@@ -564,7 +564,7 @@ class MainWindow(QMainWindow):
         failed_count = len(failed_files)
         failed_summary = f" | {failed_count} archivo(s) rechazado(s)" if failed_count else ""
         self._status_bar.showMessage(
-            f"Importadas {added_count} preguntas Stage 3 desde {len(paths)} {selection_label} ({skipped_count} duplicadas omitidas){failed_summary}",
+            f"Añadidas {added_count} preguntas Stage 3 a la sesión actual desde {len(paths)} {selection_label} ({skipped_count} duplicadas omitidas){failed_summary}",
             5000,
         )
 
