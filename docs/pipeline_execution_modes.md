@@ -13,11 +13,14 @@ Stage 1 and Stage 3 can benefit from orchestration because they naturally decomp
 | Situation | Recommended surface | Why this is the right lane |
 | --- | --- | --- |
 | One repo, folder, or coherent topic area for Stage 1 | [`prompts/summarize-sources.prompt.md`](../prompts/summarize-sources.prompt.md) | Keeps the extraction focused and easy to validate before scaling out |
-| Many repos or folders for Stage 1 | [`.github/skills/summarize-all-sources/SKILL.md`](../.github/skills/summarize-all-sources/SKILL.md) | Fans out isolated Stage 1 runs while still producing one summary per path |
-| Merge validated Stage 1 summaries into subcategories | [`prompts/merge-summaries.prompt.md`](../prompts/merge-summaries.prompt.md) | Stage 2 remains a single deliberate taxonomy pass |
+| Many repos or folders for Stage 1 — in-session | [`.github/skills/summarize-all-sources/SKILL.md`](../.github/skills/summarize-all-sources/SKILL.md) | Fans out isolated Stage 1 runs while still producing one summary per path |
+| Many repos or folders for Stage 1 — background/Copilot CLI | [`.github/agents/stage1-runner.agent.md`](../.github/agents/stage1-runner.agent.md) | Delegates each path to an isolated `source-summarizer` subagent; coordinator context stays small; persists when VS Code closes |
+| Merge validated Stage 1 summaries into subcategories | [`prompts/merge-summaries.prompt.md`](../prompts/merge-summaries.prompt.md) | Stage 2 remains a single deliberate taxonomy pass — always human-gated |
 | One subcategory for Stage 3, or any run where you want tight surface control | [`prompts/generate-questions.prompt.md`](../prompts/generate-questions.prompt.md) | Keeps one fresh context window per subcategory and one reviewable batch per invocation |
-| Many subcategories for Stage 3 in a delegated or background breadth-first pass | [`.github/skills/generate-question-batches/SKILL.md`](../.github/skills/generate-question-batches/SKILL.md) | Advances multiple subcategories safely, at most one new batch per subcategory, with checkpointed progress |
-| An approved Stage 2 scope for Stage 3 where you want one-step exhaustive coverage until tracked `SURF-*` units are exhausted | [`prompts/finish-stage3-coverage.prompt.md`](../prompts/finish-stage3-coverage.prompt.md) | Gives the user one visible launcher in the project prompt layer while reusing the exhaustive coverage workflow and manifest discipline underneath |
+| Folder or multiple subcategory files attached to `generate-questions.prompt.md` | Redirect → [`stage3-runner` agent](../.github/agents/stage3-runner.agent.md) or [`finish-stage3-coverage.prompt.md`](../prompts/finish-stage3-coverage.prompt.md) | `generate-questions.prompt.md` will detect the multi-input and refuse. Use a bulk lane instead. |
+| Many subcategories for Stage 3 — in-session breadth-first pass | [`.github/skills/generate-question-batches/SKILL.md`](../.github/skills/generate-question-batches/SKILL.md) | Advances multiple subcategories safely, at most one new batch per subcategory, with checkpointed progress |
+| Approved Stage 2 scope, exhaustive Stage 3 — in-session | [`prompts/finish-stage3-coverage.prompt.md`](../prompts/finish-stage3-coverage.prompt.md) | One visible launcher; reuses the exhaustive coverage workflow and manifest discipline underneath |
+| Approved Stage 2 scope, exhaustive Stage 3 — background/Copilot CLI | [`.github/agents/stage3-runner.agent.md`](../.github/agents/stage3-runner.agent.md) | Delegates each subcategory to an isolated `batch-generator` subagent; coordinator context stays small; persists when VS Code closes |
 
 ## Artifact Path Contract
 
@@ -58,9 +61,10 @@ This is a bulk convenience lane, not a change in Stage 1 policy. Each produced s
 Use [`.github/skills/generate-question-batches/SKILL.md`](../.github/skills/generate-question-batches/SKILL.md) when you want a delegated or background breadth-first pass across many Stage 2 subcategory files. The skill should:
 
 - treat each subcategory file as one Stage 3 unit,
+- reuse the shared Stage 3 settings for the pass, including one stable batch-wide model label when the run knows it,
 - keep a checkpoint manifest under the user-provided Stage 3 root,
 - create at most one new batch per subcategory in a single pass,
-- validate each written JSON batch before continuing, and
+- validate each written JSON batch before continuing, including the batch-wide `generated_by_model` value when requested, and
 - stop on the first invalid artifact instead of silently pushing ahead.
 
 This lane is intentionally breadth-first. If one subcategory needs repeated batching with exact `SURF-*` control, the regular [`generate-questions.prompt.md`](../prompts/generate-questions.prompt.md) invocation is usually the better tool.
@@ -71,6 +75,7 @@ The preferred user-facing surface is [`prompts/finish-stage3-coverage.prompt.md`
 
 - require an approved Stage 2 scope rather than inventing missing taxonomy,
 - keep a coverage manifest under the user-provided Stage 3 root,
+- reuse the shared Stage 3 settings for the run, including one stable batch-wide model label when the run knows it,
 - track which `SURF-*` entries each validated batch was meant to cover,
 - treat legacy batches without a manifest as existing artifacts but not as automatically tracked coverage,
 - continue wave by wave until the selected subcategories are `done`, `needs-fix`, `blocked-upstream`, or `skipped`, and
@@ -79,6 +84,37 @@ The preferred user-facing surface is [`prompts/finish-stage3-coverage.prompt.md`
 Advanced users can still invoke the skill directly, but the prompt launcher is the simpler project-facing entrypoint because it keeps exhaustive Stage 3 discoverable next to the canonical Stage 1–3 prompts.
 
 This lane is still Stage-3-only. It does not replace Stage 2, and it does not make the editor review gate optional.
+
+### Background / Copilot CLI Execution
+
+The coordinator agents are designed for runs that should continue after VS Code closes, or where you want guaranteed context isolation per subcategory (no accumulation across units in the coordinator's window).
+
+**How context isolation works:** The coordinator (e.g., `stage3-runner`) only accumulates one-line manifest entries — one per subcategory. The actual question generation runs in a `batch-generator` subagent that gets its own clean context window and returns only a summary line. The coordinator never sees the full generation output.
+
+**Stage 3 background run:**
+
+```sh
+# Select the stage3-runner agent in Copilot CLI
+gh copilot suggest --agent stage3-runner \
+  "stage2_scope: /path/to/stage2/saa2/ stage3_root: /path/to/stage3-new/ output_language: Castellano"
+```
+
+Enable in VS Code settings: `"github.copilot.chat.cli.customAgents.enabled": true`.
+
+Use `/remote on` inside the CLI session to mirror progress to GitHub and monitor from any device.
+
+Use worktree isolation mode (`--worktree-isolation`) for unattended runs — auto-approves all tool calls, no confirmation prompts.
+
+**Stage 1 background run:**
+
+```sh
+gh copilot suggest --agent stage1-runner \
+  "source_paths: /path/to/repo1, /path/to/repo2 stage1_root: /path/to/stage1-summaries/"
+```
+
+**Stage 2 is always manual.** There is no background lane for Stage 2. The taxonomy review is a deliberate human gate; do not attempt to automate or skip it.
+
+**`context: fork` as future upgrade path.** VS Code supports `context: fork` on skills (experimental, requires `github.copilot.chat.skillTool.enabled`). This would allow skills to run in isolated subagents without needing agent files. The custom agent coordinator-worker pattern used here is non-experimental and production-stable. If `context: fork` stabilizes, the worker agents (`batch-generator`, `source-summarizer`) could be replaced by forked skills, removing the need for the `.github/agents/` files. Until then, the agent-based architecture is the correct approach.
 
 ## Why Precise Prompts Stay The Default
 

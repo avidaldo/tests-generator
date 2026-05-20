@@ -10,8 +10,8 @@ For the detailed decision guide on regular versus bulk execution, the user-owned
 | ---- | ------ | ----------- |
 | `summarize-sources.prompt.md` | **Active — Stage 1** | Loss-minimizing source extraction from source files; one per repo or coherent topic area; write summaries to user-provided Stage 1 paths or roots |
 | `merge-summaries.prompt.md` | **Active — Stage 2** | Organizes raw extraction files into subcategory files with concept IDs, question surfaces, and cross-cutting context |
-| `generate-questions.prompt.md` | **Active — Stage 3** | Question generation in JSON batches written directly to user-provided Stage 3 paths or roots; one batch per invocation from one subcategory file, repeat until surfaces are covered |
-| `finish-stage3-coverage.prompt.md` | **Active — Stage 3 launcher** | Preferred user-facing one-step launcher for approved-scope exhaustive Stage 3 runs; reuses the exhaustive coverage workflow and keeps a manifest under the Stage 3 root |
+| `generate-questions.prompt.md` | **Active — Stage 3** | Question generation in JSON batches written directly to user-provided Stage 3 paths or roots; one batch per invocation from **one subcategory file**; includes a multi-input guard that redirects to bulk lanes when a folder or multiple files are attached |
+| `finish-stage3-coverage.prompt.md` | **Active — Stage 3 launcher** | Preferred user-facing one-step launcher for approved-scope exhaustive Stage 3 runs; accepts `@file:` folder attachment or `${input:}` form field; reuses the exhaustive coverage workflow and keeps a manifest under the Stage 3 root |
 | `deprecated/inventory.prompt.md` | **Deprecated** | Superseded by `summarize-sources.prompt.md` |
 | `deprecated/generate-test.prompt.md` | **Deprecated** | Monolithic prompt — superseded by the 3-stage pipeline |
 
@@ -19,13 +19,16 @@ For the detailed decision guide on regular versus bulk execution, the user-owned
 
 ### Pipeline Overview
 
-Optional helper for Stage 1 fan-out: [`.github/skills/summarize-all-sources/SKILL.md`](../.github/skills/summarize-all-sources/SKILL.md) can orchestrate one isolated `summarize-sources.prompt.md` run per material path, then return one summary artifact per path.
+**Stage 1 orchestration surfaces:**
+- In-session fan-out: [`.github/skills/summarize-all-sources/SKILL.md`](../.github/skills/summarize-all-sources/SKILL.md) — orchestrates one `summarize-sources.prompt.md` run per material path inline (context accumulates).
+- Background / Copilot CLI: [`.github/agents/stage1-runner.agent.md`](../.github/agents/stage1-runner.agent.md) — coordinator agent that delegates each path to an isolated [`source-summarizer`](../.github/agents/source-summarizer.agent.md) subagent; Copilot CLI-compatible.
 
-Optional helper for advanced Stage 3 breadth-first runs: [`.github/skills/generate-question-batches/SKILL.md`](../.github/skills/generate-question-batches/SKILL.md) can traverse multiple subcategory files from one delegated or background run, write at most one new batch per subcategory, and keep checkpointed progress under the user-provided Stage 3 root.
+**Stage 3 orchestration surfaces:**
+- In-session breadth-first pass: [`.github/skills/generate-question-batches/SKILL.md`](../.github/skills/generate-question-batches/SKILL.md) — at most one new batch per subcategory; inline (context accumulates).
+- In-session exhaustive run: [`finish-stage3-coverage.prompt.md`](finish-stage3-coverage.prompt.md) — preferred user-facing launcher for exhaustive approved-scope runs; delegates to [`finish-question-coverage`](../.github/skills/finish-question-coverage/SKILL.md) inline.
+- Background / Copilot CLI: [`.github/agents/stage3-runner.agent.md`](../.github/agents/stage3-runner.agent.md) — coordinator agent that delegates each subcategory to an isolated [`batch-generator`](../.github/agents/batch-generator.agent.md) subagent; eliminates Stage 3 context accumulation; Copilot CLI-compatible.
 
-Optional helper for advanced Stage 3 exhaustive runs over an approved Stage 2 scope: [`.github/skills/finish-question-coverage/SKILL.md`](../.github/skills/finish-question-coverage/SKILL.md) can continue with successive batches until tracked `SURF-*` coverage is exhausted while keeping a coverage manifest under the user-provided Stage 3 root.
-
-Preferred user-facing launcher for that exhaustive Stage 3 lane: [`finish-stage3-coverage.prompt.md`](finish-stage3-coverage.prompt.md). It keeps the project-facing entrypoint in root `prompts/` while reusing the existing exhaustive skill as the implementation layer.
+**Stage 2 is always a human gate.** No agent or skill automates the taxonomy review.
 
 ```text
 User provides repos (list of paths)
@@ -51,7 +54,7 @@ User collects all summary files
         ▼
 User reviews subcategory files, adjusts if needed
         │
-        ▼  ── one invocation per subcategory file (parallelizable; optional `generate-question-batches` orchestration for one breadth-first wave; optional `finish-stage3-coverage.prompt.md` launcher for approved-scope exhaustive Stage 3 runs) ──
+        ▼  ── one invocation per subcategory file (parallelizable; optional `generate-question-batches` skill for one breadth-first wave; optional `finish-stage3-coverage.prompt.md` for exhaustive in-session runs; optional `stage3-runner` agent for background/Copilot CLI runs with isolated subagent context per subcategory) ──
 [Stage 3: generate-questions.prompt.md]
         │  Reads one subcategory file (sole input)
         │  Generates one coverage-first JSON batch + adversarial
@@ -68,13 +71,14 @@ User reviews subcategory files, adjusts if needed
 Moodle import
 ```
 
-Each stage is run manually by the user. Stages 1 and 3 are parallelizable (independent invocations); Stage 1 fan-out can also be orchestrated through the `summarize-all-sources` skill, Stage 3 breadth-first delegated runs can be orchestrated through the `generate-question-batches` skill, and Stage 3 exhaustive approved-scope runs can be launched through `finish-stage3-coverage.prompt.md` while reusing the `finish-question-coverage` skill underneath. Stage 2 is still a single merge pass. Each prompt should ask for the relevant input or output path when the user did not already provide it. If a repo is too large or heterogeneous for one faithful Stage 1 document, split it by coherent topic area before continuing; a monolithic lossy summary is invalid.
+Each stage is run manually by the user. Stages 1 and 3 are parallelizable (independent invocations). Stage 1 fan-out can be orchestrated through the `summarize-all-sources` skill (inline) or the `stage1-runner` agent (background/Copilot CLI). Stage 3 breadth-first delegated runs can use the `generate-question-batches` skill (inline); exhaustive approved-scope runs can be launched through `finish-stage3-coverage.prompt.md` (inline) or the `stage3-runner` agent (background/Copilot CLI, isolated subagent context per subcategory). Stage 2 is always a single manual merge pass — no automation. Each prompt should ask for the relevant input or output path when the user did not already provide it. If a repo is too large or heterogeneous for one faithful Stage 1 document, split it by coherent topic area before continuing; a monolithic lossy summary is invalid.
 
 ### Stage 3 Artifact Guardrails
 
 - Require either a user-provided Stage 3 output root or an explicit output file path before writing.
 - When the user provides a Stage 3 output root, derive a deterministic per-subcategory folder beneath it using the input filename with the `subcategory-` prefix removed, then write `batch-###.json` there.
 - Never overwrite an existing batch file implicitly. Repeated runs should create the next free `batch-###.json` in that same subcategory folder unless the user explicitly requests a specific batch number.
+- If a Stage 3 run includes a model label, keep one stable value per written batch and write it to `generated_by_model` on every question in that batch.
 - Stage 3 learner-facing text must be self-contained. `question_text`, `general_feedback`, and `answers[].feedback` must not refer to "the material", "the notes", "the notebook", slides, or similar external anchors; source attribution belongs in `source_ref`, not in learner-facing text.
 - Stage 3 concept, taxonomy, hierarchy, and misconception-correction stems should be direct by default. Use scenario framing only when the concrete context materially changes the reasoning, diagnosis, trade-off, or procedural choice being tested.
 
@@ -229,7 +233,7 @@ The editor now owns a separate Stage 4 review-session artifact so multiple Stage
 
 ### Why JSON as Intermediate Format
 
-Direct Stage 3 import into the editor, editor-owned Stage 4 review-session persistence, adversarial filter preserved via required `feedback` fields, ~30 lines/question vs. ~60–80 for XML, and source traceability via `source_ref`. Plain GIFT was rejected because the absence of feedback fields removes the adversarial filter entirely.
+Direct Stage 3 import into the editor, editor-owned Stage 4 review-session persistence, adversarial filter preserved via required `feedback` fields, ~30 lines/question vs. ~60–80 for XML, and question-level traceability via `source_ref` plus optional `generated_by_model`. Plain GIFT was rejected because the absence of feedback fields removes the adversarial filter entirely.
 
 ---
 

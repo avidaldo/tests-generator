@@ -14,8 +14,8 @@ if str(EDITOR_DIR) not in sys.path:
     sys.path.insert(0, str(EDITOR_DIR))
 
 
-from file_io.state_io import load_review_session, load_stage3_batch  # noqa: E402
-from models.review_session import REVIEW_SESSION_ARTIFACT_TYPE  # noqa: E402
+from file_io.state_io import load_review_session, load_stage3_batch, save_review_session  # noqa: E402
+from models.review_session import REVIEW_SESSION_ARTIFACT_TYPE, ReviewSession  # noqa: E402
 
 
 class StateIoArtifactTests(unittest.TestCase):
@@ -30,6 +30,16 @@ class StateIoArtifactTests(unittest.TestCase):
 
         self.assertEqual(len(questions), 1)
         self.assertEqual(questions[0].origin_path, str(stage3_path))
+
+    def test_load_stage3_batch_preserves_generated_by_model(self) -> None:
+        stage3_path = self._write_json({
+            "version": "1.0",
+            "questions": [self._make_question_data(generated_by_model="gpt-5.4")],
+        }, "batch-001.json")
+
+        questions = load_stage3_batch(stage3_path)
+
+        self.assertEqual(questions[0].generated_by_model, "gpt-5.4")
 
     def test_load_review_session_rejects_raw_stage3_json(self) -> None:
         stage3_path = self._write_json({
@@ -67,6 +77,23 @@ class StateIoArtifactTests(unittest.TestCase):
 
         self.assertEqual(len(review_session.questions), 1)
         self.assertEqual(review_session.questions[0].origin_kind, "legacy_state")
+
+    def test_save_review_session_round_trip_preserves_generated_by_model(self) -> None:
+        questions = load_stage3_batch(
+            self._write_json({
+                "version": "1.0",
+                "questions": [self._make_question_data(generated_by_model="gpt-5.4")],
+            }, "batch-001.json")
+        )
+        temp_dir = tempfile.TemporaryDirectory()
+        self.addCleanup(temp_dir.cleanup)
+        session_path = Path(temp_dir.name) / "session.json"
+
+        save_review_session(ReviewSession.from_questions(questions), session_path)
+        reloaded_session = load_review_session(session_path)
+
+        self.assertEqual(len(reloaded_session.questions), 1)
+        self.assertEqual(reloaded_session.questions[0].generated_by_model, "gpt-5.4")
 
     def _write_json(self, payload: dict, filename: str) -> Path:
         temp_dir = tempfile.TemporaryDirectory()

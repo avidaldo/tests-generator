@@ -1,6 +1,11 @@
 ---
 description: >
   Generate multiple-choice exam questions for ONE subcategory in editor-native JSON format. Run after the merge step, one subcategory file at a time, and repeat in batches when the subcategory exposes more question surfaces than fit in one safe output window. Input: a self-contained subcategory file produced by merge-summaries.prompt.md. Output: write a JSON file directly to a user-provided Stage 3 path or root, ready to open in the quiz editor (Ctrl+O).
+agent: agent
+tools:
+  - read
+  - create
+argument-hint: 'ONE subcategory-*.md file path; Stage 3 output root; optional output language (default: ask), batch size (default: 20), SURF-* scope (default: all), model label'
 ---
 
 # Question Generation Agent
@@ -40,8 +45,26 @@ The user may additionally specify:
 |-----------|---------|---------|
 | **Question batch size** | `20` | `1`–`20` |
 | **Surface scope** | `all` | `all` · explicit `SURF-*` list from the subcategory file |
+| **Model label** | omitted | Any stable freeform label such as `gpt-5.4`, `claude-sonnet-4`, or a user-defined run tag |
 
 Use these parameters to generate repeated batches from the same subcategory when the material supports more than one safe output window.
+
+---
+
+## Multi-Input Guard
+
+**Check this before doing anything else.**
+
+If the user has attached or referenced more than one `subcategory-*.md` file, or has attached a folder containing multiple subcategory files, **do not generate questions**. Instead:
+
+1. Count the distinct subcategory files in the input.
+2. If the count is greater than 1, reply with:
+   > This prompt handles ONE subcategory at a time. You provided [N] subcategory files.
+   > For multi-subcategory runs, use one of these instead:
+   > - **Background/Copilot CLI**: select the `stage3-runner` agent.
+   > - **Exhaustive in-session run**: use [`finish-stage3-coverage.prompt.md`](finish-stage3-coverage.prompt.md).
+   > - **One breadth-first pass**: use the [`generate-question-batches` skill](../.github/skills/generate-question-batches/SKILL.md).
+3. Stop. Do not generate any questions.
 
 ---
 
@@ -242,6 +265,7 @@ The saved file must contain raw JSON only, with no Markdown fences and no surrou
       "category_path": "$course$/top/Categoria/Subcategoria",
       "status": "pendiente",
       "source_ref": "NORM-01, NORM-03",
+      "generated_by_model": "gpt-5.4",
       "answers": [
         {
           "text": "<p>Opción correcta</p>",
@@ -267,6 +291,7 @@ The saved file must contain raw JSON only, with no Markdown fences and no surrou
 - `status` is always `"pendiente"`.
 - `answers` must contain exactly 7 items: 1 correct (`fraction: "100"`) and 6 distractors (`fraction: "-50"`).
 - `answers[].feedback` is required for every option — adversarial validation depends on it.
+- If the run already knows a stable model label, include `generated_by_model` with that exact label on every question in the batch. Otherwise omit the field instead of inventing or guessing a value.
 - Omit editor-populated fields (`default_grade`, `penalty`, `single`, `shuffle_answers`, `answer_numbering`, `correct_feedback`, `partially_correct_feedback`, `incorrect_feedback`) — the editor sets them on import.
 
 ---

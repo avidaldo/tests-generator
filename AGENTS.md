@@ -55,11 +55,30 @@ See [`prompts/AGENTS.md`](prompts/AGENTS.md) for the active prompt inventory, pi
 
 Active workflow: `summarize-sources.prompt.md` (loss-minimizing Stage 1 extraction, one per repo or coherent topic area; split large corpora first) → `merge-summaries.prompt.md` (subcategory files with concept IDs, question surfaces, and cross-cutting context) → `generate-questions.prompt.md` (one subcategory batch per invocation) → editor review session → XML export.
 
+**Execution-surface routing:**
+
+| You have | Use |
+| -------- | --- |
+| One source path for Stage 1 | `summarize-sources.prompt.md` |
+| Many source paths for Stage 1 — background/CLI | `stage1-runner` agent |
+| Many source paths for Stage 1 — in-session | `summarize-all-sources` skill |
+| One subcategory file for Stage 3 | `generate-questions.prompt.md` |
+| One subcategory folder / multiple files attached | → **Stop.** Use `stage3-runner` agent or `finish-stage3-coverage.prompt.md`. `generate-questions.prompt.md` will refuse and redirect. |
+| Full Stage 3 run — background/Copilot CLI | `stage3-runner` agent (delegates each subcategory to `batch-generator` in an isolated context window) |
+| Full Stage 3 run — in-session exhaustive | `finish-stage3-coverage.prompt.md` (uses `finish-question-coverage` skill) |
+| Full Stage 3 run — in-session breadth-first | `generate-question-batches` skill |
+
 For multi-repo subjects, the optional [`summarize-all-sources` skill](.github/skills/summarize-all-sources/SKILL.md) can fan out Stage 1 into one isolated summarization per path before the merge step.
 
-For delegated or background Stage 3 breadth-first runs, the optional [`generate-question-batches` skill](.github/skills/generate-question-batches/SKILL.md) can traverse multiple subcategory files and create at most one new batch per subcategory while keeping checkpointed progress under a user-provided Stage 3 root.
+For delegated or background Stage 3 breadth-first runs, the optional [`generate-question-batches` skill](.github/skills/generate-question-batches/SKILL.md) can traverse multiple subcategory files, create at most one new batch per subcategory, keep checkpointed progress under a user-provided Stage 3 root, and reuse one shared model label per written batch when known.
 
-For approved Stage 2 scopes that need repeated successive Stage 3 batches until tracked `SURF-*` coverage is exhausted, the preferred user-facing surface is [`prompts/finish-stage3-coverage.prompt.md`](prompts/finish-stage3-coverage.prompt.md). It reuses the optional [`finish-question-coverage` skill](.github/skills/finish-question-coverage/SKILL.md) as the execution lane while keeping a coverage manifest under the user-provided Stage 3 root.
+For approved Stage 2 scopes that need repeated successive Stage 3 batches until tracked `SURF-*` coverage is exhausted, the preferred user-facing surface is [`prompts/finish-stage3-coverage.prompt.md`](prompts/finish-stage3-coverage.prompt.md). It reuses the optional [`finish-question-coverage` skill](.github/skills/finish-question-coverage/SKILL.md) as the execution lane while keeping a coverage manifest under the user-provided Stage 3 root and reusing one shared model label per written batch when known.
+
+For background or Copilot CLI runs where VS Code may close during the run, use the coordinator agents:
+- [`stage3-runner` agent](.github/agents/stage3-runner.agent.md) — delegates each subcategory to [`batch-generator`](.github/agents/batch-generator.agent.md) in an isolated subagent context. Eliminates Stage 3 context accumulation.
+- [`stage1-runner` agent](.github/agents/stage1-runner.agent.md) — fans out Stage 1 across many paths using [`source-summarizer`](.github/agents/source-summarizer.agent.md) subagents in small parallel batches.
+
+> **Stage 2 is always a human gate.** No agent or skill automates the taxonomy review. "Single background call" means Stage 1 OR Stage 3 — never a through-call from Stage 1 to Stage 3.
 
 Stage 1 operational policy in this repo:
 

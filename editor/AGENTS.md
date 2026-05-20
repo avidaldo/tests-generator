@@ -56,7 +56,7 @@ Data classes for quiz content.
 
 - `QuestionStatus(Enum)`: `PENDIENTE`, `REVISAR`, `LISTA`
 - `Answer(dataclass)`: Single answer option (`text`, `fraction`, `feedback`, `format`). Property: `is_correct`.
-- `Question(dataclass)`: Full question with answers, category, status, `is_easy`, and provenance fields (`source_ref`, `origin_kind`, `origin_path`, `origin_question_id`). Static: `generate_id()`. Properties: `category_name`, `correct_count`, `wrong_count`, `source_label`, `import_key`.
+- `Question(dataclass)`: Full question with answers, category, status, `is_easy`, and provenance fields (`source_ref`, `origin_kind`, `origin_path`, `origin_question_id`, `generated_by_model`). Static: `generate_id()`. Properties: `category_name`, `correct_count`, `wrong_count`, `source_label`, `import_key`.
 - `Category(dataclass)`: Category path and info. Property: `name`.
 
 ### `models/review_session.py`
@@ -167,7 +167,7 @@ Imports from: Qt only
 Detail editing panel for a single question.
 
 - `AnswerWidget(QFrame)`: Displays/edits one answer. Signals: `delete_requested`, `text_changed`, `feedback_changed`.
-- `QuestionDetailPanel(QWidget)`: Edits question fields and shows provenance plus advisory diagnostics for the selected question. Signals: `question_changed`, `delete_question_requested`.
+- `QuestionDetailPanel(QWidget)`: Edits question fields and shows provenance, including the optional `generated_by_model` label when present, plus advisory diagnostics for the selected question. Signals: `question_changed`, `delete_question_requested`.
   - `set_question(question: Question | None)`
   - `set_theme_mode(theme_mode: str)`
 

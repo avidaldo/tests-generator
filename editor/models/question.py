@@ -58,6 +58,7 @@ class Question:
     origin_kind: str = ""
     origin_path: str = ""
     origin_question_id: str = ""
+    generated_by_model: str = ""
     is_easy: bool = False
 
     @staticmethod

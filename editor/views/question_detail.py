@@ -506,6 +506,8 @@ class QuestionDetailPanel(QWidget):
             parts.append(question.source_label)
         if question.source_ref and question.source_ref not in parts:
             parts.append(question.source_ref)
+        if question.generated_by_model:
+            parts.append(f"Modelo: {question.generated_by_model}")
         if not parts:
             return ""
         return f"📄 {' | '.join(parts)}"

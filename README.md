@@ -48,7 +48,9 @@ Open `prompts/summarize-sources.prompt.md` as a prompt. Provide:
   - /path/to/ml-theory/docs/bias-variance.md
   ```
 
-Preferred for multi-repo or multi-folder subjects: invoke the [`.github/skills/summarize-all-sources/SKILL.md`](.github/skills/summarize-all-sources/SKILL.md) workflow. It fans out one isolated Stage 1 summarization per path and still returns one summary artifact per path.
+Preferred for multi-repo or multi-folder subjects:
+- **In-session**: invoke the [`.github/skills/summarize-all-sources/SKILL.md`](.github/skills/summarize-all-sources/SKILL.md) workflow. It fans out one isolated Stage 1 summarization per path and still returns one summary artifact per path.
+- **Background / Copilot CLI**: select the [`stage1-runner` agent](.github/agents/stage1-runner.agent.md). It delegates each path to an isolated `source-summarizer` subagent in small parallel batches and persists when VS Code closes.
 
 - **Subject Profile overrides** (optional) — if not stated in the message, the agent will ask.
 - **Stage 1 output location** — provide either a subject-owned Stage 1 output root or an explicit output file path for the current unit. If you omit it, the agent should ask before writing.
@@ -75,11 +77,14 @@ The agent proposes a subcategory taxonomy — review and adjust, then it produce
 
 Open `prompts/generate-questions.prompt.md` as a prompt when you want one subcategory at a time. Provide one subcategory `.md` file from Step 2 and either a Stage 3 output root or an explicit batch file path.
 
-The agent generates one coverage-first JSON batch from the file's full content, including scenario-based and cross-subcategory relationship questions, and writes it directly to a user-owned Stage 3 location such as `/path/to/exam-artifacts/saa2/stage3/ai-foundations-and-learning-paradigms/batch-001.json`. Repeat on the same subcategory with additional `SURF-*` scopes when you want more coverage than fits in one batch; the next run should create the next free batch file in that same subfolder.
+The agent generates one coverage-first JSON batch from the file's full content, including scenario-based and cross-subcategory relationship questions, and writes it directly to a user-owned Stage 3 location such as `/path/to/exam-artifacts/saa2/stage3/ai-foundations-and-learning-paradigms/batch-001.json`. If the run already knows one stable model label for that batch, provide it once and the batch should write that same value into `generated_by_model` for every question. Repeat on the same subcategory with additional `SURF-*` scopes when you want more coverage than fits in one batch; the next run should create the next free batch file in that same subfolder.
 
-Preferred for delegated or background breadth-first runs across many subcategories: invoke the [`.github/skills/generate-question-batches/SKILL.md`](.github/skills/generate-question-batches/SKILL.md) workflow. It creates at most one new batch per subcategory per pass and keeps checkpointed progress under the Stage 3 root.
+Preferred for delegated or background breadth-first runs across many subcategories:
+- **In-session breadth-first**: invoke the [`.github/skills/generate-question-batches/SKILL.md`](.github/skills/generate-question-batches/SKILL.md) workflow. It creates at most one new batch per subcategory per pass, keeps checkpointed progress under the Stage 3 root, and can reuse one shared model label per written batch.
+- **In-session exhaustive**: open [`prompts/finish-stage3-coverage.prompt.md`](prompts/finish-stage3-coverage.prompt.md) — accepts `@file:` folder attachment or the form field.
+- **Background / Copilot CLI**: select the [`stage3-runner` agent](.github/agents/stage3-runner.agent.md). It delegates each subcategory to an isolated `batch-generator` subagent (one clean context window per subcategory) and persists when VS Code closes.
 
-Preferred single-step autopilot for an already approved Stage 2 scope: open [`prompts/finish-stage3-coverage.prompt.md`](prompts/finish-stage3-coverage.prompt.md). It is the project-facing launcher for exhaustive Stage 3 runs and keeps generating successive batches until tracked `SURF-*` coverage is exhausted.
+Preferred single-step autopilot for an already approved Stage 2 scope (in-session): open [`prompts/finish-stage3-coverage.prompt.md`](prompts/finish-stage3-coverage.prompt.md). It is the project-facing launcher for exhaustive Stage 3 runs, can reuse one shared model label per written batch, and keeps generating successive batches until tracked `SURF-*` coverage is exhausted.
 
 The underlying implementation lane for that launcher remains [`.github/skills/finish-question-coverage/SKILL.md`](.github/skills/finish-question-coverage/SKILL.md). It is still Stage-3-only: it does not invent missing Stage 2 files, and it relies on a coverage manifest under the Stage 3 root.
 
@@ -99,6 +104,8 @@ Start a new review session, add one or more generated Stage 3 batch JSON files w
 - **Lista** → approved for export
 
 Imported Stage 3 questions start with 7 answers total. During Stage 4 review it is valid to prune distractors; a reviewed 4-answer question is a normal final state, not a schema error.
+
+If a Stage 3 batch includes `generated_by_model`, the editor preserves that question-level model label through the review session and shows it in the question provenance metadata.
 
 The editor also shows non-blocking warning markers when the correct option looks substantially longer or shorter than the distractors after visible-text normalization. Treat those warnings as review aids, not as export blockers.
 

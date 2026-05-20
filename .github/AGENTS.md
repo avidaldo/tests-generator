@@ -35,15 +35,24 @@ This folder contains the VS Code and Copilot customization layer for repository 
 
 ### Current Agents
 
+**SDD / maintenance agents** (user-invocable):
 - `todo-planner` — planning agent for the SDD loop; direct target of [`refresh-plan.prompt.md`](prompts/refresh-plan.prompt.md); owns clarification workflow and planner-only hooks.
 - `sdd-implementer` — implementation agent for the SDD loop; direct target of [`implement-plan-item.prompt.md`](prompts/implement-plan-item.prompt.md); implements one approved item at a time and syncs docs.
 - `batch-maintainer` — advanced optional maintenance agent for long unattended delegated or cloud-oriented runs; iterates through approved and unblocked items, keeps the plan and docs synced, and stops at unresolved decisions.
 
+**Pipeline coordinator agents** (user-invocable; Copilot CLI-compatible):
+- `stage3-runner` — Stage 3 coordinator; delegates each subcategory to `batch-generator` as an isolated subagent; maintains a `stage3-coverage-manifest.md` under the Stage 3 root; preferred background lane for exhaustive Stage 3 runs.
+- `stage1-runner` — Stage 1 coordinator; delegates each source path to `source-summarizer` as an isolated subagent in small parallel batches; preferred background lane when a subject spans many repos or folders.
+
+**Pipeline worker agents** (`user-invocable: false` — subagent-only):
+- `batch-generator` — atomic Stage 3 worker; receives one subcategory file path + output path + settings; generates one batch JSON in an isolated context window; returns only a one-line manifest entry.
+- `source-summarizer` — atomic Stage 1 worker; receives one source path + output path; summarizes in an isolated context window; returns only a one-line manifest entry.
+
 ### Current Skills
 
 - `customization-audit` — fetches current VS Code customization docs and audits this repo's `.github` customization files for deprecated patterns, missing recommended fields, and newly available primitives.
-- `finish-question-coverage` — exhausts Stage 3 generation across an approved Stage 2 scope by tracking `SURF-*` coverage in a manifest and continuing with successive batches until the selected subcategories are done or blocked.
-- `generate-question-batches` — runs the advanced Stage 3 bulk lane across multiple subcategory files, creating at most one new batch per subcategory while keeping checkpointed progress under a user-provided Stage 3 root.
+- `finish-question-coverage` — exhausts Stage 3 generation across an approved Stage 2 scope by tracking `SURF-*` coverage in a manifest, continuing with successive batches until the selected subcategories are done or blocked, and reusing one shared model label per written batch when known.
+- `generate-question-batches` — runs the advanced Stage 3 bulk lane across multiple subcategory files, creating at most one new batch per subcategory while keeping checkpointed progress under a user-provided Stage 3 root and reusing one shared model label per written batch when known.
 - `summarize-all-sources` — fans out `summarize-sources.prompt.md` across multiple material paths and returns one summary per path.
 - `notebook-hygiene` — installs the full four-layer notebook output enforcement stack.
 - `editor-export` — exports reviewed editor JSON state to Moodle XML with explicit status control.

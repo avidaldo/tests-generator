@@ -1,7 +1,7 @@
 ---
 name: generate-question-batches
-description: 'Traverse multiple Stage 2 subcategory files in one Stage 3 run. Use when you want an advanced delegated or background lane that writes at most one new question batch per subcategory while keeping checkpointed progress under a user-provided Stage 3 root.'
-argument-hint: 'Required: Stage 2 subcategory paths or root; Stage 3 output root; optional Output language and Question batch size'
+description: 'Traverse multiple Stage 2 subcategory files in one Stage 3 run. Use when you want an advanced delegated or background lane that writes at most one new question batch per subcategory while keeping checkpointed progress under a user-provided Stage 3 root and reusing one shared model label per written batch when known.'
+argument-hint: 'Required: Stage 2 subcategory paths or root; Stage 3 output root; optional Output language, Question batch size, and Model label'
 ---
 
 # Generate Question Batches Workflow
@@ -11,10 +11,12 @@ This skill orchestrates Stage 3 of the quiz pipeline across multiple subcategory
 ## When To Use
 
 - Generate breadth-first Stage 3 coverage across multiple subcategories from one request.
-- Run delegated or background Stage 3 work while keeping progress inspectable and resumable.
+- Run delegated Stage 3 work while keeping progress inspectable and resumable.
 - Create at most one new JSON batch per subcategory in a single bulk pass before human editor review.
 
 If you want repeated successive Stage 3 batches until an approved Stage 2 scope has tracked `SURF-*` coverage exhausted, use [finish-question-coverage](../finish-question-coverage/SKILL.md) instead.
+
+> **Background / Copilot CLI lane**: This skill runs inline in the current context window — context accumulates across all subcategories. For runs where VS Code may close, or where context isolation per subcategory matters, use the [`stage3-runner` agent](../../agents/stage3-runner.agent.md) instead. It delegates each subcategory to an isolated `batch-generator` subagent and is Copilot CLI-compatible.
 
 ## Inputs To Confirm
 
@@ -23,7 +25,7 @@ If you want repeated successive Stage 3 batches until an approved Stage 2 scope 
 2. The Stage 3 output root.
    This is required. Use the existing Stage 3 path contract from [prompts/generate-questions.prompt.md](../../../prompts/generate-questions.prompt.md).
 3. Any shared Stage 3 settings.
-   In practice this usually means **Output language** and optionally **Question batch size**. If the user needs materially different settings per subcategory, split the run instead of pretending one bulk pass is coherent.
+   In practice this usually means **Output language**, optionally **Question batch size**, and optionally one stable **Model label** for the generated batches. If the user needs materially different settings or model labels per subcategory, split the run instead of pretending one bulk pass is coherent.
 4. Whether the run should continue from existing Stage 3 artifacts or start from scratch.
 
 ## Procedure
@@ -40,8 +42,9 @@ If you want repeated successive Stage 3 batches until an approved Stage 2 scope 
    For each subcategory, apply [prompts/generate-questions.prompt.md](../../../prompts/generate-questions.prompt.md) without inventing a second Stage 3 policy. Respect the inherited Question focus, the user-provided Stage 3 output root, the direct-stem rules, the learner-facing self-containment rules, and the existing JSON schema contract.
 6. Persist each output immediately.
    Derive the per-subcategory folder from the input filename, write the next free `batch-###.json`, and do not report the unit as complete until the file exists on disk and the manifest is updated.
+   If the run includes a Model label, write that exact stable value to `generated_by_model` on every question in the saved batch. Do not vary the value inside one batch.
 7. Validate each written batch before continuing.
-   Re-open the saved JSON and confirm that it parses, each question has exactly 7 answers, every answer has feedback, the learner-facing text is self-contained, no direct concept stem drifts back into decorative classroom or named-speaker wrappers, and the correct option is not uniquely longest or shortest by a clear margin when you compare normalized visible option text only. If one unit fails validation, stop the pass, mark that unit `needs-fix`, and do not continue to later units until the failure is repaired or consciously deferred.
+   Re-open the saved JSON and confirm that it parses, each question has exactly 7 answers, every answer has feedback, the learner-facing text is self-contained, no direct concept stem drifts back into decorative classroom or named-speaker wrappers, the correct option is not uniquely longest or shortest by a clear margin when you compare normalized visible option text only, and when a Model label was requested every question in that batch carries the same `generated_by_model` value. If one unit fails validation, stop the pass, mark that unit `needs-fix`, and do not continue to later units until the failure is repaired or consciously deferred.
 8. Keep partial progress inspectable.
    Update the manifest after every unit with the saved batch path, status, and any note needed to resume safely.
 9. Stop at the Stage 3 boundary.
@@ -53,5 +56,6 @@ If you want repeated successive Stage 3 batches until an approved Stage 2 scope 
 - Do not turn this skill into an exhaustive-coverage lane. Its job is one breadth-first wave only; repeated successive batching belongs in [finish-question-coverage](../finish-question-coverage/SKILL.md).
 - Do not write more than one new batch per subcategory in a single bulk pass unless the user explicitly narrows the run to that subcategory and asks for repeated batching.
 - Do not overwrite existing batch files implicitly. Always advance to the next free `batch-###.json` unless the user explicitly requests a specific batch number.
+- Do not mix model labels inside one written batch. If a different model label is needed, that is a different batch run.
 - Do not continue past the first invalid generated artifact in the current pass. Stop, record the failure, and keep the checkpoint state honest.
 - Do not skip the human review gate. Bulk generation increases throughput, but the editor remains the mandatory validation boundary before XML export or further repeated batching.

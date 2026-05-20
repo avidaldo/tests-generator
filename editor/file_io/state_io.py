@@ -37,6 +37,7 @@ def _serialize_question(question: Question) -> dict:
         "origin_kind": question.origin_kind,
         "origin_path": question.origin_path,
         "origin_question_id": question.origin_question_id,
+        "generated_by_model": question.generated_by_model,
         "is_easy": question.is_easy,
         "answers": [
             {
@@ -154,6 +155,7 @@ def _deserialize_question(question_data: dict, filepath: Path) -> Question:
         origin_kind=origin_kind,
         origin_path=origin_path,
         origin_question_id=question_data.get("origin_question_id", question_data.get("id", "")),
+        generated_by_model=question_data.get("generated_by_model", ""),
         is_easy=bool(question_data.get("is_easy", False)),
     )
 

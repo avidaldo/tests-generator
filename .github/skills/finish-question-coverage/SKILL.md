@@ -1,7 +1,7 @@
 ---
 name: finish-question-coverage
-description: 'Continue Stage 3 generation across an approved Stage 2 scope until the selected subcategories have tracked SURF coverage or a declared stop condition is reached. Use when you want an advanced delegated or background lane that keeps designing batches after the first breadth-first wave.'
-argument-hint: 'Required: approved Stage 2 subcategory paths or root; Stage 3 output root; optional Output language, Question batch size, and stop condition'
+description: 'Continue Stage 3 generation across an approved Stage 2 scope until the selected subcategories have tracked SURF coverage or a declared stop condition is reached. Use when you want an advanced delegated or background lane that keeps designing batches after the first breadth-first wave while reusing one stable model label per written batch when known.'
+argument-hint: 'Required: approved Stage 2 subcategory paths or root; Stage 3 output root; optional Output language, Question batch size, Model label, and stop condition'
 ---
 
 # Finish Question Coverage Workflow
@@ -11,8 +11,10 @@ This skill orchestrates repeated Stage 3 runs over an approved Stage 2 scope. Th
 ## When To Use
 
 - Continue after the first breadth-first Stage 3 wave when selected subcategories still expose uncovered `SURF-*` units.
-- Run delegated or background Stage 3 work until tracked coverage is exhausted across an approved Stage 2 scope.
+- Run exhaustive Stage 3 work until tracked coverage is exhausted across an approved Stage 2 scope.
 - Resume a previous Stage 3 coverage run from a manifest created by this skill.
+
+> **Background / Copilot CLI lane**: This skill runs inline in the current context window — context accumulates across all subcategories and waves. For runs where VS Code may close, or where context isolation per subcategory matters, use the [`stage3-runner` agent](../../agents/stage3-runner.agent.md) instead. It delegates each subcategory to an isolated `batch-generator` subagent and is Copilot CLI-compatible.
 
 ## When Not To Use
 
@@ -27,7 +29,7 @@ This skill orchestrates repeated Stage 3 runs over an approved Stage 2 scope. Th
 2. The Stage 3 output root.
    This is required. Use the existing Stage 3 path contract from [prompts/generate-questions.prompt.md](../../../prompts/generate-questions.prompt.md).
 3. Shared Stage 3 settings.
-   In practice this usually means **Output language** and optionally **Question batch size**.
+   In practice this usually means **Output language**, optionally **Question batch size**, and optionally one stable **Model label** for the generated batches.
 4. Continuation mode.
    Distinguish among a clean start, resuming from an existing manifest created by this skill, or adopting a Stage 3 root that already contains legacy batches.
 5. The stop condition.
@@ -49,8 +51,9 @@ This skill orchestrates repeated Stage 3 runs over an approved Stage 2 scope. Th
    Group uncovered surfaces into a coherent batch that honors the requested question batch size and prefers fresh surfaces before duplicates. Use an explicit `SURF-*` scope when invoking Stage 3 generation.
 6. Reuse the canonical Stage 3 rules for every batch.
    For each selected scope, apply [prompts/generate-questions.prompt.md](../../../prompts/generate-questions.prompt.md) without inventing a second Stage 3 policy. Respect the inherited Question focus, the user-provided Stage 3 output root, the learner-facing self-containment rules, the direct-stem rules, and the JSON schema contract.
+   If the run includes a Model label, write that exact stable value to `generated_by_model` on every question in the saved batch. Do not vary the value inside one batch.
 7. Persist and validate each batch before continuing.
-   Write the next free `batch-###.json`, then re-open it and confirm that it parses, each question has exactly 7 answers, every answer has feedback, the learner-facing text is self-contained, the correct option is not uniquely longest or shortest by a clear margin when you compare normalized visible option text only, and the manifest records which `SURF-*` entries this batch was meant to cover. If one batch fails validation, stop the run, mark that unit `needs-fix`, and do not continue.
+   Write the next free `batch-###.json`, then re-open it and confirm that it parses, each question has exactly 7 answers, every answer has feedback, the learner-facing text is self-contained, the correct option is not uniquely longest or shortest by a clear margin when you compare normalized visible option text only, the manifest records which `SURF-*` entries this batch was meant to cover, and when a Model label was requested every question in that batch carries the same `generated_by_model` value. If one batch fails validation, stop the run, mark that unit `needs-fix`, and do not continue.
 8. Update the manifest after every batch.
    Record the saved batch path, the targeted `SURF-*` entries, validation status, and the next uncovered surfaces so the run stays inspectable and resumable.
 9. Continue wave by wave until the stop condition is met.
@@ -64,6 +67,7 @@ This skill orchestrates repeated Stage 3 runs over an approved Stage 2 scope. Th
 - Do not overload the one-wave Stage 3 skill. Use [generate-question-batches](../generate-question-batches/SKILL.md) for a single breadth-first pass; use this skill only when repeated successive batching is the point.
 - Do not infer `SURF-*` coverage from untracked legacy batches.
 - Do not overwrite existing batch files implicitly. Always advance to the next free `batch-###.json` unless the user explicitly requests a specific batch number.
+- Do not mix model labels inside one written batch. If a different model label is needed, that is a different batch run.
 - Do not continue past the first invalid generated artifact in the current run.
 - Do not claim full subject coverage unless the selected Stage 2 scope itself covers the intended subject.
 - Do not skip the human review gate. This skill increases Stage 3 throughput only; it does not replace editor review.

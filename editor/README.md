@@ -30,6 +30,8 @@ Both actions **append** questions into the current review session. Folder import
 
 Imported Stage 3 batches start with 7 answers total: 1 correct option + 6 distractors. During Stage 4 review it is valid to prune distractors; approved questions often finish with 4 answers total before export.
 
+If a Stage 3 batch includes `generated_by_model`, the detail panel keeps that question-level model label in the existing provenance line and preserves it when the review session is saved.
+
 ### Open a saved review session
 
 - `Archivo -> Abrir sesión de revisión...`
@@ -81,7 +83,7 @@ uv run python editor/main.py
 ## Keyboard Shortcuts
 
 | Key | Action |
-|-----|--------|
+| --- | --- |
 | `Ctrl+O` | Import Stage 3 files |
 | `Ctrl+S` | Save review session |
 | `Ctrl+Shift+S` | Save review session as |

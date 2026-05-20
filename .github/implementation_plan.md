@@ -1,9 +1,9 @@
 # Implementation Plan
 
-> Updated: 2026-05-19 (local sync)
+> Updated: 2026-05-20 (local sync)
 > Branch: decomposed
 > Status: active
-> Local sync 2026-05-19: added an advanced Stage 3 exhaustive-coverage skill for approved Stage 2 scopes, clarified the distinction from the one-wave breadth-first Stage 3 skill, and synced the project docs, customization inventories, and durable customization rationale.
+> Local sync 2026-05-20: introduced coordinator-worker agent architecture for background/Copilot CLI execution. Added four new agents: `stage3-runner` (Stage 3 coordinator), `stage1-runner` (Stage 1 coordinator), `batch-generator` (Stage 3 atomic worker, `user-invocable: false`), `source-summarizer` (Stage 1 atomic worker, `user-invocable: false`). Added multi-input guard and frontmatter (`agent:`, `tools:`, `argument-hint:`) to `generate-questions.prompt.md`. Updated `finish-stage3-coverage.prompt.md` to accept `@file:` folder attachments. Updated all pipeline documentation surfaces: `AGENTS.md`, `prompts/AGENTS.md`, `.github/AGENTS.md`, `README.md`, `docs/pipeline_execution_modes.md`, and the three coordinator skills to reference the new background lane.
 
 ## Working Agreements
 
@@ -66,6 +66,10 @@
 - Dependency: depends on P37 and P38 so the doc reflects the final implemented workflow rather than an intermediate state.
 
 ## Recently Completed
+
+- P48 — 2026-05-20. Wired the optional Stage 3 `Model label` setting through the batch-generation orchestration surfaces so one stable label is applied to every question in a written batch when known; synced `.github/skills/generate-question-batches/SKILL.md`, `.github/skills/finish-question-coverage/SKILL.md`, `prompts/finish-stage3-coverage.prompt.md`, `prompts/generate-questions.prompt.md`, `prompts/AGENTS.md`, `docs/pipeline_execution_modes.md`, `README.md`, `AGENTS.md`, `.github/AGENTS.md`, and `.github/README.md`; and validated the touched markdown surfaces with diagnostics.
+
+- P47 — 2026-05-20. Added optional question-level `generated_by_model` provenance across the Stage 3 to Stage 4 editor workflow by extending `editor/models/question.py`, preserving the field through `editor/file_io/state_io.py`, showing it in the existing provenance line in `editor/views/question_detail.py`, syncing `docs/editor_json_schema.md`, `prompts/generate-questions.prompt.md`, `editor/README.md`, `README.md`, `editor/AGENTS.md`, and `prompts/AGENTS.md`, and validating the change with focused `editor/tests/test_state_io.py`, a `py_compile` check on the touched editor files, and an offscreen Qt runtime check of the provenance formatter.
 
 - P46 — 2026-05-20. Added focused editor regression tests under `editor/tests/`: `test_state_io.py` covers the strict Stage 3 batch versus Stage 4 review-session JSON contract plus legacy editor-state compatibility, and `test_main_window_session_flow.py` covers dirty-state prompt gating and autosave-restore dirty tracking under offscreen Qt; validated the new tests individually and then with the existing `test_question_diagnostics.py` in one focused editor test run.
 

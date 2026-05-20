@@ -11,8 +11,10 @@ This skill orchestrates Stage 1 of the quiz pipeline across multiple material pa
 ## When To Use
 
 - Summarize multiple repos, folders, or files in one request while keeping one summary per path.
-- Parallelize Stage 1 work instead of manually running `summarize-sources.prompt.md` once per path.
+- Fan out Stage 1 work instead of manually running `summarize-sources.prompt.md` once per path.
 - Reuse one shared Question focus setting across several Stage 1 runs.
+
+> **Background / Copilot CLI lane**: This skill runs inline in the current context window. For runs where VS Code may close, or where context isolation per source matters, use the [`stage1-runner` agent](../../agents/stage1-runner.agent.md) instead. It delegates each path to an isolated `source-summarizer` subagent in small parallel batches and is Copilot CLI-compatible.
 
 ## Inputs To Confirm
 
