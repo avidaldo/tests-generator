@@ -80,7 +80,8 @@ Each stage is run manually by the user. Stages 1 and 3 are parallelizable (indep
 - Never overwrite an existing batch file implicitly. Repeated runs should create the next free `batch-###.json` in that same subcategory folder unless the user explicitly requests a specific batch number.
 - If a Stage 3 run includes a model label, keep one stable value per written batch and write it to `generated_by_model` on every question in that batch.
 - Stage 3 learner-facing text must be self-contained. `question_text`, `general_feedback`, and `answers[].feedback` must not refer to "the material", "the notes", "the notebook", slides, or similar external anchors; source attribution belongs in `source_ref`, not in learner-facing text.
-- Stage 3 concept, taxonomy, hierarchy, and misconception-correction stems should be direct by default. Use scenario framing only when the concrete context materially changes the reasoning, diagnosis, trade-off, or procedural choice being tested.
+- Stage 3 concept, taxonomy, hierarchy, and misconception-correction stems should be direct by default. Avoid graded or comparative ranking language such as `mejor`, `más apropiada`, `más precisa`, `best`, `most appropriate`, `best reflects`, `closest match`, or `least wrong` unless explicit conditions make one answer uniquely correct. Use scenario framing only when the concrete context materially changes the reasoning, diagnosis, trade-off, or procedural choice being tested.
+- Stage 3 distractors must be plausible to a student with partial knowledge. Avoid absurd, out-of-domain, or obviously opposite filler options; if a surface cannot support 6 plausible distractors from the subcategory file, redesign the item or choose a stronger surface instead of forcing weak fillers.
 
 ### Stage 1 Operational Guardrails
 

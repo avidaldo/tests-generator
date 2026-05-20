@@ -140,11 +140,12 @@ Generate questions about code constructs, API usage, syntax patterns, and implem
 - Learner-facing text must be self-contained in `question_text`, `general_feedback`, and `answers[].feedback`: include the needed context directly in the field itself; keep source grounding in `source_ref`, not in learner-facing attribution
 - Forbidden learner-facing anchors include phrases such as `según el material`, `según las notas`, `según el cuaderno`, `del material`, `according to the material`, `according to the notes`, `the material`, `in the notebook`, and equivalent references to notes, notebooks, slides, class materials, or the source file
 - If a draft stem or feedback uses external attribution, rewrite it by embedding the needed fact, distinction, or scenario directly in the learner-facing text
-  - ✅ `¿Cuál es la corrección conceptual más precisa sobre la relación entre AI y machine learning?`
+  - ✅ `¿Qué afirmación describe correctamente la relación entre AI y machine learning?`
   - ❌ `¿Cuál es la corrección más precisa según el material?`
   - ✅ `Correcto. AI es el campo general y machine learning es una subárea que aprende a partir de datos.`
   - ❌ `Correcto. Esa es la distinción central del material.`
 - Ask directly by default for definitions, distinctions, taxonomy, hierarchy, and misconception-correction questions
+- Question stems must establish binary correctness by default. Avoid graded or comparative wording such as `mejor`, `más apropiada`, `más precisa`, `best`, `most appropriate`, `best reflects`, `closest match`, or `least wrong` unless the question states explicit conditions that make one answer uniquely correct.
 - Use scenarios only when the concrete situation materially changes the reasoning, diagnosis, trade-off, or procedural choice being tested
 - If removing a classroom, debate, named-speaker, or other narrative wrapper leaves the tested concept, answer logic, and difficulty unchanged, remove the wrapper as decorative framing
 - Coverage-first batching: within one output, cover as many distinct high-yield surfaces as possible before writing multiple near-duplicate questions about the same narrow angle
@@ -190,18 +191,23 @@ For each selected concept or surface, identify exploitable angles before writing
 Choose the lightest stem that still tests the intended reasoning.
 
 - For definitions, distinctions, taxonomy, hierarchy, and misconception-correction questions, ask directly by default instead of wrapping the stem in decorative narration.
+- Stems must frame the answer space as correct vs. incorrect, not as a ranking of "best" or "least bad" options.
+- Rewrite comparative stems such as `¿Qué práctica refleja mejor...?`, `¿Cuál es la más apropiada...?`, `Which option best reflects...?`, or `Which is the closest match...?` into direct wording such as `¿Qué opción describe correctamente...?`, `¿Cuál es correcta en este contexto?`, or `¿Qué explicación identifica el problema?`.
+- If the question genuinely tests a trade-off or context-dependent preference, state the condition explicitly in the stem and make each answer option describe a concrete condition under which one choice is correct.
 - Use a scenario when the concrete facts of the situation materially affect the correct answer, the diagnosis, the trade-off, or the procedural choice.
 - Questions may be long when that context is necessary to establish a non-trivial scenario, decision, diagnosis, or procedure.
 - If removing the narrative wrapper leaves the tested concept, answer logic, and difficulty unchanged, the wrapper is decorative and should be removed.
 
 Examples:
 
-- ✅ Direct concept stem: `¿Cuál es la corrección conceptual más precisa sobre la relación entre AI y machine learning?`
+- ✅ Direct concept stem: `¿Qué afirmación describe correctamente la relación entre AI y machine learning?`
 - ❌ Decorative wrapper: `En un debate de clase, alguien afirma: "Machine learning y AI son lo mismo". ¿Qué corrección conceptual es la más precisa?`
 - ✅ Legitimate scenario: `Una empresa llama "AGI" a un asistente que convence a jueces humanos en entrevistas breves, pero falla fuera del diálogo. ¿Por qué esa conclusión es demasiado fuerte?`
 - ❌ Decorative named speaker: `La profesora Laura abre la clase diciendo que un sistema muy avanzado ya es AGI. ¿Qué opción la corrige mejor?`
 
 Apply distractor strategies from [docs/distractor_design.md](../docs/distractor_design.md). Use variety across questions — do not rely on a single strategy.
+
+If a selected surface cannot support 6 plausible distractors from the subcategory file, do not force a weak standalone item from that surface. Switch to a stronger surface or redesign the item around a richer comparison, procedure, misconception, or diagnostic angle that the file actually supports.
 
 Coverage rules for this phase:
 
@@ -216,6 +222,17 @@ Coverage rules for this phase:
 For every distractor, write its `feedback` field explaining **unambiguously** why it is false.
 
 > If you struggle to explain a distractor's falseness without saying "it's not the best option" or "it's almost correct", **discard that distractor and generate another**. A weak feedback is a signal that the distractor is ambiguous and will mislead students unfairly.
+
+Every distractor must be plausible to a student with partial knowledge. Reject distractors that are cartoonishly false, out of domain, blatant opposites with no credible misconception behind them, contradictions of a basic definition already stated in the file, or filler options that any minimally prepared student would dismiss immediately.
+
+Operational check: write the distractor feedback first. If the feedback can only say `incorrect`, `obviously wrong`, `false`, `not the answer`, or similar shallow negation without naming the specific misconception, false causal link, concept blend, or procedural confusion that makes the option wrong, discard that distractor and replace it.
+
+Examples:
+
+- ❌ Absurd distractor: `Copiar logs extensos, documentos irrelevantes y temas no relacionados en el mismo prompt, porque así el modelo tendrá más opciones para responder.`
+- ✅ Plausible distractor: `Añadir todo el contexto disponible sin filtrar, porque más tokens siempre mejoran la respuesta aunque parte del contenido no sea relevante.`
+- ❌ Absurd distractor: `La regularización reduce el sobreajuste porque hace que el modelo responda al azar.`
+- ✅ Plausible distractor: `La regularización reduce el sobreajuste principalmente porque garantiza error cero en entrenamiento.`
 
 The feedback for the correct answer must explain *why* it is correct, not just restate it.
 
@@ -234,7 +251,10 @@ Before finalizing the JSON, verify all of the following:
 5. Run a final learner-facing text pass on every `question_text`, `general_feedback`, and `answers[].feedback`: each field must be self-contained and understandable without the source file, notes, notebook, slides, or class materials.
 6. If any learner-facing field contains a forbidden anchor such as `según el material`, `según las notas`, `según el cuaderno`, `del material`, `according to the material`, `according to the notes`, `the material`, or `in the notebook`, rewrite that field before saving JSON. Preserve the tested concept, difficulty, and `source_ref`; change only the wording needed to embed the context directly.
 7. For every definition, distinction, taxonomy, hierarchy, or misconception-correction question, check whether the stem still works with the narrative wrapper removed. If it does, save the direct version instead of the wrapped one.
-8. For every question, compare the answer options using normalized visible text only. Ignore HTML/style wrappers. If the correct option is uniquely the longest or shortest by a clear margin, rebalance the option set before saving the JSON.
+8. For every question, check whether the stem relies on graded or comparative wording such as `mejor`, `más apropiada`, `más precisa`, `best`, `most appropriate`, `closest match`, or `least wrong`. If it does, rewrite the stem into direct binary wording or state the explicit condition that makes one answer uniquely correct.
+9. For every distractor, ask whether a student with partial knowledge could plausibly choose it. If the option is obviously dismissible, out of domain, cartoonishly false, or merely the direct opposite of the correct answer with no credible misconception behind it, rewrite or replace it.
+10. If a question cannot support 6 plausible distractors from the selected material, redesign the question around a stronger surface or a richer misconception/comparison/procedure angle instead of keeping weak filler options.
+11. For every question, compare the answer options using normalized visible text only. Ignore HTML/style wrappers. If the correct option is uniquely the longest or shortest by a clear margin, rebalance the option set before saving the JSON.
 </generation_algorithm>
 
 ---
