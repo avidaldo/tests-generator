@@ -61,6 +61,13 @@ class QuizModel(QAbstractListModel):
                 return q
         return None
 
+    def get_index_of_question(self, question: Question) -> int:
+        """Return the row for the exact question instance currently in the model."""
+        for index, existing_question in enumerate(self._questions):
+            if existing_question is question:
+                return index
+        return -1
+
     def add_questions(self, questions: list[Question]) -> int:
         """Add questions to the model, skipping duplicates by import identity.
 

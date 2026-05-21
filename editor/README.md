@@ -28,6 +28,8 @@ If you use the wrong action for a JSON file, the editor now rejects it and tells
 
 Both actions **append** questions into the current review session. Folder import is recursive and only reads `batch-*.json` files. Duplicate questions are skipped using the stored provenance keys.
 
+Stage 3 `id` values do not need to be globally unique across a merged review session. The editor tracks imported duplicates by provenance and applies edits to the currently selected question instance.
+
 Imported Stage 3 batches start with 7 answers total: 1 correct option + 6 distractors. During Stage 4 review it is valid to prune distractors; approved questions often finish with 4 answers total before export.
 
 If a Stage 3 batch includes `generated_by_model`, the detail panel keeps that question-level model label in the existing provenance line and preserves it when the review session is saved.

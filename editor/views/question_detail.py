@@ -587,7 +587,7 @@ class QuestionDetailPanel(QWidget):
         """Toggle the is_easy flag on the current question."""
         if not self._current_question:
             return
-        cmd = ToggleEasyCommand(self._model, self._current_question.id)
+        cmd = ToggleEasyCommand(self._model, self._current_question)
         self._undo_stack.push(cmd)
         self._refresh_display()
         self.question_changed.emit()
@@ -603,7 +603,7 @@ class QuestionDetailPanel(QWidget):
 
         if self._current_question.status != new_status:
             from models.undo_commands import SetStatusCommand
-            cmd = SetStatusCommand(self._model, self._current_question.id, new_status)
+            cmd = SetStatusCommand(self._model, self._current_question, new_status)
             self._undo_stack.push(cmd)
             self._refresh_display()
             self.question_changed.emit()
@@ -614,7 +614,7 @@ class QuestionDetailPanel(QWidget):
         new_text = self._question_edit.toHtml()
         if new_text != self._current_question.question_text:
             cmd = EditQuestionFieldCommand(
-                self._model, self._current_question.id,
+                self._model, self._current_question,
                 "question_text", self._current_question.question_text, new_text
             )
             self._undo_stack.push(cmd)
@@ -625,7 +625,7 @@ class QuestionDetailPanel(QWidget):
         new_text = self._feedback_edit.toHtml()
         if new_text != self._current_question.general_feedback:
             cmd = EditQuestionFieldCommand(
-                self._model, self._current_question.id,
+                self._model, self._current_question,
                 "general_feedback", self._current_question.general_feedback, new_text
             )
             self._undo_stack.push(cmd)
@@ -633,7 +633,9 @@ class QuestionDetailPanel(QWidget):
     def _on_delete_answer(self, answer_index: int):
         if not self._current_question:
             return
-        cmd = DeleteAnswerCommand(self._model, self._current_question.id, answer_index)
+        if not 0 <= answer_index < len(self._current_question.answers):
+            return
+        cmd = DeleteAnswerCommand(self._model, self._current_question, answer_index)
         self._undo_stack.push(cmd)
         self._refresh_answers()
         self._refresh_warning_label()
@@ -646,7 +648,7 @@ class QuestionDetailPanel(QWidget):
             old_text = self._current_question.answers[answer_index].text
             if new_text != old_text:
                 cmd = EditAnswerCommand(
-                    self._model, self._current_question.id, answer_index,
+                    self._model, self._current_question, answer_index,
                     "text", old_text, new_text
                 )
                 self._undo_stack.push(cmd)
@@ -659,7 +661,7 @@ class QuestionDetailPanel(QWidget):
             old_feedback = self._current_question.answers[answer_index].feedback
             if new_feedback != old_feedback:
                 cmd = EditAnswerCommand(
-                    self._model, self._current_question.id, answer_index,
+                    self._model, self._current_question, answer_index,
                     "feedback", old_feedback, new_feedback
                 )
                 self._undo_stack.push(cmd)
@@ -671,7 +673,7 @@ class QuestionDetailPanel(QWidget):
         new_category = self._category_edit.text().strip()
         if new_category != self._current_question.category_path:
             cmd = EditQuestionFieldCommand(
-                self._model, self._current_question.id,
+                self._model, self._current_question,
                 "category_path", self._current_question.category_path, new_category
             )
             self._undo_stack.push(cmd)

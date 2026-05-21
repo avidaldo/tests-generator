@@ -168,3 +168,5 @@ This repository uses AI coding assistants as development tools.
 - Customization-layer docs and maintenance workflows live in [`.github/README.md`](.github/README.md), [`.github/AGENTS.md`](.github/AGENTS.md), and [`.github/docs/README.md`](.github/docs/README.md).
 - Prompt design standards live in [`.github/instructions/prompt-authoring.instructions.md`](.github/instructions/prompt-authoring.instructions.md).
 - Workspace-level discovery settings live in [`.vscode/settings.json`](.vscode/settings.json).
+
+

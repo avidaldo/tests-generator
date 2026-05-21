@@ -87,7 +87,7 @@ Qt model holding the question list.
   - `remove_question(index) -> Question | None`
   - `insert_question(index, question)`
   - `update_question(index)` — emits `dataChanged`
-  - `get_question(index)`, `get_question_by_id(id)`, `get_index_by_id(id)`
+  - `get_question(index)`, `get_question_by_id(id)`, `get_index_by_id(id)`, `get_index_of_question(question)`
   - Properties: `questions`, `categories`
 
 Imports from: `models.question`
@@ -97,6 +97,7 @@ Imports from: `models.question`
 Qt undo commands for edit operations.
 
 - `DeleteQuestionCommand`, `ToggleStatusCommand`, `SetStatusCommand`, `EditQuestionFieldCommand`, `DeleteAnswerCommand`, `EditAnswerCommand`, `ToggleEasyCommand`
+- Question-edit commands bind to the selected `Question` instance instead of resolving by `Question.id`, because merged Stage 4 sessions can legitimately contain repeated Stage 3 ids from different source batches.
 - All extend `QUndoCommand` with `redo()`/`undo()`.
 
 Imports from: `models.question`, `models.quiz_model`

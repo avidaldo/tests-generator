@@ -10,6 +10,11 @@ from models.question import Question, Answer, QuestionStatus
 from models.quiz_model import QuizModel
 
 
+def _get_question_index(model: QuizModel, question: Question) -> int:
+    """Resolve the row for the exact question instance currently stored in the model."""
+    return model.get_index_of_question(question)
+
+
 class DeleteQuestionCommand(QUndoCommand):
     """Command to delete a question."""
 
@@ -31,21 +36,20 @@ class DeleteQuestionCommand(QUndoCommand):
 class ToggleStatusCommand(QUndoCommand):
     """Command to toggle question status."""
 
-    def __init__(self, model: QuizModel, question_id: str, parent=None):
+    def __init__(self, model: QuizModel, question: Question, parent=None):
         super().__init__(parent)
         self._model = model
-        self._question_id = question_id
+        self._question = question
         self.setText("Cambiar estado")
 
     def _toggle(self) -> None:
-        question = self._model.get_question_by_id(self._question_id)
-        if question:
-            question.status = (
+        index = _get_question_index(self._model, self._question)
+        if index != -1:
+            self._question.status = (
                 QuestionStatus.LISTA
-                if question.status == QuestionStatus.REVISAR
+                if self._question.status == QuestionStatus.REVISAR
                 else QuestionStatus.REVISAR
             )
-            index = self._model.get_index_by_id(self._question_id)
             self._model.update_question(index)
 
     def redo(self) -> None:
@@ -58,44 +62,41 @@ class ToggleStatusCommand(QUndoCommand):
 class SetStatusCommand(QUndoCommand):
     """Command to set question status to a specific value."""
 
-    def __init__(self, model: QuizModel, question_id: str, new_status: QuestionStatus, parent=None):
+    def __init__(self, model: QuizModel, question: Question, new_status: QuestionStatus, parent=None):
         super().__init__(parent)
         self._model = model
-        self._question_id = question_id
+        self._question = question
         self._new_status = new_status
         self._old_status: QuestionStatus | None = None
         self.setText(f"Estado → {new_status.value}")
 
     def redo(self) -> None:
-        question = self._model.get_question_by_id(self._question_id)
-        if question:
-            self._old_status = question.status
-            question.status = self._new_status
-            index = self._model.get_index_by_id(self._question_id)
+        index = _get_question_index(self._model, self._question)
+        if index != -1:
+            self._old_status = self._question.status
+            self._question.status = self._new_status
             self._model.update_question(index)
 
     def undo(self) -> None:
-        question = self._model.get_question_by_id(self._question_id)
-        if question and self._old_status is not None:
-            question.status = self._old_status
-            index = self._model.get_index_by_id(self._question_id)
+        index = _get_question_index(self._model, self._question)
+        if index != -1 and self._old_status is not None:
+            self._question.status = self._old_status
             self._model.update_question(index)
 
 
 class ToggleEasyCommand(QUndoCommand):
     """Command to toggle the is_easy flag on a question."""
 
-    def __init__(self, model: QuizModel, question_id: str, parent=None):
+    def __init__(self, model: QuizModel, question: Question, parent=None):
         super().__init__(parent)
         self._model = model
-        self._question_id = question_id
+        self._question = question
         self.setText("Alternar fácil")
 
     def _toggle(self) -> None:
-        question = self._model.get_question_by_id(self._question_id)
-        if question:
-            question.is_easy = not question.is_easy
-            index = self._model.get_index_by_id(self._question_id)
+        index = _get_question_index(self._model, self._question)
+        if index != -1:
+            self._question.is_easy = not self._question.is_easy
             self._model.update_question(index)
 
     def redo(self) -> None:
@@ -108,11 +109,11 @@ class ToggleEasyCommand(QUndoCommand):
 class EditQuestionFieldCommand(QUndoCommand):
     """Command to edit a question field."""
 
-    def __init__(self, model: QuizModel, question_id: str,
+    def __init__(self, model: QuizModel, question: Question,
                  field_name: str, old_value: str, new_value: str, parent=None):
         super().__init__(parent)
         self._model = model
-        self._question_id = question_id
+        self._question = question
         self._field_name = field_name
         self._old_value = old_value
         self._new_value = new_value
@@ -125,47 +126,44 @@ class EditQuestionFieldCommand(QUndoCommand):
         self._set_value(self._old_value)
 
     def _set_value(self, value: str) -> None:
-        question = self._model.get_question_by_id(self._question_id)
-        if question:
-            setattr(question, self._field_name, value)
-            index = self._model.get_index_by_id(self._question_id)
+        index = _get_question_index(self._model, self._question)
+        if index != -1:
+            setattr(self._question, self._field_name, value)
             self._model.update_question(index)
 
 
 class DeleteAnswerCommand(QUndoCommand):
     """Command to delete an answer from a question."""
 
-    def __init__(self, model: QuizModel, question_id: str, answer_index: int, parent=None):
+    def __init__(self, model: QuizModel, question: Question, answer_index: int, parent=None):
         super().__init__(parent)
         self._model = model
-        self._question_id = question_id
+        self._question = question
         self._answer_index = answer_index
         self._deleted_answer: Answer | None = None
         self.setText("Eliminar respuesta")
 
     def redo(self) -> None:
-        question = self._model.get_question_by_id(self._question_id)
-        if question and 0 <= self._answer_index < len(question.answers):
-            self._deleted_answer = question.answers.pop(self._answer_index)
-            index = self._model.get_index_by_id(self._question_id)
+        index = _get_question_index(self._model, self._question)
+        if index != -1 and 0 <= self._answer_index < len(self._question.answers):
+            self._deleted_answer = self._question.answers.pop(self._answer_index)
             self._model.update_question(index)
 
     def undo(self) -> None:
-        question = self._model.get_question_by_id(self._question_id)
-        if question and self._deleted_answer:
-            question.answers.insert(self._answer_index, self._deleted_answer)
-            index = self._model.get_index_by_id(self._question_id)
+        index = _get_question_index(self._model, self._question)
+        if index != -1 and self._deleted_answer:
+            self._question.answers.insert(self._answer_index, self._deleted_answer)
             self._model.update_question(index)
 
 
 class EditAnswerCommand(QUndoCommand):
     """Command to edit an answer field."""
 
-    def __init__(self, model: QuizModel, question_id: str, answer_index: int,
+    def __init__(self, model: QuizModel, question: Question, answer_index: int,
                  field_name: str, old_value: str, new_value: str, parent=None):
         super().__init__(parent)
         self._model = model
-        self._question_id = question_id
+        self._question = question
         self._answer_index = answer_index
         self._field_name = field_name
         self._old_value = old_value
@@ -179,8 +177,7 @@ class EditAnswerCommand(QUndoCommand):
         self._set_value(self._old_value)
 
     def _set_value(self, value: str) -> None:
-        question = self._model.get_question_by_id(self._question_id)
-        if question and 0 <= self._answer_index < len(question.answers):
-            setattr(question.answers[self._answer_index], self._field_name, value)
-            index = self._model.get_index_by_id(self._question_id)
+        index = _get_question_index(self._model, self._question)
+        if index != -1 and 0 <= self._answer_index < len(self._question.answers):
+            setattr(self._question.answers[self._answer_index], self._field_name, value)
             self._model.update_question(index)
