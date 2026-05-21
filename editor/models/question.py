@@ -24,6 +24,7 @@ class Answer:
     fraction: str  # "100" for correct, negative for incorrect
     feedback: str = ""
     format: str = "html"
+    correct_reviewed: bool = False
 
     @property
     def is_correct(self) -> bool:
@@ -60,6 +61,7 @@ class Question:
     origin_question_id: str = ""
     generated_by_model: str = ""
     is_easy: bool = False
+    review_notes: str = ""
 
     @staticmethod
     def generate_id() -> str:

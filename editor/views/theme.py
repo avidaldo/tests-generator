@@ -29,6 +29,11 @@ _LIGHT_COLORS = {
     "correct_input": "#F1F8E9",
     "correct_input_border": "#81C784",
     "correct_text": "#1B5E20",
+    "correct_reviewed_frame": "#E0F2F1",
+    "correct_reviewed_border": "#00796B",
+    "correct_reviewed_input": "#E0F7FA",
+    "correct_reviewed_input_border": "#26A69A",
+    "correct_reviewed_text": "#004D40",
     "incorrect_frame": "#F7F7F8",
     "incorrect_border": "#CDD3D8",
     "incorrect_input": "#FFFFFF",
@@ -52,6 +57,11 @@ _DARK_COLORS = {
     "correct_input": "#10241C",
     "correct_input_border": "#3FB950",
     "correct_text": "#D7FBE8",
+    "correct_reviewed_frame": "#0F3D3E",
+    "correct_reviewed_border": "#12B0A8",
+    "correct_reviewed_input": "#0A2D2E",
+    "correct_reviewed_input_border": "#16CBBF",
+    "correct_reviewed_text": "#B2F0EC",
     "incorrect_frame": "#2A3038",
     "incorrect_border": "#59636E",
     "incorrect_input": "#1F242C",
@@ -199,11 +209,20 @@ def build_muted_label_style(theme_variant: str) -> str:
     return f"color: {colors['muted']};"
 
 
-def build_answer_frame_style(theme_variant: str, is_correct: bool) -> str:
+def build_answer_frame_style(theme_variant: str, is_correct: bool, is_reviewed: bool = False) -> str:
     colors = _theme_colors(theme_variant)
-    background_key = "correct_frame" if is_correct else "incorrect_frame"
-    border_key = "correct_border" if is_correct else "incorrect_border"
-    border_width = "2px" if is_correct else "1px"
+    if is_correct:
+        background_key = "correct_frame"
+        border_key = "correct_border"
+        border_width = "2px"
+    elif is_reviewed:
+        background_key = "correct_reviewed_frame"
+        border_key = "correct_reviewed_border"
+        border_width = "2px"
+    else:
+        background_key = "incorrect_frame"
+        border_key = "incorrect_border"
+        border_width = "1px"
     return "\n".join((
         "QFrame {",
         f"    border: {border_width} solid {colors[border_key]};",
@@ -213,12 +232,16 @@ def build_answer_frame_style(theme_variant: str, is_correct: bool) -> str:
     ))
 
 
-def build_answer_editor_style(theme_variant: str, is_correct: bool, font_size: int | None = None) -> str:
+def build_answer_editor_style(theme_variant: str, is_correct: bool, is_reviewed: bool = False, font_size: int | None = None) -> str:
     colors = _theme_colors(theme_variant)
     if is_correct:
         background = colors["correct_input"]
         border = colors["correct_input_border"]
         text = colors["correct_text"]
+    elif is_reviewed:
+        background = colors["correct_reviewed_input"]
+        border = colors["correct_reviewed_input_border"]
+        text = colors["correct_reviewed_text"]
     else:
         background = colors["incorrect_input"]
         border = colors["incorrect_input_border"]

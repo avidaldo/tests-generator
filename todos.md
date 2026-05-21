@@ -4,13 +4,13 @@
 
 ## Editor Features
 
-- Add a box for notes on each question selected as "Revisar" to allow the reviewer to specify the reason for that status and any specific feedback for the automatic reviewer (Also clarify notation: human reviewer (stage 4) vs automatic reviewer (stage 5); and in fact that stage 5 is a loop with stage 4, since a new human review is still required before marking questions as "Lista").
-- All alsoa  way to write notes on other questions that should be createed.
-- Ver el modo de recuperar la forma de indicar en el feedback de cada pregunta una referencia al material de clase indicando dónde está explicada (esto también es un mecanismo de robustez para evitar alucionaciones y garantizar el rigor)
-- botón para añadir notas para anexar un documento de incidencias o futuras especificaciones (como estas mismas)
-- para cada pregunta, añadir opción para marcar como correcto-revisado un distractor (y que cambie ligeramente su color), y opción para eliminar todos los no marcados como correctos.
-- Identificar cuando la pregunta que se está editando cumple los requisitos básicos de formato (respuesta correcta + 3 distractores). Impedir en caso contrario marcarla como lista (desmarcar el botón y mostrar un mensaje de error indicando qué falta si igualmente se hace click en él).
-- Al marcar una pregunta como "Lista" se salta automaticamente a la siguiente, para agilizar el proceso de revisión.
+- [x] Add a box for notes on each question selected as "Revisar" to allow the reviewer to specify the reason for that status and any specific feedback for the automatic reviewer (Also clarify notation: human reviewer (stage 4) vs automatic reviewer (stage 5); and in fact that stage 5 is a loop with stage 4, since a new human review is still required before marking questions as "Lista").
+- [x] Also a way to write notes on other questions that should be created.
+- [x] Ver el modo de recuperar la forma de indicar en el feedback de cada pregunta una referencia al material de clase indicando dónde está explicada (esto también es un mecanismo de robustez para evitar alucionaciones y garantizar el rigor)
+- [x] botón para añadir notas para anexar un documento de incidencias o futuras especificaciones (como estas mismas)
+- [x] para cada pregunta, añadir opción para marcar como correcto-revisado un distractor (y que cambie ligeramente su color), y opción para eliminar todos los no marcados como correctos.
+- [x] Identificar cuando la pregunta que se está editando cumple los requisitos básicos de formato (respuesta correcta + 3 distractores). Impedir en caso contrario marcarla como lista (desmarcar el botón y mostrar un mensaje de error indicando qué falta si igualmente se hace click en él).
+- [x] Al marcar una pregunta como "Lista" se salta automaticamente a la siguiente, para agilizar el proceso de revisión.
 
 ## General features
 

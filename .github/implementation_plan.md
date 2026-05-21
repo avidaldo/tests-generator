@@ -33,13 +33,12 @@
 
 ## Planned Work
 
-- No approved unblocked items remain.
+No planned work remaining.
 
 ## Next Sequence
 
-1. Refresh the plan when new approved work appears.
+No next sequence.
 
-## Item Details
 
 ### P40 — Direct Stage 3 Concept Stems
 
@@ -66,6 +65,10 @@
 - Dependency: depends on P37 and P38 so the doc reflects the final implemented workflow rather than an intermediate state.
 
 ## Recently Completed
+
+- P50 — 2026-05-21. Implemented class material reference (`source_ref`) features: added editable `_source_ref_edit` field to details panel, integrated with `EditQuestionFieldCommand` for undo/redo stack support, wired dynamic `_source_label` updates, connected the undo stack's `indexChanged` signal to auto-refresh details display with a `_block_refresh_on_undo` guard, and added comprehensive unit tests verifying these features in `editor/tests/test_editor_improvements.py`.
+
+- P49 — 2026-05-21. Implemented editor improvements: added correct-reviewed status checkboxes with soft teal colors, a purge distractors button to remove non-reviewed wrong answers, validation rules for LISTA status (1 correct + 3 wrong), automatic demotion on validation failure, and auto-navigation to select the next question in the filtered list when marking a question as LISTA. Added 6 unit tests covering all features in `editor/tests/test_editor_improvements.py`.
 
 - P48 — 2026-05-20. Wired the optional Stage 3 `Model label` setting through the batch-generation orchestration surfaces so one stable label is applied to every question in a written batch when known; synced `.github/skills/generate-question-batches/SKILL.md`, `.github/skills/finish-question-coverage/SKILL.md`, `prompts/finish-stage3-coverage.prompt.md`, `prompts/generate-questions.prompt.md`, `prompts/AGENTS.md`, `docs/pipeline_execution_modes.md`, `README.md`, `AGENTS.md`, `.github/AGENTS.md`, and `.github/README.md`; and validated the touched markdown surfaces with diagnostics.
 

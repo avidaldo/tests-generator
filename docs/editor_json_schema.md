@@ -50,6 +50,7 @@ The `Abrir sesión de revisión...` action accepts this envelope. Older editor-s
 | --- | --- | --- |
 | `artifact_type` | string | Always `"review_session"` for editor-owned sessions. |
 | `version` | string | Schema version. Currently always `"1.0"`. |
+| `notes` | string | General review-session notes (e.g. issues list, future specifications, missing questions). |
 | `imported_sources` | array | Optional session-level provenance summary. See [Imported Source Object](#imported-source-object). |
 | `questions` | array | Ordered list of question objects. Export continues to read this top-level array directly. |
 
@@ -100,6 +101,7 @@ The `Abrir sesión de revisión...` action accepts this envelope. Older editor-s
 | `category_path` | string | yes | Full Moodle category path: `$course$/top/CategoryRoot/Subcategory`. |
 | `status` | string | yes | Review state. One of `"pendiente"` · `"revisar"` · `"lista"`. Generated questions always start as `"pendiente"`. |
 | `is_easy` | boolean | no | Difficulty flag. `true` marks the question as easy. Only meaningful on `"lista"` questions; used for difficulty-filtered exports. Defaults to `false` if omitted. |
+| `review_notes` | string | no | Reviewer notes explaining why a question is marked as `"revisar"` or needs revision. Defaults to `""` if omitted. |
 | `source_ref` | string | Stage 3 yes | One or more concept IDs from the Stage 2 subcategory file, such as `"NORM-01"` or `"NORM-01, CV-03"`. XML-derived questions may leave this empty. |
 | `generated_by_model` | string | no | Optional question-level model label recorded during Stage 3 generation when the run already knows it. The editor preserves it into Stage 4 review-session JSON and shows it in the provenance metadata when present. |
 | `source_file` | string | no | Legacy compatibility field retained for imported XML or old saved states. New Stage 3 batches should omit it. |
@@ -140,6 +142,7 @@ The editor fills these with correct defaults on import. Stage 3 generation shoul
 | `fraction` | string | yes | `"100"` for the correct answer and `"-50"` for each distractor. See [Scoring](#scoring). |
 | `feedback` | string | yes | HTML. Explanation shown to the student after the attempt. Required on every option because the adversarial validation step depends on it. |
 | `format` | string | yes | Always `"html"`. |
+| `correct_reviewed` | boolean | no | Reviewer flag indicating that a distractor has been reviewed and marked as correct/valid by a human. Defaults to `false`. |
 
 ### Answer count
 

@@ -6,7 +6,8 @@ Always-editable fields, 3-state workflow: PENDIENTE → REVISAR → LISTA
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel,
     QTextEdit, QPlainTextEdit, QPushButton, QLineEdit,
-    QGroupBox, QFrame, QSizePolicy, QSpacerItem, QScrollArea
+    QGroupBox, QFrame, QSizePolicy, QSpacerItem, QScrollArea,
+    QCheckBox, QMessageBox
 )
 from PyQt6.QtCore import pyqtSignal, Qt, QTimer
 from PyQt6.QtGui import QUndoStack, QFont
@@ -36,8 +37,10 @@ class AnswerWidget(QFrame):
     delete_requested = pyqtSignal(int)  # answer index
     text_changed = pyqtSignal(int, str)  # answer index, new text
     feedback_changed = pyqtSignal(int, str)  # answer index, new feedback
+    reviewed_changed = pyqtSignal(int, bool)  # answer index, correct_reviewed
 
     def __init__(self, index: int, text: str, fraction: str, is_correct: bool,
+                 correct_reviewed: bool = False,
                  feedback: str = "", show_feedback: bool = True,
                  theme_mode: str = THEME_SYSTEM, parent=None):
         super().__init__(parent)
@@ -45,6 +48,7 @@ class AnswerWidget(QFrame):
         self._text = text
         self._feedback = feedback
         self._is_correct = is_correct
+        self._correct_reviewed = correct_reviewed
         self._theme_mode = theme_mode
         self._is_updating = False
 
@@ -66,6 +70,13 @@ class AnswerWidget(QFrame):
         header.addWidget(self._header_label)
 
         header.addStretch()
+
+        self._correct_reviewed_cb = None
+        if not is_correct:
+            self._correct_reviewed_cb = QCheckBox("Correcto-Revisado")
+            self._correct_reviewed_cb.setChecked(correct_reviewed)
+            self._correct_reviewed_cb.stateChanged.connect(self._on_reviewed_state_changed)
+            header.addWidget(self._correct_reviewed_cb)
 
         self._delete_btn = QPushButton("🗑")
         self._delete_btn.setFixedSize(30, 30)
@@ -113,10 +124,18 @@ class AnswerWidget(QFrame):
             return
         theme_variant = effective_theme_variant(self._theme_mode)
         font_size = self.font().pointSize() if self.font().pointSize() > 0 else None
-        self.setStyleSheet(build_answer_frame_style(theme_variant, self._is_correct))
-        self._text_edit.setStyleSheet(build_answer_editor_style(theme_variant, self._is_correct, font_size))
+        self.setStyleSheet(build_answer_frame_style(theme_variant, self._is_correct, self._correct_reviewed))
+        self._text_edit.setStyleSheet(build_answer_editor_style(theme_variant, self._is_correct, self._correct_reviewed, font_size))
         self._feedback_edit.setStyleSheet(build_text_edit_style(theme_variant, font_size))
         self._feedback_label.setStyleSheet(build_muted_label_style(theme_variant))
+
+    def _on_reviewed_state_changed(self, state: int):
+        if self._correct_reviewed_cb:
+            checked = self._correct_reviewed_cb.isChecked()
+            if checked != self._correct_reviewed:
+                self._correct_reviewed = checked
+                self._apply_styles()
+                self.reviewed_changed.emit(self._index, checked)
 
     def set_theme_mode(self, theme_mode: str):
         self._theme_mode = theme_mode
@@ -188,6 +207,7 @@ class QuestionDetailPanel(QWidget):
 
     question_changed = pyqtSignal()
     delete_question_requested = pyqtSignal()
+    status_about_to_change = pyqtSignal(object, object)  # (question, new_status)
 
     def __init__(self, model: QuizModel, undo_stack: QUndoStack, parent=None):
         super().__init__(parent)
@@ -198,8 +218,10 @@ class QuestionDetailPanel(QWidget):
         self._is_updating = False
         self._show_feedback = True  # Toggle state for feedback visibility
         self._theme_mode = THEME_SYSTEM
+        self._block_refresh_on_undo = False
 
         self._setup_ui()
+        self._undo_stack.indexChanged.connect(self._on_undo_stack_changed)
 
     def _setup_ui(self):
         layout = QVBoxLayout(self)
@@ -265,6 +287,21 @@ class QuestionDetailPanel(QWidget):
 
         layout.addLayout(cat_row)
 
+        # Source reference row (editable)
+        ref_row = QHBoxLayout()
+        ref_row.setSpacing(8)
+
+        ref_icon = QLabel("🔗")
+        ref_icon.setFixedWidth(20)
+        ref_row.addWidget(ref_icon)
+
+        self._source_ref_edit = QLineEdit()
+        self._source_ref_edit.setPlaceholderText("Referencia al material (ej: NORM-01, CV-03)")
+        self._source_ref_edit.editingFinished.connect(self._on_source_ref_changed)
+        ref_row.addWidget(self._source_ref_edit, 1)
+
+        layout.addLayout(ref_row)
+
         # Current status indicator
         self._status_label = QLabel("")
         self._status_label.setStyleSheet("padding: 5px;")
@@ -302,11 +339,40 @@ class QuestionDetailPanel(QWidget):
         feedback_layout.addWidget(self._feedback_edit)
         layout.addWidget(self._feedback_group)
 
+        # Notes for "Revisar" status
+        self._review_notes_group = QGroupBox("Notas de revisión")
+        review_notes_layout = QVBoxLayout(self._review_notes_group)
+        
+        loop_info = QLabel(
+            "<b>Flujo de trabajo:</b> El revisor automático (Stage 5) procesará estas observaciones. "
+            "Cualquier corrección resultante requerirá una nueva revisión manual (Stage 4) "
+            "antes de poder marcar la pregunta como Lista."
+        )
+        loop_info.setWordWrap(True)
+        loop_info.setStyleSheet("color: #E65100; font-size: 10px; margin-bottom: 2px;")
+        review_notes_layout.addWidget(loop_info)
+        
+        self._review_notes_edit = QTextEdit()
+        self._review_notes_edit.setPlaceholderText("Especifica aquí el motivo de revisión o feedback...")
+        self._review_notes_edit.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
+        self._review_notes_edit.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
+        self._review_notes_edit.textChanged.connect(self._on_review_notes_changed)
+        self._review_notes_edit.textChanged.connect(lambda: self._adjust_textedit_height(self._review_notes_edit, 30, 120))
+        review_notes_layout.addWidget(self._review_notes_edit)
+        
+        layout.addWidget(self._review_notes_group)
+
         # Answers section with toggle button
         answers_header = QHBoxLayout()
         answers_title = QLabel("<b>Respuestas</b>")
         answers_header.addWidget(answers_title)
         answers_header.addStretch()
+
+        self._purge_btn = QPushButton("🗑 Eliminar no marcados")
+        self._purge_btn.setStyleSheet("background-color: #C62828; color: white;")
+        self._purge_btn.clicked.connect(self._on_purge_answers)
+        self._purge_btn.setToolTip("Eliminar todos los distractores que no estén marcados como correctos o correcto-revisados")
+        answers_header.addWidget(self._purge_btn)
 
         self._toggle_feedback_btn = QPushButton("💬 Ocultar Feedback")
         self._toggle_feedback_btn.setCheckable(True)
@@ -330,8 +396,12 @@ class QuestionDetailPanel(QWidget):
             self._question_edit.setStyleSheet(build_text_edit_style(theme_variant, font_size))
         if hasattr(self, "_feedback_edit"):
             self._feedback_edit.setStyleSheet(build_text_edit_style(theme_variant, font_size))
+        if hasattr(self, "_review_notes_edit"):
+            self._review_notes_edit.setStyleSheet(build_text_edit_style(theme_variant, font_size))
         if hasattr(self, "_category_edit"):
             self._category_edit.setStyleSheet(build_line_edit_style(theme_variant, font_size))
+        if hasattr(self, "_source_ref_edit"):
+            self._source_ref_edit.setStyleSheet(build_line_edit_style(theme_variant, font_size))
         if hasattr(self, "_source_label"):
             self._source_label.setStyleSheet(build_muted_label_style(theme_variant))
         if hasattr(self, "_warning_label"):
@@ -421,17 +491,25 @@ class QuestionDetailPanel(QWidget):
             self._name_label.setText("Selecciona una pregunta")
             self._category_edit.clear()
             self._category_edit.setEnabled(False)
+            if hasattr(self, "_source_ref_edit"):
+                self._source_ref_edit.clear()
+                self._source_ref_edit.setEnabled(False)
             self._source_label.setText("")
             self._status_label.setText("")
             self._warning_label.clear()
             self._warning_label.setVisible(False)
             self._question_edit.clear()
             self._feedback_edit.clear()
+            if hasattr(self, "_review_notes_edit"):
+                self._review_notes_edit.clear()
+            if hasattr(self, "_review_notes_group"):
+                self._review_notes_group.setVisible(False)
             self._clear_answers()
             self._lista_btn.setEnabled(False)
             self._revisar_btn.setEnabled(False)
             self._easy_btn.setEnabled(False)
             self._easy_btn.setChecked(False)
+            self._purge_btn.setEnabled(False)
             self._delete_question_btn.setEnabled(False)
             self._is_updating = False
             return
@@ -440,12 +518,16 @@ class QuestionDetailPanel(QWidget):
         self._name_label.setText(q.name)
         self._category_edit.setText(q.category_path or "")
         self._category_edit.setEnabled(True)
+        if hasattr(self, "_source_ref_edit"):
+            self._source_ref_edit.setText(q.source_ref or "")
+            self._source_ref_edit.setEnabled(True)
         self._source_label.setText(self._format_source_label(q))
 
         # Enable buttons
         self._delete_question_btn.setEnabled(True)
         self._easy_btn.setEnabled(True)
         self._easy_btn.setChecked(q.is_easy)
+        self._purge_btn.setEnabled(True)
 
         # Status indicator and button states
         if q.status == QuestionStatus.LISTA:
@@ -483,6 +565,13 @@ class QuestionDetailPanel(QWidget):
         # Feedback - clean HTML
         self._feedback_edit.setHtml(self._clean_html(q.general_feedback or ""))
         self._apply_font_to_text_edit(self._feedback_edit, self.font())
+
+        # Review notes
+        notes_visible = (q.status == QuestionStatus.REVISAR or bool(q.review_notes))
+        self._review_notes_group.setVisible(notes_visible)
+        self._review_notes_edit.setPlainText(q.review_notes or "")
+        self._apply_font_to_text_edit(self._review_notes_edit, self.font())
+        QTimer.singleShot(0, lambda: self._adjust_textedit_height(self._review_notes_edit, 30, 120))
 
         # Adjust heights after content is set (use timer to ensure viewport is sized)
         QTimer.singleShot(0, lambda: self._adjust_textedit_height(self._question_edit, 30, 300))
@@ -550,6 +639,7 @@ class QuestionDetailPanel(QWidget):
                 text=self._clean_html(ans.text),
                 fraction=ans.fraction,
                 is_correct=ans.is_correct,
+                correct_reviewed=ans.correct_reviewed,
                 feedback=self._clean_html(ans.feedback),
                 show_feedback=self._show_feedback,
                 theme_mode=self._theme_mode,
@@ -560,6 +650,7 @@ class QuestionDetailPanel(QWidget):
             widget.delete_requested.connect(self._on_delete_answer)
             widget.text_changed.connect(self._on_answer_text_changed)
             widget.feedback_changed.connect(self._on_answer_feedback_changed)
+            widget.reviewed_changed.connect(self._on_answer_reviewed_changed)
             self._answer_widgets.append(widget)
             self._answers_layout.addWidget(widget)
 
@@ -583,14 +674,31 @@ class QuestionDetailPanel(QWidget):
         for widget in self._answer_widgets:
             widget.set_feedback_visible(self._show_feedback)
 
+    def _push_command(self, cmd):
+        self._block_refresh_on_undo = True
+        try:
+            self._undo_stack.push(cmd)
+        finally:
+            self._block_refresh_on_undo = False
+
     def _toggle_easy(self):
         """Toggle the is_easy flag on the current question."""
         if not self._current_question:
             return
         cmd = ToggleEasyCommand(self._model, self._current_question)
-        self._undo_stack.push(cmd)
+        self._push_command(cmd)
         self._refresh_display()
         self.question_changed.emit()
+
+    def _validate_format(self, question: Question) -> list[str]:
+        errors = []
+        c_count = question.correct_count
+        w_count = question.wrong_count
+        if c_count != 1:
+            errors.append(f"Debe haber exactamente 1 respuesta correcta (actual: {c_count}).")
+        if w_count != 3:
+            errors.append(f"Debe haber exactamente 3 distractores (respuestas incorrectas) (actual: {w_count}).")
+        return errors
 
     def _set_status(self, new_status: QuestionStatus):
         """Set the question to a specific status. If already at that status, reset to PENDIENTE."""
@@ -601,10 +709,24 @@ class QuestionDetailPanel(QWidget):
         if self._current_question.status == new_status:
             new_status = QuestionStatus.PENDIENTE
 
+        if new_status == QuestionStatus.LISTA:
+            errors = self._validate_format(self._current_question)
+            if errors:
+                QMessageBox.warning(
+                    self,
+                    "Error de formato",
+                    "No se puede marcar la pregunta como LISTA debido a los siguientes errores de formato:\n\n" + "\n".join(errors)
+                )
+                self._refresh_display()
+                return
+
         if self._current_question.status != new_status:
+            # Emit status_about_to_change before modifying status
+            self.status_about_to_change.emit(self._current_question, new_status)
+
             from models.undo_commands import SetStatusCommand
             cmd = SetStatusCommand(self._model, self._current_question, new_status)
-            self._undo_stack.push(cmd)
+            self._push_command(cmd)
             self._refresh_display()
             self.question_changed.emit()
 
@@ -617,7 +739,7 @@ class QuestionDetailPanel(QWidget):
                 self._model, self._current_question,
                 "question_text", self._current_question.question_text, new_text
             )
-            self._undo_stack.push(cmd)
+            self._push_command(cmd)
 
     def _on_feedback_changed(self):
         if self._is_updating or not self._current_question:
@@ -628,17 +750,70 @@ class QuestionDetailPanel(QWidget):
                 self._model, self._current_question,
                 "general_feedback", self._current_question.general_feedback, new_text
             )
-            self._undo_stack.push(cmd)
+            self._push_command(cmd)
+
+    def _on_review_notes_changed(self):
+        if self._is_updating or not self._current_question:
+            return
+        new_text = self._review_notes_edit.toPlainText()
+        if new_text != self._current_question.review_notes:
+            cmd = EditQuestionFieldCommand(
+                self._model, self._current_question,
+                "review_notes", self._current_question.review_notes, new_text
+            )
+            self._push_command(cmd)
 
     def _on_delete_answer(self, answer_index: int):
         if not self._current_question:
             return
         if not 0 <= answer_index < len(self._current_question.answers):
             return
-        cmd = DeleteAnswerCommand(self._model, self._current_question, answer_index)
-        self._undo_stack.push(cmd)
+
+        self._block_refresh_on_undo = True
+        self._undo_stack.beginMacro("Eliminar respuesta")
+        try:
+            cmd = DeleteAnswerCommand(self._model, self._current_question, answer_index)
+            self._undo_stack.push(cmd)
+
+            if self._current_question.status == QuestionStatus.LISTA:
+                errors = self._validate_format(self._current_question)
+                if errors:
+                    from models.undo_commands import SetStatusCommand
+                    demote_cmd = SetStatusCommand(self._model, self._current_question, QuestionStatus.PENDIENTE)
+                    self._undo_stack.push(demote_cmd)
+        finally:
+            self._undo_stack.endMacro()
+            self._block_refresh_on_undo = False
+
         self._refresh_answers()
         self._refresh_warning_label()
+        self._refresh_display()
+        self.question_changed.emit()
+
+    def _on_purge_answers(self):
+        if not self._current_question:
+            return
+
+        self._block_refresh_on_undo = True
+        self._undo_stack.beginMacro("Eliminar respuestas no marcadas")
+        try:
+            from models.undo_commands import PurgeAnswersCommand
+            cmd = PurgeAnswersCommand(self._model, self._current_question)
+            self._undo_stack.push(cmd)
+
+            if self._current_question.status == QuestionStatus.LISTA:
+                errors = self._validate_format(self._current_question)
+                if errors:
+                    from models.undo_commands import SetStatusCommand
+                    demote_cmd = SetStatusCommand(self._model, self._current_question, QuestionStatus.PENDIENTE)
+                    self._undo_stack.push(demote_cmd)
+        finally:
+            self._undo_stack.endMacro()
+            self._block_refresh_on_undo = False
+
+        self._refresh_answers()
+        self._refresh_warning_label()
+        self._refresh_display()
         self.question_changed.emit()
 
     def _on_answer_text_changed(self, answer_index: int, new_text: str):
@@ -651,7 +826,7 @@ class QuestionDetailPanel(QWidget):
                     self._model, self._current_question, answer_index,
                     "text", old_text, new_text
                 )
-                self._undo_stack.push(cmd)
+                self._push_command(cmd)
                 self._refresh_warning_label()
 
     def _on_answer_feedback_changed(self, answer_index: int, new_feedback: str):
@@ -664,7 +839,20 @@ class QuestionDetailPanel(QWidget):
                     self._model, self._current_question, answer_index,
                     "feedback", old_feedback, new_feedback
                 )
-                self._undo_stack.push(cmd)
+                self._push_command(cmd)
+
+    def _on_answer_reviewed_changed(self, answer_index: int, checked: bool):
+        if self._is_updating or not self._current_question:
+            return
+        if answer_index < len(self._current_question.answers):
+            old_reviewed = self._current_question.answers[answer_index].correct_reviewed
+            if checked != old_reviewed:
+                cmd = EditAnswerCommand(
+                    self._model, self._current_question, answer_index,
+                    "correct_reviewed", old_reviewed, checked
+                )
+                self._push_command(cmd)
+                self._refresh_warning_label()
 
     def _on_category_changed(self):
         """Handle category path edit."""
@@ -676,5 +864,26 @@ class QuestionDetailPanel(QWidget):
                 self._model, self._current_question,
                 "category_path", self._current_question.category_path, new_category
             )
-            self._undo_stack.push(cmd)
+            self._push_command(cmd)
             self.question_changed.emit()
+
+    def _on_source_ref_changed(self):
+        """Handle source reference edit."""
+        if self._is_updating or not self._current_question:
+            return
+        new_ref = self._source_ref_edit.text().strip()
+        if new_ref != self._current_question.source_ref:
+            cmd = EditQuestionFieldCommand(
+                self._model, self._current_question,
+                "source_ref", self._current_question.source_ref, new_ref
+            )
+            self._push_command(cmd)
+            # Update source label immediately
+            self._source_label.setText(self._format_source_label(self._current_question))
+            self.question_changed.emit()
+
+    def _on_undo_stack_changed(self):
+        """Handle indexChanged from undo stack to refresh details UI if not local push."""
+        if getattr(self, "_block_refresh_on_undo", False) or self._is_updating:
+            return
+        self._refresh_display()

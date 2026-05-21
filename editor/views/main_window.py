@@ -8,7 +8,8 @@ from PyQt6.QtWidgets import (
     QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QSplitter,
     QListView, QTreeWidget, QTreeWidgetItem, QMenuBar, QMenu,
     QToolBar, QStatusBar, QFileDialog, QMessageBox, QPushButton,
-    QLabel, QGroupBox, QScrollArea, QGridLayout, QApplication
+    QLabel, QGroupBox, QScrollArea, QGridLayout, QApplication,
+    QDialog, QTextEdit
 )
 from PyQt6.QtCore import Qt, QModelIndex, QSortFilterProxyModel, QSettings, QTimer
 from PyQt6.QtGui import QAction, QActionGroup, QUndoStack, QKeySequence, QFont, QPalette, QWheelEvent
@@ -18,7 +19,7 @@ from models.question import QuestionStatus
 from models.question_diagnostics import analyze_question
 from models.undo_commands import DeleteQuestionCommand
 from views.question_detail import QuestionDetailPanel
-from views.theme import THEME_OPTIONS, THEME_SYSTEM, apply_app_theme
+from views.theme import THEME_OPTIONS, THEME_SYSTEM, apply_app_theme, effective_theme_variant, build_text_edit_style
 from file_io.stage3_batch_finder import discover_stage3_batch_files
 from file_io.xml_parser import parse_multiple_files
 from file_io.xml_writer import generate_xml
@@ -69,6 +70,46 @@ class StatusFilterProxyModel(QSortFilterProxyModel):
         return True
 
 
+class SessionNotesDialog(QDialog):
+    """Dialog for editing general session notes."""
+
+    def __init__(self, notes: str, theme_mode: str = THEME_SYSTEM, parent=None):
+        super().__init__(parent)
+        self.setWindowTitle("Notas de la sesión")
+        self.setMinimumSize(500, 400)
+        self.resize(600, 450)
+
+        layout = QVBoxLayout(self)
+
+        self.label = QLabel("Notas generales de la sesión (lista de problemas, especificaciones futuras, etc.):")
+        layout.addWidget(self.label)
+
+        self.text_edit = QTextEdit()
+        self.text_edit.setPlainText(notes)
+
+        theme_variant = effective_theme_variant(theme_mode)
+        self.text_edit.setStyleSheet(build_text_edit_style(theme_variant))
+
+        layout.addWidget(self.text_edit)
+
+        # Standard buttons
+        buttons_layout = QHBoxLayout()
+        self.btn_cancel = QPushButton("Cancelar")
+        self.btn_cancel.clicked.connect(self.reject)
+        self.btn_save = QPushButton("Guardar")
+        self.btn_save.setDefault(True)
+        self.btn_save.clicked.connect(self.accept)
+
+        buttons_layout.addStretch()
+        buttons_layout.addWidget(self.btn_cancel)
+        buttons_layout.addWidget(self.btn_save)
+
+        layout.addLayout(buttons_layout)
+
+    def get_notes(self) -> str:
+        return self.text_edit.toPlainText()
+
+
 class MainWindow(QMainWindow):
     """Main application window."""
 
@@ -105,8 +146,10 @@ class MainWindow(QMainWindow):
         self._settings = QSettings()
         self._current_state_file: Path | None = None
         self._session_dirty = False
+        self._session_notes = ""
         self._suspend_dirty_tracking = False
         self._theme_mode = theme_mode
+        self._next_question_to_select = None
         app = QApplication.instance()
         current_palette = app.palette() if app is not None else QPalette()
         self._system_palette = QPalette(system_palette) if system_palette is not None else QPalette(current_palette)
@@ -225,6 +268,8 @@ class MainWindow(QMainWindow):
         self._detail_panel.question_changed.connect(self._mark_session_dirty)
         self._detail_panel.question_changed.connect(self._refresh_category_tree)
         self._detail_panel.delete_question_requested.connect(self._delete_selected)
+        self._detail_panel.status_about_to_change.connect(self._on_status_about_to_change)
+        self._detail_panel.question_changed.connect(self._on_question_changed_nav)
 
         scroll = QScrollArea()
         scroll.setWidget(self._detail_panel)
@@ -263,6 +308,10 @@ class MainWindow(QMainWindow):
         save_as_action.setShortcut(QKeySequence.StandardKey.SaveAs)
         save_as_action.triggered.connect(self._save_review_session_as)
         file_menu.addAction(save_as_action)
+
+        session_notes_action = QAction("Notas de sesión...", self)
+        session_notes_action.triggered.connect(self._show_session_notes_dialog)
+        file_menu.addAction(session_notes_action)
 
         file_menu.addSeparator()
 
@@ -360,6 +409,7 @@ class MainWindow(QMainWindow):
         toolbar.addAction("Añadir carpeta", self._import_stage3_folder)
         toolbar.addAction("Abrir sesión", self._open_review_session)
         toolbar.addAction("Guardar", self._save_review_session)
+        toolbar.addAction("Notas de sesión", self._show_session_notes_dialog)
 
     def _setup_shortcuts(self):
         pass  # Shortcuts defined in menu actions
@@ -382,6 +432,7 @@ class MainWindow(QMainWindow):
         current_state_file: Path | None,
         status_message: str,
         is_dirty: bool = False,
+        notes: str = "",
     ):
         self._suspend_dirty_tracking = True
         try:
@@ -390,6 +441,7 @@ class MainWindow(QMainWindow):
             self._model.add_questions(list(questions))
         finally:
             self._suspend_dirty_tracking = False
+        self._session_notes = notes
         self._current_state_file = current_state_file
         self._detail_panel.set_question(None)
         self._refresh_category_tree()
@@ -410,7 +462,7 @@ class MainWindow(QMainWindow):
 
     def _save_review_session_to_path(self, filepath: Path) -> bool:
         try:
-            save_state(self._model.questions, filepath)
+            save_state(self._model.questions, filepath, self._session_notes)
             self._current_state_file = filepath
             self._settings.setValue("last_state_file", str(filepath))
             self._clear_autosave()
@@ -577,6 +629,16 @@ class MainWindow(QMainWindow):
 
         self._replace_loaded_session([], None, "Nueva sesión de revisión")
 
+    def _show_session_notes_dialog(self):
+        """Show the dialog to edit general session notes."""
+        dialog = SessionNotesDialog(self._session_notes, self._theme_mode, self)
+        if dialog.exec() == QDialog.DialogCode.Accepted:
+            new_notes = dialog.get_notes()
+            if new_notes != self._session_notes:
+                self._session_notes = new_notes
+                self._mark_session_dirty()
+                self._schedule_autosave()
+
     def _open_review_session(self):
         file, _ = QFileDialog.getOpenFileName(
             self,
@@ -601,6 +663,7 @@ class MainWindow(QMainWindow):
                 review_session.questions,
                 filepath,
                 f"Abierta sesión con {len(review_session.questions)} preguntas",
+                notes=review_session.notes,
             )
         except Exception as e:
             QMessageBox.critical(self, "Error", f"Error al cargar: {e}")
@@ -672,6 +735,37 @@ class MainWindow(QMainWindow):
             if self._proxy_model.rowCount() > 0:
                 new_row = min(proxy_index.row(), self._proxy_model.rowCount() - 1)
                 self._question_list.setCurrentIndex(self._proxy_model.index(new_row, 0))
+
+    def _on_status_about_to_change(self, question, new_status):
+        self._next_question_to_select = None
+        if new_status == QuestionStatus.LISTA:
+            current_proxy_index = self._question_list.currentIndex()
+            if current_proxy_index.isValid():
+                next_row = current_proxy_index.row() + 1
+                if next_row < self._proxy_model.rowCount():
+                    next_proxy_index = self._proxy_model.index(next_row, 0)
+                    next_source_index = self._proxy_model.mapToSource(next_proxy_index)
+                    self._next_question_to_select = self._model.get_question(next_source_index.row())
+
+    def _on_question_changed_nav(self):
+        if self._next_question_to_select:
+            target = self._next_question_to_select
+            self._next_question_to_select = None
+            QTimer.singleShot(0, lambda: self._select_question_by_reference(target))
+
+    def _select_question_by_reference(self, question):
+        found_index = QModelIndex()
+        for r in range(self._proxy_model.rowCount()):
+            proxy_idx = self._proxy_model.index(r, 0)
+            src_idx = self._proxy_model.mapToSource(proxy_idx)
+            q = self._model.get_question(src_idx.row())
+            if q is question:
+                found_index = proxy_idx
+                break
+        if found_index.isValid():
+            self._question_list.setCurrentIndex(found_index)
+        else:
+            self._detail_panel.set_question(None)
 
     def _on_question_selected(self, current: QModelIndex, previous: QModelIndex):
         # Map proxy index to source index
@@ -752,7 +846,7 @@ class MainWindow(QMainWindow):
         if not self._model.questions:
             return
         try:
-            save_state(self._model.questions, self._autosave_file)
+            save_state(self._model.questions, self._autosave_file, self._session_notes)
             self._settings.setValue("autosave_file", str(self._autosave_file))
         except Exception:
             pass  # Silent fail for autosave
@@ -774,6 +868,7 @@ class MainWindow(QMainWindow):
             current_state_file,
             f"Restauradas {len(review_session.questions)} preguntas",
             is_dirty=is_autosave_restore,
+            notes=review_session.notes,
         )
 
     def _auto_load_last_state(self):

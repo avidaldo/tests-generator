@@ -24,11 +24,12 @@ class ReviewSession:
 
     questions: list[Question] = field(default_factory=list)
     imported_sources: list[ImportedSource] = field(default_factory=list)
+    notes: str = ""
     artifact_type: str = REVIEW_SESSION_ARTIFACT_TYPE
     version: str = REVIEW_SESSION_VERSION
 
     @classmethod
-    def from_questions(cls, questions: list[Question]) -> "ReviewSession":
+    def from_questions(cls, questions: list[Question], notes: str = "") -> "ReviewSession":
         imported_sources: list[ImportedSource] = []
         seen_sources: set[tuple[str, str, str]] = set()
 
@@ -49,4 +50,4 @@ class ReviewSession:
                 )
             )
 
-        return cls(questions=list(questions), imported_sources=imported_sources)
+        return cls(questions=list(questions), imported_sources=imported_sources, notes=notes)

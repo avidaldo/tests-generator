@@ -160,7 +160,7 @@ class EditAnswerCommand(QUndoCommand):
     """Command to edit an answer field."""
 
     def __init__(self, model: QuizModel, question: Question, answer_index: int,
-                 field_name: str, old_value: str, new_value: str, parent=None):
+                 field_name: str, old_value: any, new_value: any, parent=None):
         super().__init__(parent)
         self._model = model
         self._question = question
@@ -168,7 +168,7 @@ class EditAnswerCommand(QUndoCommand):
         self._field_name = field_name
         self._old_value = old_value
         self._new_value = new_value
-        self.setText(f"Editar respuesta")
+        self.setText("Editar respuesta")
 
     def redo(self) -> None:
         self._set_value(self._new_value)
@@ -176,8 +176,36 @@ class EditAnswerCommand(QUndoCommand):
     def undo(self) -> None:
         self._set_value(self._old_value)
 
-    def _set_value(self, value: str) -> None:
+    def _set_value(self, value: any) -> None:
         index = _get_question_index(self._model, self._question)
         if index != -1 and 0 <= self._answer_index < len(self._question.answers):
             setattr(self._question.answers[self._answer_index], self._field_name, value)
             self._model.update_question(index)
+
+
+class PurgeAnswersCommand(QUndoCommand):
+    """Command to remove all distractors not marked as correct or correct-reviewed."""
+
+    def __init__(self, model: QuizModel, question: Question, parent=None):
+        super().__init__(parent)
+        self._model = model
+        self._question = question
+        self._old_answers = list(question.answers)
+        self.setText("Eliminar respuestas no marcadas")
+
+    def redo(self) -> None:
+        index = _get_question_index(self._model, self._question)
+        if index != -1:
+            # Keep correct answers or those marked as correct-reviewed
+            self._question.answers = [
+                ans for ans in self._old_answers
+                if ans.is_correct or ans.correct_reviewed
+            ]
+            self._model.update_question(index)
+
+    def undo(self) -> None:
+        index = _get_question_index(self._model, self._question)
+        if index != -1:
+            self._question.answers = list(self._old_answers)
+            self._model.update_question(index)
+

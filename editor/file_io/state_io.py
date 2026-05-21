@@ -39,12 +39,14 @@ def _serialize_question(question: Question) -> dict:
         "origin_question_id": question.origin_question_id,
         "generated_by_model": question.generated_by_model,
         "is_easy": question.is_easy,
+        "review_notes": question.review_notes,
         "answers": [
             {
                 "text": answer.text,
                 "fraction": answer.fraction,
                 "feedback": answer.feedback,
                 "format": answer.format,
+                "correct_reviewed": getattr(answer, "correct_reviewed", False),
             }
             for answer in question.answers
         ],
@@ -114,6 +116,7 @@ def _deserialize_question(question_data: dict, filepath: Path) -> Question:
             fraction=answer["fraction"],
             feedback=answer.get("feedback", ""),
             format=answer.get("format", "html"),
+            correct_reviewed=answer.get("correct_reviewed", False),
         )
         for answer in question_data.get("answers", [])
     ]
@@ -157,6 +160,7 @@ def _deserialize_question(question_data: dict, filepath: Path) -> Question:
         origin_question_id=question_data.get("origin_question_id", question_data.get("id", "")),
         generated_by_model=question_data.get("generated_by_model", ""),
         is_easy=bool(question_data.get("is_easy", False)),
+        review_notes=question_data.get("review_notes", ""),
     )
 
 
@@ -175,12 +179,13 @@ def _deserialize_review_session(data: dict, filepath: Path) -> ReviewSession:
     review_session = ReviewSession(
         questions=questions,
         imported_sources=imported_sources,
+        notes=data.get("notes", ""),
         artifact_type=data.get("artifact_type", REVIEW_SESSION_ARTIFACT_TYPE),
         version=data.get("version", REVIEW_SESSION_VERSION),
     )
     if review_session.imported_sources:
         return review_session
-    return ReviewSession.from_questions(review_session.questions)
+    return ReviewSession.from_questions(review_session.questions, notes=review_session.notes)
 
 
 def save_review_session(review_session: ReviewSession, filepath: Path) -> None:
@@ -188,6 +193,7 @@ def save_review_session(review_session: ReviewSession, filepath: Path) -> None:
     data = {
         "artifact_type": REVIEW_SESSION_ARTIFACT_TYPE,
         "version": review_session.version,
+        "notes": review_session.notes,
         "imported_sources": [
             _serialize_imported_source(imported_source)
             for imported_source in review_session.imported_sources
@@ -223,9 +229,11 @@ def load_stage3_batch(filepath: Path) -> list[Question]:
     return _deserialize_review_session(data, filepath).questions
 
 
-def save_state(questions: list[Question], filepath: Path) -> None:
+def save_state(questions: list[Question], filepath: Path, notes: str = "") -> None:
     """Save the current state to a JSON file."""
-    save_review_session(ReviewSession.from_questions(questions), filepath)
+    session = ReviewSession.from_questions(questions)
+    session.notes = notes
+    save_review_session(session, filepath)
 
 
 def load_state(filepath: Path) -> list[Question]:
