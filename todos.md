@@ -18,6 +18,7 @@
 - Modular defininendo en un documento concreto las reglas de diseño de las preguntas (como que todas las preguntas tengan la misma longitud o que no sean ambiguas) para mejor mantenimeinto y escalabilidad del proyecto.
 - Mejorar la salida del stage 3 para indicar cuántas preguntas se generaron, todavía suele haber problemas con la exahustividad.
 - Crear un prompt que subdivida en 2 exámenes separando las preguntas más parecidas o que puedan dar información para resolver otra.
+- Currently a single batch seems to be generated for each topic when using the skill. I want complete coverage of all topics.
 
 
 
