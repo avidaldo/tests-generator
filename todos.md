@@ -12,6 +12,8 @@
 - [x] Identificar cuando la pregunta que se está editando cumple los requisitos básicos de formato (respuesta correcta + 3 distractores). Impedir en caso contrario marcarla como lista (desmarcar el botón y mostrar un mensaje de error indicando qué falta si igualmente se hace click en él).
 - [x] Al marcar una pregunta como "Lista" se salta automaticamente a la siguiente, para agilizar el proceso de revisión.
 
+- El botón "Eliminar no marcados" debería solo poder usarse cuando se haya marcado al menos 3 distractores como correctos para evitar dejar una pregunta no válida por error. Además, al eliminar los no marcados, se debería marcar automáticamente la pregunta como "Lista" si cumple los requisitos de formato, para agilizar el proceso de revisión. Quizá el botón debería estar desactivado mientras no se cumplan los requisitos para su uso. Y tal vez esto sería bueno también para "Lista", que solo se pueda marcar como lista si se cumplen los requisitos de formato, en lugar de sacar la ventana de warning después de hacer click en él. ¿Podría el mensaje equivalente al warning aparecer al intentar marcar como "Lista" pero no como una ventana emergente sino como un mensaje temporal sobre él, al estilo de los hints????? de javascript (Revisar si pyQt permite eso)
+
 ## General features
 
 - Remove unnecessary customizations as those about development and SDD. They are currently overcomplex and a simple implementation based on this same document (once its structure is also polished) with built-in agents should be enough.
@@ -37,3 +39,7 @@
 - Evitar adjetivos que claramente tienen connotación negativa indicando abiertamente una tipica descripción de algo que está mal, como "enorme" o "confuso"?
 - Evitar distractores infantiles como 'VS Code no puede ser un IDE real porque no es un "verdadero IDE" como PyCharm.'
 - Los distractores deben ser manifiestamente erroreos, pese a disimularlo. Nunca ser una opción menos correcta que otra.
+- Es necesario mejorar el estilo de la redacción. Si bien la dificultad conceptual es importante, también lo es la claridad, si un estilo recargado o innecesariamente formal y complejo.
+- Evitar preguntar sobre varios conceptos a la vez si no hay ninguna relación entre ellos relacionada con aquello que se pregunta, como "¿Qué combinación describe mejor cómo kernel size, stride, padding y pooling afectan la salida espacial de una CNN?". Además, esta pregunta rompe la idea de no usar graduaciones como "mejor".
+- Hay un claro abuso de formulaciones como "¿Qué comparación describe mejor..."; de nuevo con graduación. Debe evitarse en favor de un estilo más directo.
+- Evita preguntas que ya den información en el propio enunciado como "Una noticia puede etiquetarse simultáneamente como "economía", "energía" y "política internacional". ¿Por qué esta tarea encaja mejor con multilabel classification que con multiclass classification?"; es mejor preguntar "Qué tipo de problema de IA lo explica mejor y por qué", no informando así por adelantado que ya es, indeed, multilabel classification. 
