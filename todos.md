@@ -16,7 +16,11 @@
 - feature: "abrir sesión reciente", que guarde las rutas de aquellas que han sido abiertas previamente para poder cambiar entre ellas con más fluidez. En cualquier caso, siempre que se cambia sesión, si la anterior no ha sido guardada, debe guardarse. 
 - Bien pensado, en lugar de guardar cada sesión haciendo click, debería guardarse cada cambio directamente en el fichero de persistencia. No veo un motivo para dejarlo en memoria y fijar todo haciendo click. Deberíamos eliminar el botón de guardar y simplemente guardar cada cambio en el momento que se realiza.
 - Es necesario crear un sistema de idiomas siguiendo una arquitectura limpia, con un fichero de configuración con todos los strings de la interfaz. Debería existir por lo menos una versión en inglés y otra en castellano.
-- Si una pregunta empieza por "Por qué", es esperable que las respuestas empiecen por "Porque".
+- All internal code and variables should be in english (for instance the status "revisar" should be "review" or "to_review"), but the user interface could be in other languages. Currently a english/spanish version would be desirable.
+
+
+
+
 
 ## General features
 
@@ -52,4 +56,4 @@
 - Evita redactar preguntas que incluyan información en el propio enunciado como "¿Por qué logistic regression se considera un modelo de clasificación aunque su nombre contenga la palabra regression?"; es mejor preguntar "¿Qué tipo de modelo de IA es logistic regression y por qué?".
 - Evitar preguntar sobre varios conceptos a la vez si no hay ninguna relación entre ellos relacionada con aquello que se pregunta, como "¿Qué combinación describe mejor cómo kernel size, stride, padding y pooling afectan la salida espacial de una CNN?". Además, esta pregunta rompe la idea de no usar graduaciones como "mejor". Otro ejemplo es "¿Por qué dataloaders, mini-batches y device consistency importan en el entrenamiento práctico de redes neuronales?". Si el objetivo de la pregunta no tiene que ver con la relación entre los conceptos, no deben preguntarse juntos sino subdividir en distintas preguntas.
 - Hay un claro abuso de formulaciones como "¿Qué comparación describe mejor..."; de nuevo con graduación. Debe evitarse en favor de un estilo más directo.
-- Han aparecido alucionaciones que eno estaban 
+- Si una pregunta empieza por "Por qué", es esperable que las respuestas empiecen por "Porque".
