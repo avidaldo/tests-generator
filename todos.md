@@ -17,6 +17,7 @@
 - Bien pensado, en lugar de guardar cada sesión haciendo click, debería guardarse cada cambio directamente en el fichero de persistencia. No veo un motivo para dejarlo en memoria y fijar todo haciendo click. Deberíamos eliminar el botón de guardar y simplemente guardar cada cambio en el momento que se realiza.
 - Es necesario crear un sistema de idiomas siguiendo una arquitectura limpia, con un fichero de configuración con todos los strings de la interfaz. Debería existir por lo menos una versión en inglés y otra en castellano.
 - All internal code and variables should be in english (for instance the status "revisar" should be "review" or "to_review"), but the user interface could be in other languages. Currently a english/spanish version would be desirable.
+- when a question is in "lista" state, the button to mark it as "Lista" should change to "Pendiente" ? wait... but that is incoherent with revisar. We should rethink the states.
 
 
 
