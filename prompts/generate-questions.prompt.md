@@ -12,7 +12,18 @@ argument-hint: 'ONE subcategory-*.md file path; Stage 3 output root; optional ou
 
 You are an exam architect operating at Master's level (EQF Level 7), specialised in psychometric design. Your goal is to create questions that discriminate between surface-level memorisation and deep conceptual understanding.
 
-Before generating, consult [Adversarial Filters And Distractor Design](../docs/adversarial_logic_filters.md) §1 and §6, and [Distractor Design & Psychometric Techniques](../docs/distractor_design.md) for strategies and anti-bias rules.
+Before generating, read the operational rule set in [Question Rules](../docs/questions_rules.md) and its modules under [docs/rules/](../docs/rules/): [stem-design](../docs/rules/stem-design.md), [distractor-design](../docs/rules/distractor-design.md), [anti-bias](../docs/rules/anti-bias.md), and [register-and-tone](../docs/rules/register-and-tone.md). Also consult [Adversarial Filters](../docs/adversarial_logic_filters.md) §1 and §6 and [Distractor Design & Psychometric Techniques](../docs/distractor_design.md) for strategy background.
+
+Treat the following as **hard rejection criteria** — regenerate any question that violates them:
+
+- The stem leaks the answer or presumes its own conclusion (e.g. "¿Por qué X *puede ser preferible*…?").
+- The stem bundles unrelated concepts whose relationship is not what is being tested.
+- The stem uses graded/superlative framing ("¿Qué … describe **mejor**…?").
+- A distractor contradicts a fact the stem states or implies, instead of merely ignoring it.
+- A distractor is a lazy partial-element answer, a non-answer, childish, or merely "less correct" than the key.
+- A "¿Por qué…?" stem whose options do not all begin "Porque…".
+
+See [docs/questions_rules.md](../docs/questions_rules.md) §4 for the full pre-release checklist.
 
 
 ---
@@ -271,7 +282,13 @@ Do not leave the JSON only in chat. Write it directly to disk using this Stage 3
 - Create missing directories before writing the file.
 - If the output location is missing, ask before writing.
 
-The saved file must contain raw JSON only, with no Markdown fences and no surrounding prose. After writing the file, respond in chat with a terse confirmation that includes only the saved file path, the number of generated questions, and the covered `SURF-*` IDs.
+The saved file must contain raw JSON only, with no Markdown fences and no surrounding prose. After writing the file, respond in chat with a terse **coverage report** so the user can judge exhaustiveness at a glance (todos: Stage 3 output should make question counts and coverage explicit):
+
+- Saved file path.
+- Number of questions generated in this batch.
+- Covered `SURF-*` IDs in this batch.
+- **Remaining/uncovered `SURF-*` IDs** for this subcategory (those not yet covered by this or prior batches), or an explicit "all surfaces covered" statement.
+- A one-line `covered N / total M surfaces` tally and an explicit recommendation to run another batch when M > N.
 
 ```json
 {
@@ -283,7 +300,7 @@ The saved file must contain raw JSON only, with no Markdown fences and no surrou
       "question_text": "<p>Enunciado de la pregunta en HTML.</p>",
       "general_feedback": "<p>Explicación didáctica completa de la respuesta correcta y por qué los errores son comunes.</p>",
       "category_path": "$course$/top/Categoria/Subcategoria",
-      "status": "pendiente",
+      "status": "pending",
       "source_ref": "NORM-01, NORM-03",
       "generated_by_model": "gpt-5.4",
       "answers": [
@@ -308,7 +325,7 @@ The saved file must contain raw JSON only, with no Markdown fences and no surrou
 
 **Key generation rules:**
 
-- `status` is always `"pendiente"`.
+- `status` is always `"pending"`.
 - `answers` must contain exactly 7 items: 1 correct (`fraction: "100"`) and 6 distractors (`fraction: "-50"`).
 - `answers[].feedback` is required for every option — adversarial validation depends on it.
 - If the run already knows a stable model label, include `generated_by_model` with that exact label on every question in the batch. Otherwise omit the field instead of inventing or guessing a value.

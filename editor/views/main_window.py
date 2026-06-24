@@ -16,6 +16,7 @@ from PyQt6.QtGui import QAction, QActionGroup, QUndoStack, QKeySequence, QFont, 
 
 from models.quiz_model import QuizModel
 from models.question import QuestionStatus
+from i18n import tr, set_language, current_language, available_languages
 from models.question_diagnostics import analyze_question
 from models.undo_commands import DeleteQuestionCommand
 from views.question_detail import QuestionDetailPanel
@@ -58,7 +59,7 @@ class StatusFilterProxyModel(QSortFilterProxyModel):
 
         # Easy-only mode overrides status filter (implies LISTA + is_easy)
         if self._easy_only:
-            if question.status != QuestionStatus.LISTA or not question.is_easy:
+            if question.status != QuestionStatus.READY or not question.is_easy:
                 return False
         elif self._status_filter is not None and question.status != self._status_filter:
             return False
@@ -203,32 +204,32 @@ class MainWindow(QMainWindow):
         left_layout.setContentsMargins(0, 0, 0, 0)
 
         # Filter buttons in 2x2 grid
-        filter_group = QGroupBox("Filtros")
+        filter_group = QGroupBox(tr("filters.group"))
         filter_layout = QGridLayout(filter_group)
         filter_layout.setSpacing(4)
 
-        self._btn_all = QPushButton("Todas")
+        self._btn_all = QPushButton(tr("filter.all"))
         self._btn_all.setCheckable(True)
         self._btn_all.setChecked(True)
         self._btn_all.clicked.connect(lambda: self._set_status_filter(None))
         filter_layout.addWidget(self._btn_all, 0, 0)
 
-        self._btn_pendiente = QPushButton("● Pendiente")
+        self._btn_pendiente = QPushButton(tr("filter.pending"))
         self._btn_pendiente.setCheckable(True)
-        self._btn_pendiente.clicked.connect(lambda: self._set_status_filter(QuestionStatus.PENDIENTE))
+        self._btn_pendiente.clicked.connect(lambda: self._set_status_filter(QuestionStatus.PENDING))
         filter_layout.addWidget(self._btn_pendiente, 0, 1)
 
-        self._btn_revisar = QPushButton("↻ Revisar")
+        self._btn_revisar = QPushButton(tr("filter.review"))
         self._btn_revisar.setCheckable(True)
-        self._btn_revisar.clicked.connect(lambda: self._set_status_filter(QuestionStatus.REVISAR))
+        self._btn_revisar.clicked.connect(lambda: self._set_status_filter(QuestionStatus.REVIEW))
         filter_layout.addWidget(self._btn_revisar, 1, 0)
 
-        self._btn_lista = QPushButton("✓ Lista")
+        self._btn_lista = QPushButton(tr("filter.ready"))
         self._btn_lista.setCheckable(True)
-        self._btn_lista.clicked.connect(lambda: self._set_status_filter(QuestionStatus.LISTA))
+        self._btn_lista.clicked.connect(lambda: self._set_status_filter(QuestionStatus.READY))
         filter_layout.addWidget(self._btn_lista, 1, 1)
 
-        self._btn_lista_facil = QPushButton("★ Lista fácil")
+        self._btn_lista_facil = QPushButton(tr("filter.ready_easy"))
         self._btn_lista_facil.setCheckable(True)
         self._btn_lista_facil.clicked.connect(self._set_easy_filter)
         filter_layout.addWidget(self._btn_lista_facil, 2, 0, 1, 2)
@@ -236,7 +237,7 @@ class MainWindow(QMainWindow):
         left_layout.addWidget(filter_group)
 
         # Category tree
-        cat_group = QGroupBox("Categorías")
+        cat_group = QGroupBox(tr("group.categories"))
         cat_layout = QVBoxLayout(cat_group)
         self._category_tree = QTreeWidget()
         self._category_tree.setHeaderHidden(True)
@@ -251,7 +252,7 @@ class MainWindow(QMainWindow):
         middle_layout = QVBoxLayout(middle_panel)
         middle_layout.setContentsMargins(0, 0, 0, 0)
 
-        list_group = QGroupBox("Preguntas")
+        list_group = QGroupBox(tr("group.questions"))
         list_layout = QVBoxLayout(list_group)
         self._question_list = QListView()
         self._question_list.setModel(self._proxy_model)  # Use proxy model for filtering
@@ -282,137 +283,211 @@ class MainWindow(QMainWindow):
         # Status bar
         self._status_bar = QStatusBar()
         self.setStatusBar(self._status_bar)
-        self._stats_label = QLabel("Total: 0 | Lista: 0 | Revisar: 0")
+        self._stats_label = QLabel("")
         self._status_bar.addWidget(self._stats_label)
 
     def _setup_menu(self):
         menubar = self.menuBar()
 
         # File menu
-        file_menu = menubar.addMenu("Archivo")
+        file_menu = menubar.addMenu(tr("menu.file"))
 
-        new_session_action = QAction("Nueva sesión de revisión", self)
+        new_session_action = QAction(tr("action.new_session"), self)
         new_session_action.triggered.connect(self._new_review_session)
         file_menu.addAction(new_session_action)
 
-        open_session_action = QAction("Abrir sesión de revisión...", self)
+        open_session_action = QAction(tr("action.open_session"), self)
         open_session_action.triggered.connect(self._open_review_session)
         file_menu.addAction(open_session_action)
 
-        save_action = QAction("Guardar sesión", self)
-        save_action.setShortcut(QKeySequence.StandardKey.Save)
-        save_action.triggered.connect(self._save_review_session)
-        file_menu.addAction(save_action)
+        self._recent_menu = file_menu.addMenu(tr("menu.open_recent"))
+        self._rebuild_recent_menu()
 
-        save_as_action = QAction("Guardar sesión como...", self)
+        # Sessions auto-save on every change (write-through). "Save as..." only
+        # assigns a file path / renames; there is no manual "Save" action.
+        save_as_action = QAction(tr("action.save_as"), self)
         save_as_action.setShortcut(QKeySequence.StandardKey.SaveAs)
         save_as_action.triggered.connect(self._save_review_session_as)
         file_menu.addAction(save_as_action)
 
-        session_notes_action = QAction("Notas de sesión...", self)
+        session_notes_action = QAction(tr("action.session_notes"), self)
         session_notes_action.triggered.connect(self._show_session_notes_dialog)
         file_menu.addAction(session_notes_action)
 
         file_menu.addSeparator()
 
-        import_menu = file_menu.addMenu("Añadir")
+        import_menu = file_menu.addMenu(tr("menu.add"))
 
-        import_batch_action = QAction("Archivos Stage 3...", self)
+        import_batch_action = QAction(tr("action.add_stage3"), self)
         import_batch_action.setShortcut(QKeySequence.StandardKey.Open)
         import_batch_action.triggered.connect(self._import_stage3_batches)
         import_menu.addAction(import_batch_action)
 
-        import_batch_folder_action = QAction("Carpeta Stage 3...", self)
+        import_batch_folder_action = QAction(tr("action.add_stage3_folder"), self)
         import_batch_folder_action.triggered.connect(self._import_stage3_folder)
         import_menu.addAction(import_batch_folder_action)
 
-        legacy_import_menu = import_menu.addMenu("Legado")
+        legacy_import_menu = import_menu.addMenu(tr("menu.legacy"))
 
-        import_xml_action = QAction("Banco XML de Moodle...", self)
+        import_xml_action = QAction(tr("action.import_xml"), self)
         import_xml_action.triggered.connect(self._import_legacy_xml_files)
         legacy_import_menu.addAction(import_xml_action)
 
         file_menu.addSeparator()
 
-        export_menu = file_menu.addMenu("Exportar")
+        export_menu = file_menu.addMenu(tr("menu.export"))
 
-        export_action = QAction("Moodle XML...", self)
+        export_action = QAction(tr("action.export_xml"), self)
         export_action.triggered.connect(self._export_xml)
         export_menu.addAction(export_action)
 
-        export_easy_action = QAction("Moodle XML (solo fáciles)...", self)
+        export_easy_action = QAction(tr("action.export_xml_easy"), self)
         export_easy_action.triggered.connect(self._export_xml_easy)
         export_menu.addAction(export_easy_action)
 
         file_menu.addSeparator()
 
-        quit_action = QAction("Salir", self)
+        quit_action = QAction(tr("action.quit"), self)
         quit_action.setShortcut(QKeySequence.StandardKey.Quit)
         quit_action.triggered.connect(self.close)
         file_menu.addAction(quit_action)
 
         # Edit menu
-        edit_menu = menubar.addMenu("Editar")
+        edit_menu = menubar.addMenu(tr("menu.edit"))
 
-        undo_action = self._undo_stack.createUndoAction(self, "Deshacer")
+        undo_action = self._undo_stack.createUndoAction(self, tr("action.undo"))
         undo_action.setShortcut(QKeySequence.StandardKey.Undo)
         edit_menu.addAction(undo_action)
 
-        redo_action = self._undo_stack.createRedoAction(self, "Rehacer")
+        redo_action = self._undo_stack.createRedoAction(self, tr("action.redo"))
         redo_action.setShortcut(QKeySequence.StandardKey.Redo)
         edit_menu.addAction(redo_action)
 
         edit_menu.addSeparator()
 
-        delete_action = QAction("Eliminar pregunta", self)
+        delete_action = QAction(tr("action.delete_question"), self)
         delete_action.setShortcut(QKeySequence.StandardKey.Delete)
         delete_action.triggered.connect(self._delete_selected)
         edit_menu.addAction(delete_action)
 
         # View menu
-        view_menu = menubar.addMenu("Vista")
+        view_menu = menubar.addMenu(tr("menu.view"))
 
-        zoom_in_action = QAction("Aumentar zoom", self)
+        zoom_in_action = QAction(tr("action.zoom_in"), self)
         zoom_in_action.setShortcut("Ctrl++")
         zoom_in_action.triggered.connect(self._zoom_in)
         view_menu.addAction(zoom_in_action)
 
-        zoom_out_action = QAction("Reducir zoom", self)
+        zoom_out_action = QAction(tr("action.zoom_out"), self)
         zoom_out_action.setShortcut("Ctrl+-")
         zoom_out_action.triggered.connect(self._zoom_out)
         view_menu.addAction(zoom_out_action)
 
-        reset_zoom_action = QAction("Restablecer zoom", self)
+        reset_zoom_action = QAction(tr("action.reset_zoom"), self)
         reset_zoom_action.setShortcut("Ctrl+0")
         reset_zoom_action.triggered.connect(self._reset_zoom)
         view_menu.addAction(reset_zoom_action)
 
         view_menu.addSeparator()
 
-        theme_menu = view_menu.addMenu("Tema")
+        theme_menu = view_menu.addMenu(tr("menu.theme"))
         theme_action_group = QActionGroup(self)
         theme_action_group.setExclusive(True)
 
-        for theme_mode, label in THEME_OPTIONS:
-            action = QAction(label, self)
+        for theme_mode, _label in THEME_OPTIONS:
+            action = QAction(tr(f"theme.{theme_mode}"), self)
             action.setCheckable(True)
             action.triggered.connect(lambda checked, mode=theme_mode: self._set_theme_mode(mode))
             theme_action_group.addAction(action)
             theme_menu.addAction(action)
             self._theme_actions[theme_mode] = action
 
+        # Language submenu
+        language_menu = view_menu.addMenu(tr("menu.language"))
+        language_group = QActionGroup(self)
+        language_group.setExclusive(True)
+        for code, native_name in available_languages():
+            action = QAction(native_name, self)
+            action.setCheckable(True)
+            action.setChecked(code == current_language())
+            action.triggered.connect(lambda checked, lang=code: self._set_language(lang))
+            language_group.addAction(action)
+            language_menu.addAction(action)
+
     def _setup_toolbar(self):
-        toolbar = QToolBar("Principal")
+        toolbar = QToolBar(tr("toolbar.main"))
         self.addToolBar(toolbar)
 
-        toolbar.addAction("Añadir Stage 3", self._import_stage3_batches)
-        toolbar.addAction("Añadir carpeta", self._import_stage3_folder)
-        toolbar.addAction("Abrir sesión", self._open_review_session)
-        toolbar.addAction("Guardar", self._save_review_session)
-        toolbar.addAction("Notas de sesión", self._show_session_notes_dialog)
+        toolbar.addAction(tr("toolbar.add_stage3"), self._import_stage3_batches)
+        toolbar.addAction(tr("toolbar.add_folder"), self._import_stage3_folder)
+        toolbar.addAction(tr("toolbar.open_session"), self._open_review_session)
+        toolbar.addAction(tr("toolbar.session_notes"), self._show_session_notes_dialog)
 
     def _setup_shortcuts(self):
         pass  # Shortcuts defined in menu actions
+
+    def _set_language(self, language: str) -> None:
+        """Persist the chosen UI language; applied on next launch."""
+        if language == current_language():
+            return
+        self._settings.setValue("language", language)
+        set_language(language)
+        QMessageBox.information(
+            self, tr("language.restart_title"), tr("language.restart_body")
+        )
+
+    _MAX_RECENT_SESSIONS = 8
+
+    def _recent_sessions(self) -> list[str]:
+        stored = self._settings.value("recent_sessions", [], type=list) or []
+        return [str(path) for path in stored if path]
+
+    def _add_recent_session(self, filepath: Path) -> None:
+        path_str = str(filepath)
+        recents = [p for p in self._recent_sessions() if p != path_str]
+        recents.insert(0, path_str)
+        self._settings.setValue("recent_sessions", recents[: self._MAX_RECENT_SESSIONS])
+        self._rebuild_recent_menu()
+
+    def _rebuild_recent_menu(self) -> None:
+        menu = getattr(self, "_recent_menu", None)
+        if menu is None:
+            return
+        menu.clear()
+        recents = self._recent_sessions()
+        if not recents:
+            empty = QAction("(sin sesiones recientes)", self)
+            empty.setEnabled(False)
+            menu.addAction(empty)
+            return
+        for path_str in recents:
+            action = QAction(Path(path_str).name, self)
+            action.setToolTip(path_str)
+            action.triggered.connect(lambda _checked, p=path_str: self._open_recent_session(p))
+            menu.addAction(action)
+        menu.addSeparator()
+        clear_action = QAction("Borrar lista", self)
+        clear_action.triggered.connect(self._clear_recent_sessions)
+        menu.addAction(clear_action)
+
+    def _clear_recent_sessions(self) -> None:
+        self._settings.setValue("recent_sessions", [])
+        self._rebuild_recent_menu()
+
+    def _open_recent_session(self, path_str: str) -> None:
+        filepath = Path(path_str)
+        if not filepath.exists():
+            QMessageBox.warning(self, "Aviso", f"La sesión ya no existe:\n{path_str}")
+            recents = [p for p in self._recent_sessions() if p != path_str]
+            self._settings.setValue("recent_sessions", recents)
+            self._rebuild_recent_menu()
+            return
+        if not self._confirm_session_replacement(
+            "Abrir sesión",
+            "La sesión actual se reemplazará al abrir otro archivo. ¿Desea guardar antes de continuar?",
+        ):
+            return
+        self._load_session_from_path(filepath)
 
     def _default_session_dir(self) -> str:
         if self._current_state_file is not None:
@@ -465,6 +540,7 @@ class MainWindow(QMainWindow):
             save_state(self._model.questions, filepath, self._session_notes)
             self._current_state_file = filepath
             self._settings.setValue("last_state_file", str(filepath))
+            self._add_recent_session(filepath)
             self._clear_autosave()
             self._set_session_dirty(False)
             self._status_bar.showMessage(f"Sesión guardada en {filepath}", 3000)
@@ -655,10 +731,13 @@ class MainWindow(QMainWindow):
         ):
             return
 
+        self._load_session_from_path(Path(file))
+
+    def _load_session_from_path(self, filepath: Path) -> None:
         try:
-            filepath = Path(file)
             review_session = load_review_session(filepath)
-            self._settings.setValue("last_state_file", file)
+            self._settings.setValue("last_state_file", str(filepath))
+            self._add_recent_session(filepath)
             self._replace_loaded_session(
                 review_session.questions,
                 filepath,
@@ -669,7 +748,7 @@ class MainWindow(QMainWindow):
             QMessageBox.critical(self, "Error", f"Error al cargar: {e}")
 
     def _export_xml(self):
-        lista_questions = [q for q in self._model.questions if q.status == QuestionStatus.LISTA]
+        lista_questions = [q for q in self._model.questions if q.status == QuestionStatus.READY]
         if not lista_questions:
             QMessageBox.information(
                 self,
@@ -694,7 +773,7 @@ class MainWindow(QMainWindow):
     def _export_xml_easy(self):
         easy_questions = [
             q for q in self._model.questions
-            if q.status == QuestionStatus.LISTA and q.is_easy
+            if q.status == QuestionStatus.READY and q.is_easy
         ]
         if not easy_questions:
             QMessageBox.information(
@@ -738,7 +817,7 @@ class MainWindow(QMainWindow):
 
     def _on_status_about_to_change(self, question, new_status):
         self._next_question_to_select = None
-        if new_status == QuestionStatus.LISTA:
+        if new_status == QuestionStatus.READY:
             current_proxy_index = self._question_list.currentIndex()
             if current_proxy_index.isValid():
                 next_row = current_proxy_index.row() + 1
@@ -789,9 +868,9 @@ class MainWindow(QMainWindow):
         self._filter_status = status
         self._filter_easy_only = False
         self._btn_all.setChecked(status is None)
-        self._btn_pendiente.setChecked(status == QuestionStatus.PENDIENTE)
-        self._btn_revisar.setChecked(status == QuestionStatus.REVISAR)
-        self._btn_lista.setChecked(status == QuestionStatus.LISTA)
+        self._btn_pendiente.setChecked(status == QuestionStatus.PENDING)
+        self._btn_revisar.setChecked(status == QuestionStatus.REVIEW)
+        self._btn_lista.setChecked(status == QuestionStatus.READY)
         self._btn_lista_facil.setChecked(False)
         # Apply filter to proxy model
         self._proxy_model.set_easy_only(False)
@@ -800,7 +879,7 @@ class MainWindow(QMainWindow):
         self._detail_panel.set_question(None)
 
     def _set_easy_filter(self):
-        self._filter_status = QuestionStatus.LISTA
+        self._filter_status = QuestionStatus.READY
         self._filter_easy_only = True
         self._btn_all.setChecked(False)
         self._btn_pendiente.setChecked(False)
@@ -824,16 +903,15 @@ class MainWindow(QMainWindow):
 
     def _update_stats(self):
         total = self._model.rowCount()
-        lista = sum(1 for q in self._model.questions if q.status == QuestionStatus.LISTA)
-        revisar = sum(1 for q in self._model.questions if q.status == QuestionStatus.REVISAR)
-        pendiente = sum(1 for q in self._model.questions if q.status == QuestionStatus.PENDIENTE)
-        easy = sum(1 for q in self._model.questions if q.status == QuestionStatus.LISTA and q.is_easy)
+        lista = sum(1 for q in self._model.questions if q.status == QuestionStatus.READY)
+        revisar = sum(1 for q in self._model.questions if q.status == QuestionStatus.REVIEW)
+        pendiente = sum(1 for q in self._model.questions if q.status == QuestionStatus.PENDING)
+        easy = sum(1 for q in self._model.questions if q.status == QuestionStatus.READY and q.is_easy)
         warnings = sum(1 for q in self._model.questions if analyze_question(q).has_warnings)
 
         self._stats_label.setText(
-            "Total: "
-            f"{total} | ⋯ Pendiente: {pendiente} | ↻ Revisar: {revisar} | "
-            f"✓ Lista: {lista} | ★ Fácil: {easy} | ! Warnings: {warnings}"
+            tr("stats.summary", total=total, pending=pendiente, review=revisar,
+               ready=lista, easy=easy, warnings=warnings)
         )
 
     def _schedule_autosave(self, *args):
@@ -842,8 +920,23 @@ class MainWindow(QMainWindow):
             self._autosave_timer.start()
 
     def _do_autosave(self):
-        """Perform the actual autosave to backup file."""
+        """Write changes straight through to the active session file (todos §17).
+
+        When the session already has a file path, every change is persisted directly to
+        it, so there is no manual "save" step. A session with no path yet (freshly
+        imported, never "Guardar como...") falls back to the crash-recovery backup file
+        and stays marked dirty so it is offered for saving on close/replace.
+        """
         if not self._model.questions:
+            return
+        if self._current_state_file is not None:
+            try:
+                save_state(self._model.questions, self._current_state_file, self._session_notes)
+                self._settings.setValue("last_state_file", str(self._current_state_file))
+                self._clear_autosave()
+                self._set_session_dirty(False)
+            except Exception:
+                pass  # Silent fail; keep dirty so the user can still save manually.
             return
         try:
             save_state(self._model.questions, self._autosave_file, self._session_notes)

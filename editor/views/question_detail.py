@@ -1,17 +1,19 @@
 """
 Question Detail Panel - View and edit questions with answers.
-Always-editable fields, 3-state workflow: PENDIENTE → REVISAR → LISTA
+Always-editable fields, 3-state segmented workflow: Pendiente / Revisar / Lista
 """
 
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel,
     QTextEdit, QPlainTextEdit, QPushButton, QLineEdit,
     QGroupBox, QFrame, QSizePolicy, QSpacerItem, QScrollArea,
-    QCheckBox, QMessageBox
+    QCheckBox
 )
 from PyQt6.QtCore import pyqtSignal, Qt, QTimer
 from PyQt6.QtGui import QUndoStack, QFont
 import re
+
+from i18n import tr
 
 from models.question import Question, QuestionStatus
 from models.question_diagnostics import analyze_question
@@ -202,7 +204,7 @@ class AnswerWidget(QFrame):
 
 class QuestionDetailPanel(QWidget):
     """Panel for viewing and editing question details.
-    3-state workflow: PENDIENTE → REVISAR → LISTA
+    3-state segmented workflow: Pendiente / Revisar / Lista (mutually exclusive).
     """
 
     question_changed = pyqtSignal()
@@ -231,27 +233,47 @@ class QuestionDetailPanel(QWidget):
         # Header with name and actions
         header = QHBoxLayout()
 
-        self._name_label = QLabel("Selecciona una pregunta")
+        self._name_label = QLabel(tr("detail.select_question"))
         self._name_label.setStyleSheet("font-weight: bold;")
         self._name_label.setWordWrap(True)
         header.addWidget(self._name_label, 1)
 
-        # Status buttons - 3 states
-        self._lista_btn = QPushButton("✓ Lista")
-        self._lista_btn.setMinimumWidth(90)
-        self._lista_btn.setStyleSheet("background-color: #2E7D32; color: white; font-weight: bold;")
-        self._lista_btn.clicked.connect(lambda: self._set_status(QuestionStatus.LISTA))
-        self._lista_btn.setToolTip("Marcar como revisada y lista para el examen")
-        header.addWidget(self._lista_btn)
+        # Status segmented control - 3 mutually-exclusive states.
+        # Exactly one is checked at a time; clicking the active one is a no-op.
+        self._pendiente_btn = QPushButton(tr("btn.pending"))
+        self._pendiente_btn.setCheckable(True)
+        self._pendiente_btn.setMinimumWidth(90)
+        self._pendiente_btn.setStyleSheet(
+            "QPushButton { background-color: #E0E0E0; color: #333; font-weight: bold; }"
+            "QPushButton:checked { background-color: #1565C0; color: white; }"
+        )
+        self._pendiente_btn.clicked.connect(lambda: self._set_status(QuestionStatus.PENDING))
+        self._pendiente_btn.setToolTip(tr("tooltip.pending"))
+        header.addWidget(self._pendiente_btn)
 
-        self._revisar_btn = QPushButton("↻ Revisar")
+        self._revisar_btn = QPushButton(tr("btn.review"))
+        self._revisar_btn.setCheckable(True)
         self._revisar_btn.setMinimumWidth(90)
-        self._revisar_btn.setStyleSheet("background-color: #F57C00; color: white; font-weight: bold;")
-        self._revisar_btn.clicked.connect(lambda: self._set_status(QuestionStatus.REVISAR))
-        self._revisar_btn.setToolTip("Marcar para revisión posterior")
+        self._revisar_btn.setStyleSheet(
+            "QPushButton { background-color: #E0E0E0; color: #333; font-weight: bold; }"
+            "QPushButton:checked { background-color: #F57C00; color: white; }"
+        )
+        self._revisar_btn.clicked.connect(lambda: self._set_status(QuestionStatus.REVIEW))
+        self._revisar_btn.setToolTip(tr("tooltip.review"))
         header.addWidget(self._revisar_btn)
 
-        self._easy_btn = QPushButton("★ Fácil")
+        self._lista_btn = QPushButton(tr("btn.ready"))
+        self._lista_btn.setCheckable(True)
+        self._lista_btn.setMinimumWidth(90)
+        self._lista_btn.setStyleSheet(
+            "QPushButton { background-color: #E0E0E0; color: #333; font-weight: bold; }"
+            "QPushButton:checked { background-color: #2E7D32; color: white; }"
+        )
+        self._lista_btn.clicked.connect(lambda: self._set_status(QuestionStatus.READY))
+        self._lista_btn.setToolTip(tr("tooltip.ready"))
+        header.addWidget(self._lista_btn)
+
+        self._easy_btn = QPushButton(tr("btn.easy"))
         self._easy_btn.setCheckable(True)
         self._easy_btn.setMinimumWidth(80)
         self._easy_btn.setStyleSheet(
@@ -262,7 +284,7 @@ class QuestionDetailPanel(QWidget):
         self._easy_btn.setToolTip("Marcar como fácil (para exportación filtrada)")
         header.addWidget(self._easy_btn)
 
-        self._delete_question_btn = QPushButton("🗑 Eliminar")
+        self._delete_question_btn = QPushButton(tr("btn.delete"))
         self._delete_question_btn.setStyleSheet("background-color: #C62828; color: white;")
         self._delete_question_btn.clicked.connect(lambda: self.delete_question_requested.emit())
         header.addWidget(self._delete_question_btn)
@@ -311,6 +333,19 @@ class QuestionDetailPanel(QWidget):
         self._warning_label.setWordWrap(True)
         self._warning_label.setVisible(False)
         layout.addWidget(self._warning_label)
+
+        # Transient inline hint (replaces blocking warning dialogs); auto-hides.
+        self._format_hint_label = QLabel("")
+        self._format_hint_label.setWordWrap(True)
+        self._format_hint_label.setVisible(False)
+        self._format_hint_label.setStyleSheet(
+            "padding: 6px 8px; background-color: #FFF3CD; color: #7A5C00; "
+            "border: 1px solid #FFE08A; border-radius: 4px;"
+        )
+        layout.addWidget(self._format_hint_label)
+        self._format_hint_timer = QTimer(self)
+        self._format_hint_timer.setSingleShot(True)
+        self._format_hint_timer.timeout.connect(lambda: self._format_hint_label.setVisible(False))
 
         # Separator
         sep = QFrame()
@@ -364,17 +399,17 @@ class QuestionDetailPanel(QWidget):
 
         # Answers section with toggle button
         answers_header = QHBoxLayout()
-        answers_title = QLabel("<b>Respuestas</b>")
+        answers_title = QLabel(f"<b>{tr('label.answers')}</b>")
         answers_header.addWidget(answers_title)
         answers_header.addStretch()
 
-        self._purge_btn = QPushButton("🗑 Eliminar no marcados")
+        self._purge_btn = QPushButton(tr("btn.purge"))
         self._purge_btn.setStyleSheet("background-color: #C62828; color: white;")
         self._purge_btn.clicked.connect(self._on_purge_answers)
-        self._purge_btn.setToolTip("Eliminar todos los distractores que no estén marcados como correctos o correcto-revisados")
+        self._purge_btn.setToolTip(tr("tooltip.purge_ready"))
         answers_header.addWidget(self._purge_btn)
 
-        self._toggle_feedback_btn = QPushButton("💬 Ocultar Feedback")
+        self._toggle_feedback_btn = QPushButton(tr("btn.hide_feedback"))
         self._toggle_feedback_btn.setCheckable(True)
         self._toggle_feedback_btn.setChecked(True)
         self._toggle_feedback_btn.clicked.connect(self._toggle_feedback_visibility)
@@ -527,34 +562,48 @@ class QuestionDetailPanel(QWidget):
         self._delete_question_btn.setEnabled(True)
         self._easy_btn.setEnabled(True)
         self._easy_btn.setChecked(q.is_easy)
-        self._purge_btn.setEnabled(True)
 
-        # Status indicator and button states
-        if q.status == QuestionStatus.LISTA:
-            easy_suffix = " (★ Fácil)" if q.is_easy else ""
-            self._status_label.setText(f"Estado: ✓ LISTA{easy_suffix}")
+        # "Eliminar no marcados" is only safe once enough distractors have been
+        # marked correct-reviewed to leave a valid question (1 correct + 3 distractors).
+        marked_distractors = sum(1 for a in q.answers if a.correct_reviewed and not a.is_correct)
+        self._purge_btn.setEnabled(marked_distractors >= 3)
+        self._purge_btn.setToolTip(
+            tr("tooltip.purge_ready") if marked_distractors >= 3 else tr("tooltip.purge_blocked")
+        )
+
+        # Status segmented control: exactly one button reflects the current status.
+        self._pendiente_btn.setChecked(q.status == QuestionStatus.PENDING)
+        self._revisar_btn.setChecked(q.status == QuestionStatus.REVIEW)
+        self._lista_btn.setChecked(q.status == QuestionStatus.READY)
+
+        # Signal whether "Lista" is currently reachable (valid format).
+        format_errors = self._validate_format(q)
+        self._lista_btn.setToolTip(
+            tr("tooltip.ready")
+            if not format_errors
+            else tr("tooltip.ready_incomplete", errors=" ".join(format_errors))
+        )
+
+        # Status indicator text
+        if q.status == QuestionStatus.READY:
+            easy_suffix = tr("status.ready_easy_suffix") if q.is_easy else ""
+            self._status_label.setText(f"{tr('status.ready')}{easy_suffix}")
             self._status_label.setStyleSheet(
                 "padding: 5px; background-color: #C8E6C9; "
                 "color: #1B5E20; border-radius: 3px; font-weight: bold;"
             )
-            self._lista_btn.setEnabled(False)
-            self._revisar_btn.setEnabled(True)
-        elif q.status == QuestionStatus.REVISAR:
-            self._status_label.setText("Estado: ↻ REVISAR")
+        elif q.status == QuestionStatus.REVIEW:
+            self._status_label.setText(tr("status.review"))
             self._status_label.setStyleSheet(
                 "padding: 5px; background-color: #FFE0B2; "
                 "color: #E65100; border-radius: 3px; font-weight: bold;"
             )
-            self._lista_btn.setEnabled(True)
-            self._revisar_btn.setEnabled(False)
-        else:  # PENDIENTE
-            self._status_label.setText("Estado: ⋯ PENDIENTE")
+        else:  # PENDING
+            self._status_label.setText(tr("status.pending"))
             self._status_label.setStyleSheet(
                 "padding: 5px; background-color: #E3F2FD; "
                 "color: #1565C0; border-radius: 3px; font-weight: bold;"
             )
-            self._lista_btn.setEnabled(True)
-            self._revisar_btn.setEnabled(True)
 
         self._refresh_warning_label()
 
@@ -567,7 +616,7 @@ class QuestionDetailPanel(QWidget):
         self._apply_font_to_text_edit(self._feedback_edit, self.font())
 
         # Review notes
-        notes_visible = (q.status == QuestionStatus.REVISAR or bool(q.review_notes))
+        notes_visible = (q.status == QuestionStatus.REVIEW or bool(q.review_notes))
         self._review_notes_group.setVisible(notes_visible)
         self._review_notes_edit.setPlainText(q.review_notes or "")
         self._apply_font_to_text_edit(self._review_notes_edit, self.font())
@@ -669,7 +718,7 @@ class QuestionDetailPanel(QWidget):
         """Toggle feedback visibility for all answer widgets."""
         self._show_feedback = self._toggle_feedback_btn.isChecked()
         self._toggle_feedback_btn.setText(
-            "💬 Ocultar Feedback" if self._show_feedback else "💬 Mostrar Feedback"
+            tr("btn.hide_feedback") if self._show_feedback else tr("btn.show_feedback")
         )
         for widget in self._answer_widgets:
             widget.set_feedback_visible(self._show_feedback)
@@ -695,40 +744,43 @@ class QuestionDetailPanel(QWidget):
         c_count = question.correct_count
         w_count = question.wrong_count
         if c_count != 1:
-            errors.append(f"Debe haber exactamente 1 respuesta correcta (actual: {c_count}).")
+            errors.append(tr("validate.need_one_correct", count=c_count))
         if w_count != 3:
-            errors.append(f"Debe haber exactamente 3 distractores (respuestas incorrectas) (actual: {w_count}).")
+            errors.append(tr("validate.need_three_distractors", count=w_count))
         return errors
 
+    def _show_format_hint(self, text: str):
+        """Show a transient inline hint (non-blocking) that auto-hides after a few seconds."""
+        self._format_hint_label.setText(text)
+        self._format_hint_label.setVisible(True)
+        self._format_hint_timer.start(5000)
+
     def _set_status(self, new_status: QuestionStatus):
-        """Set the question to a specific status. If already at that status, reset to PENDIENTE."""
+        """Set the question to a specific status (segmented single-select; no toggle revert)."""
         if not self._current_question:
             return
 
-        # Toggle: if already at this status, go back to PENDIENTE
+        # Clicking the already-active state is a no-op; just re-sync the buttons.
         if self._current_question.status == new_status:
-            new_status = QuestionStatus.PENDIENTE
+            self._refresh_display()
+            return
 
-        if new_status == QuestionStatus.LISTA:
+        if new_status == QuestionStatus.READY:
             errors = self._validate_format(self._current_question)
             if errors:
-                QMessageBox.warning(
-                    self,
-                    "Error de formato",
-                    "No se puede marcar la pregunta como LISTA debido a los siguientes errores de formato:\n\n" + "\n".join(errors)
-                )
-                self._refresh_display()
+                # Inline transient hint instead of a blocking dialog (todos §15).
+                self._show_format_hint(tr("hint.not_ready", errors=" ".join(errors)))
+                self._refresh_display()  # revert the button to the real status
                 return
 
-        if self._current_question.status != new_status:
-            # Emit status_about_to_change before modifying status
-            self.status_about_to_change.emit(self._current_question, new_status)
+        # Emit status_about_to_change before modifying status
+        self.status_about_to_change.emit(self._current_question, new_status)
 
-            from models.undo_commands import SetStatusCommand
-            cmd = SetStatusCommand(self._model, self._current_question, new_status)
-            self._push_command(cmd)
-            self._refresh_display()
-            self.question_changed.emit()
+        from models.undo_commands import SetStatusCommand
+        cmd = SetStatusCommand(self._model, self._current_question, new_status)
+        self._push_command(cmd)
+        self._refresh_display()
+        self.question_changed.emit()
 
     def _on_question_text_changed(self):
         if self._is_updating or not self._current_question:
@@ -775,11 +827,11 @@ class QuestionDetailPanel(QWidget):
             cmd = DeleteAnswerCommand(self._model, self._current_question, answer_index)
             self._undo_stack.push(cmd)
 
-            if self._current_question.status == QuestionStatus.LISTA:
+            if self._current_question.status == QuestionStatus.READY:
                 errors = self._validate_format(self._current_question)
                 if errors:
                     from models.undo_commands import SetStatusCommand
-                    demote_cmd = SetStatusCommand(self._model, self._current_question, QuestionStatus.PENDIENTE)
+                    demote_cmd = SetStatusCommand(self._model, self._current_question, QuestionStatus.PENDING)
                     self._undo_stack.push(demote_cmd)
         finally:
             self._undo_stack.endMacro()
@@ -797,16 +849,21 @@ class QuestionDetailPanel(QWidget):
         self._block_refresh_on_undo = True
         self._undo_stack.beginMacro("Eliminar respuestas no marcadas")
         try:
-            from models.undo_commands import PurgeAnswersCommand
+            from models.undo_commands import PurgeAnswersCommand, SetStatusCommand
             cmd = PurgeAnswersCommand(self._model, self._current_question)
             self._undo_stack.push(cmd)
 
-            if self._current_question.status == QuestionStatus.LISTA:
-                errors = self._validate_format(self._current_question)
-                if errors:
-                    from models.undo_commands import SetStatusCommand
-                    demote_cmd = SetStatusCommand(self._model, self._current_question, QuestionStatus.PENDIENTE)
+            errors = self._validate_format(self._current_question)
+            if errors:
+                if self._current_question.status == QuestionStatus.READY:
+                    demote_cmd = SetStatusCommand(self._model, self._current_question, QuestionStatus.PENDING)
                     self._undo_stack.push(demote_cmd)
+            elif self._current_question.status != QuestionStatus.READY:
+                # Purge left a valid question (1 correct + 3 distractors): mark it Lista
+                # automatically to speed up review (todos line 15).
+                self.status_about_to_change.emit(self._current_question, QuestionStatus.READY)
+                promote_cmd = SetStatusCommand(self._model, self._current_question, QuestionStatus.READY)
+                self._undo_stack.push(promote_cmd)
         finally:
             self._undo_stack.endMacro()
             self._block_refresh_on_undo = False

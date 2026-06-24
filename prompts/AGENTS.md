@@ -2,7 +2,7 @@
 
 ## Current State
 
-This folder contains the canonical question-generation prompt files for the repository. VS Code discovers this folder through `chat.promptFilesLocations` in `.vscode/settings.json`. Repository-maintenance launchers live in [../.github/prompts/AGENTS.md](../.github/prompts/AGENTS.md).
+This folder contains the canonical question-generation prompt files for the repository. VS Code discovers this folder through `chat.promptFilesLocations` in `.vscode/settings.json`.
 
 For the detailed decision guide on regular versus bulk execution, the user-owned artifact path contract, and when to use the Stage 1 or Stage 3 skills instead of the precise prompt lane, see [docs/pipeline_execution_modes.md](../docs/pipeline_execution_modes.md).
 
@@ -92,8 +92,6 @@ Each stage is run manually by the user. Stages 1 and 3 are parallelizable (indep
 - After each batch, validate every produced summary against [docs/summary_format.md](../docs/summary_format.md). In this repo the practical minimum is: exact H1 headings `# File Inventory`, `# Content`, `# Cross-References`; a valid inventory table; and no fenced code blocks.
 - Stop the batch on the first invalid summary. Repair or rerun that unit, then revalidate before launching more Stage 1 work.
 - Treat existing partial summaries as inputs to validate, not as automatically trusted artifacts. Stage 2 should receive only validated Stage 1 files.
-
-Repository-maintenance launchers are documented separately in [../.github/prompts/AGENTS.md](../.github/prompts/AGENTS.md). This file is only for the quiz-generation pipeline.
 
 **Intermediate format**: JSON conforming to [`docs/editor_json_schema.md`](../docs/editor_json_schema.md) — the canonical schema for both the immutable Stage 3 batch envelope and the editor-owned Stage 4 review-session envelope used by `editor/file_io/state_io.py`.
 

@@ -57,6 +57,42 @@ class MainWindowSessionFlowTests(unittest.TestCase):
         self.assertTrue(self.window._session_dirty)
         self.assertTrue(self.window.isWindowModified())
 
+    def test_autosave_writes_through_to_session_file_and_clears_dirty(self) -> None:
+        import json
+        import tempfile
+
+        temp_dir = tempfile.TemporaryDirectory()
+        self.addCleanup(temp_dir.cleanup)
+        session_path = Path(temp_dir.name) / "session.json"
+
+        self.window._replace_loaded_session([_make_question()], session_path, 'Loaded')
+        self.window._mark_session_dirty()
+        self.assertTrue(self.window._session_dirty)
+
+        self.window._do_autosave()
+
+        self.assertTrue(session_path.exists())
+        data = json.loads(session_path.read_text())
+        self.assertEqual(len(data["questions"]), 1)
+        self.assertFalse(self.window._session_dirty)
+
+    def test_recent_sessions_mru_dedups_and_orders_most_recent_first(self) -> None:
+        import tempfile
+        from PyQt6.QtCore import QSettings
+
+        temp_dir = tempfile.TemporaryDirectory()
+        self.addCleanup(temp_dir.cleanup)
+        # Isolate QSettings to a temp ini file so the test does not touch real settings.
+        self.window._settings = QSettings(str(Path(temp_dir.name) / "s.ini"), QSettings.Format.IniFormat)
+
+        a = Path(temp_dir.name) / "a.json"
+        b = Path(temp_dir.name) / "b.json"
+        self.window._add_recent_session(a)
+        self.window._add_recent_session(b)
+        self.window._add_recent_session(a)  # re-adding moves it to the front
+
+        self.assertEqual(self.window._recent_sessions(), [str(a), str(b)])
+
     def test_replace_loaded_session_can_mark_restored_autosave_dirty(self) -> None:
         self.window._replace_loaded_session(
             [_make_question()],

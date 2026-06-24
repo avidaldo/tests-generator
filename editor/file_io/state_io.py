@@ -121,11 +121,11 @@ def _deserialize_question(question_data: dict, filepath: Path) -> Question:
         for answer in question_data.get("answers", [])
     ]
 
-    status_str = question_data.get("status", "pendiente")
+    status_str = question_data.get("status", "pending")
     try:
-        status = QuestionStatus(status_str)
+        status = QuestionStatus.from_value(status_str)
     except ValueError:
-        status = QuestionStatus.PENDIENTE
+        status = QuestionStatus.PENDING
 
     origin_kind = _infer_origin_kind(question_data, filepath)
     origin_path = question_data.get("origin_path", "")

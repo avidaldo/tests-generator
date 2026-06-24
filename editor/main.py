@@ -15,6 +15,7 @@ if str(_editor_dir) not in sys.path:
 from PyQt6.QtCore import QSettings
 from PyQt6.QtGui import QPalette
 from PyQt6.QtWidgets import QApplication
+from i18n import DEFAULT_LANGUAGE, set_language
 from views.main_window import MainWindow
 from views.theme import THEME_SYSTEM, apply_app_theme
 
@@ -25,6 +26,7 @@ def main():
     app.setOrganizationName("avidaldo")
 
     settings = QSettings()
+    set_language(settings.value("language", DEFAULT_LANGUAGE, type=str))
     theme_mode = settings.value("theme_mode", THEME_SYSTEM, type=str)
     system_palette = QPalette(app.palette())
     style = app.style()

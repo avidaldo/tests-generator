@@ -76,7 +76,7 @@ Each subcategory file must be fully self-contained — the question generator wi
 ```markdown
 # Subcategory: [Name]
 
-**Category path:** $course$/top/CategoryRoot/Subcategory
+**Category path:** $course$/top/<ExamRoot>/Subcategory
 **Question focus:** conceptual-only | syntax-included
 
 ## Concepts
@@ -128,6 +128,11 @@ Brief summaries of concepts from other subcategories that relate to this one. Th
 ---
 
 ## Rules for subcategory files
+
+### Exam isolation (base category root)
+- Every subcategory file for the same exam must share a single **exam base category root**: `$course$/top/<ExamRoot>/<Subcategory>`.
+- Choose a distinct `<ExamRoot>` per exam (for example `exam-2026-ml`, `parcial-2026-poo`) so questions from different exams never collide in the same Moodle category. Confirm the `<ExamRoot>` with the user once at the start of a merge run and reuse it across every subcategory file in that run.
+- Do not reuse a previous exam's root for a new exam. A new exam means a new base category.
 
 ### Concept assignment
 - Each concept has exactly one **primary subcategory** where its full definition lives.

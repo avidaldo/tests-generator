@@ -16,7 +16,7 @@ if str(EDITOR_DIR) not in sys.path:
 
 from PyQt6.QtCore import QTimer, QModelIndex
 from PyQt6.QtGui import QUndoStack
-from PyQt6.QtWidgets import QApplication, QMessageBox
+from PyQt6.QtWidgets import QApplication
 
 from models.question import Answer, Question, QuestionStatus
 from models.quiz_model import QuizModel
@@ -170,7 +170,7 @@ class EditorImprovementsTests(unittest.TestCase):
         # 4. Deletion/purge demotion macro.
         q = Question(
             id="Q1", name="Q1", question_text="Stem", general_feedback="", category_path="Cat",
-            status=QuestionStatus.LISTA,
+            status=QuestionStatus.READY,
             answers=[
                 Answer(text="Correct", fraction="100"),
                 Answer(text="W1", fraction="-33.33333"),
@@ -187,18 +187,19 @@ class EditorImprovementsTests(unittest.TestCase):
         self.panel._on_delete_answer(3)
 
         self.assertEqual(len(q.answers), 3)
-        self.assertEqual(q.status, QuestionStatus.PENDIENTE)
+        self.assertEqual(q.status, QuestionStatus.PENDING)
 
         # Verify undo restores both the deleted answer and the LISTA status.
         self.undo_stack.undo()
         self.assertEqual(len(q.answers), 4)
-        self.assertEqual(q.status, QuestionStatus.LISTA)
+        self.assertEqual(q.status, QuestionStatus.READY)
 
     def test_set_status_lista_validation_fails(self) -> None:
-        # Setting status to LISTA on an invalid question should show a warning and remain at previous status.
+        # Setting status to READY on an invalid question should show a transient inline
+        # hint (not a blocking dialog) and remain at the previous status.
         q = Question(
             id="Q1", name="Q1", question_text="Stem", general_feedback="", category_path="Cat",
-            status=QuestionStatus.PENDIENTE,
+            status=QuestionStatus.PENDING,
             answers=[
                 Answer(text="Correct", fraction="100"),
                 Answer(text="W1", fraction="-33.33333"),
@@ -207,11 +208,13 @@ class EditorImprovementsTests(unittest.TestCase):
         self.model.add_questions([q])
         self.panel.set_question(q)
 
-        with patch.object(QMessageBox, 'warning') as warning_mock:
-            self.panel._set_status(QuestionStatus.LISTA)
-            warning_mock.assert_called_once()
+        self.panel._set_status(QuestionStatus.READY)
 
-        self.assertEqual(q.status, QuestionStatus.PENDIENTE)
+        # The inline hint is populated and not explicitly hidden (parent isn't shown
+        # in headless tests, so isVisible() would be False; isHidden() is the right check).
+        self.assertFalse(self.panel._format_hint_label.isHidden())
+        self.assertIn("LISTA", self.panel._format_hint_label.text())
+        self.assertEqual(q.status, QuestionStatus.PENDING)
 
     def test_auto_navigation_on_status_lista(self) -> None:
         # Create a MainWindow instance
@@ -221,7 +224,7 @@ class EditorImprovementsTests(unittest.TestCase):
         # Create three questions
         q1 = Question(
             id="Q1", name="Q1", question_text="Stem", general_feedback="", category_path="Cat",
-            status=QuestionStatus.PENDIENTE,
+            status=QuestionStatus.PENDING,
             answers=[
                 Answer(text="Correct", fraction="100"),
                 Answer(text="W1", fraction="-33.33333"),
@@ -231,7 +234,7 @@ class EditorImprovementsTests(unittest.TestCase):
         )
         q2 = Question(
             id="Q2", name="Q2", question_text="Stem", general_feedback="", category_path="Cat",
-            status=QuestionStatus.PENDIENTE,
+            status=QuestionStatus.PENDING,
             answers=[
                 Answer(text="Correct", fraction="100"),
                 Answer(text="W1", fraction="-33.33333"),
@@ -241,7 +244,7 @@ class EditorImprovementsTests(unittest.TestCase):
         )
         q3 = Question(
             id="Q3", name="Q3", question_text="Stem", general_feedback="", category_path="Cat",
-            status=QuestionStatus.PENDIENTE,
+            status=QuestionStatus.PENDING,
             answers=[
                 Answer(text="Correct", fraction="100"),
                 Answer(text="W1", fraction="-33.33333"),
@@ -256,7 +259,7 @@ class EditorImprovementsTests(unittest.TestCase):
         window._refresh_category_tree()
 
         # Set filter to PENDIENTE so that changing q1 to LISTA will filter it out
-        window._set_status_filter(QuestionStatus.PENDIENTE)
+        window._set_status_filter(QuestionStatus.PENDING)
 
         # Select Q1 in the list view
         idx1 = window._proxy_model.index(0, 0)
@@ -269,10 +272,10 @@ class EditorImprovementsTests(unittest.TestCase):
 
         with patch.object(QTimer, 'singleShot', side_effect=immediate_single_shot):
             # Mark Q1 as LISTA
-            window._detail_panel._set_status(QuestionStatus.LISTA)
+            window._detail_panel._set_status(QuestionStatus.READY)
 
         # Q1 should now be LISTA and filtered out, and the selected question in details panel should be Q2!
-        self.assertEqual(q1.status, QuestionStatus.LISTA)
+        self.assertEqual(q1.status, QuestionStatus.READY)
         self.assertEqual(window._detail_panel._current_question, q2)
 
     def test_question_review_notes_persistence(self) -> None:

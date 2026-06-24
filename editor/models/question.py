@@ -12,9 +12,17 @@ import uuid
 
 class QuestionStatus(Enum):
     """Question review status."""
-    PENDIENTE = "pendiente"  # Newly imported, not yet seen
-    REVISAR = "revisar"       # Seen but needs further review
-    LISTA = "lista"           # Approved and ready for exam
+    PENDING = "pending"  # Newly imported, not yet seen
+    REVIEW = "review"    # Seen but needs further review
+    READY = "ready"      # Approved and ready for exam
+
+    @classmethod
+    def from_value(cls, value: str) -> "QuestionStatus":
+        """Parse a status value, mapping legacy Spanish values to the English enum."""
+        legacy = {"pendiente": cls.PENDING, "revisar": cls.REVIEW, "lista": cls.READY}
+        if value in legacy:
+            return legacy[value]
+        return cls(value)
 
 
 @dataclass
@@ -43,7 +51,7 @@ class Question:
     general_feedback: str
     category_path: str
     answers: list[Answer] = field(default_factory=list)
-    status: QuestionStatus = QuestionStatus.PENDIENTE
+    status: QuestionStatus = QuestionStatus.PENDING
 
     # Moodle-specific fields
     default_grade: str = "1.0000000"

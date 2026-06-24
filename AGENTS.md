@@ -11,12 +11,9 @@
 
 ## Planning And Living Documentation
 
-- `TODO:` is the default inline capture marker. Prefer low-friction capture over elaborate inline taxonomies.
-- `.github/implementation_plan.md` is the curated active plan. Question-style TODOs must be moved there as Clarification Queue entries before implementation starts.
-- Use [`.github/prompts/refresh-plan.prompt.md`](.github/prompts/refresh-plan.prompt.md) to refresh the plan and surface unresolved questions before larger changes.
-- Use [`.github/prompts/implement-plan-item.prompt.md`](.github/prompts/implement-plan-item.prompt.md) after the relevant plan item is approved.
+- `TODO:` is the default inline capture marker, and [`todos.md`](todos.md) is the project's backlog. Prefer low-friction capture over elaborate inline taxonomies.
+- For larger changes, plan with the built-in agent/plan tooling (e.g. plan mode) against `todos.md`; there is no separate SDD plan loop. The previous `.github/implementation_plan.md` workflow and its planner/implementer prompts were removed to keep the setup simple.
 - When a change affects architecture, workflow, or agent behavior, update the relevant docs and instruction files in the same change.
-- Canonical rationale for this split lives in [`.github/docs/customization_architecture.md`](.github/docs/customization_architecture.md).
 
 ## Project Overview
 
@@ -27,7 +24,6 @@ This repository contains tools and prompts for generating, editing, and analyzin
 | Path | Purpose | Instructions |
 | ---- | ------- | ------------ |
 | `prompts/` | Canonical question-generation prompt files (`.prompt.md`) | [`prompts/AGENTS.md`](prompts/AGENTS.md) |
-| `.github/prompts/` | Repository-maintenance prompt launchers for the SDD loop | [`.github/prompts/AGENTS.md`](.github/prompts/AGENTS.md) |
 | `.github/instructions/` | VS Code file-scoped instruction adapters (`.instructions.md`) | [`AGENTS.md`](AGENTS.md) |
 | `.github/` | VS Code customization layer: agents, prompts, hooks, and living customization docs | [`.github/AGENTS.md`](.github/AGENTS.md) |
 | `editor/` | PyQt-based Stage 4 review editor with secondary legacy XML import | [`editor/AGENTS.md`](editor/AGENTS.md) |
@@ -98,11 +94,8 @@ Each step is run manually. See the [Usage guide in README.md](README.md#usage-ge
 
 ## Planning Workflow
 
-- Capture open work locally with `TODO:` markers.
-- Refresh `.github/implementation_plan.md` with [`.github/prompts/refresh-plan.prompt.md`](.github/prompts/refresh-plan.prompt.md) before coding when the task touches multiple files, unresolved design questions, or existing TODOs.
-- Resolve Clarification Queue items with the user before implementation.
-- Implement one approved item at a time with [`.github/prompts/implement-plan-item.prompt.md`](.github/prompts/implement-plan-item.prompt.md), then sync the plan and any affected docs or instructions before finishing.
-- For long unattended delegated or cloud-oriented runs, [`.github/prompts/run-batch-maintenance.prompt.md`](.github/prompts/run-batch-maintenance.prompt.md) is the advanced optional lane. It processes approved and unblocked items iteratively but does not replace the canonical safe loop.
+- Capture open work locally with `TODO:` markers and in [`todos.md`](todos.md).
+- For tasks spanning multiple files or with unresolved design questions, plan against `todos.md` using the built-in plan/agent tooling and resolve open questions with the user before implementing. There is no separate maintenance plan file.
 
 ## VS Code Customization Layer
 
@@ -111,7 +104,6 @@ Each step is run manually. See the [Usage guide in README.md](README.md#usage-ge
 - The optional [`generate-question-batches` skill](.github/skills/generate-question-batches/SKILL.md) provides the advanced Stage 3 bulk lane for delegated or background question generation across multiple subcategories.
 - The detailed customization inventory now lives in [`.github/AGENTS.md`](.github/AGENTS.md).
 - The human-oriented customization guide now lives in [`.github/README.md`](.github/README.md).
-- Maintenance prompt policy now lives in [`.github/prompts/AGENTS.md`](.github/prompts/AGENTS.md).
 - Stage 3 question-design rules live in [`prompts/generate-questions.prompt.md`](prompts/generate-questions.prompt.md) and the linked domain docs rather than in a prompt-specific `.github/instructions/` adapter.
 - Root `prompts/` remains reserved for the quiz-generation pipeline and stays enabled through `.vscode/settings.json`.
 - Keep this root file focused on project-facing policy and discovery; do not duplicate the full customization inventory here.

@@ -38,6 +38,10 @@ Implications of this contract:
 - Keep lightweight manifests or checkpoint files next to the user-owned artifact roots, not buried inside this repository.
 - Never overwrite an existing Stage 3 batch implicitly. Create the next free `batch-###.json` unless the user explicitly requests a specific batch number.
 
+### Exam isolation (base category root)
+
+Each exam gets a **distinct Moodle base category root** so its questions never mix with another exam's. At Stage 2 (`merge-summaries.prompt.md`), every subcategory file for one exam shares `$course$/top/<ExamRoot>/<Subcategory>`, where `<ExamRoot>` is unique per exam (e.g. `exam-2026-ml`). A new exam means a new root — never reuse a previous exam's root. To carve one reviewed set into two papers, see [`prompts/split-exam.prompt.md`](../prompts/split-exam.prompt.md).
+
 ## Regular Vs Bulk Execution
 
 The regular lane is prompt-first and intentionally narrow. It is the right default when the user wants tight control, when the scope is small enough to inspect directly, or when the next step depends on human review before more work is justified.

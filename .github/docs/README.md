@@ -12,7 +12,6 @@ This folder contains durable design rationale and decision records for the repos
 
 - [`../README.md`](../README.md) — human-oriented entry point for the customization layer.
 - [`../AGENTS.md`](../AGENTS.md) — customization-layer policy and inventory.
-- [`../implementation_plan.md`](../implementation_plan.md) — active operational plan and decision log for maintenance work.
 
 ## Current Documents
 

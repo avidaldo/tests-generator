@@ -59,7 +59,7 @@ def parse_xml_file(xml_path: Path) -> tuple[list[Category], list[Question]]:
                 general_feedback=feedback_elem.text if feedback_elem is not None and feedback_elem.text else "",
                 category_path=current_category_path,
                 answers=answers,
-                status=QuestionStatus.PENDIENTE,
+                status=QuestionStatus.PENDING,
                 default_grade=grade_elem.text if grade_elem is not None and grade_elem.text else "1.0000000",
                 penalty=penalty_elem.text if penalty_elem is not None and penalty_elem.text else "0.0000000",
                 single=single_elem.text if single_elem is not None and single_elem.text else "true",

@@ -4,12 +4,12 @@ Convert a Stage 4 review-session JSON file to Moodle XML.
 
 Reads the JSON format produced by the quiz editor (`editor/file_io/state_io.py`)
 and outputs Moodle-compatible multichoice XML. By default only exports questions
-with status "lista" (approved by the human reviewer), which is the intended
+with status "ready" (approved by the human reviewer), which is the intended
 pipeline step after human review in the editor.
 
 Usage:
     json_to_moodle_xml.py <input.json> <output.xml>
-    json_to_moodle_xml.py <input.json> <output.xml> --status lista revisar
+    json_to_moodle_xml.py <input.json> <output.xml> --status ready review
     json_to_moodle_xml.py <input.json> <output.xml> --all-statuses
     json_to_moodle_xml.py <input.json> <output.xml> --easy-only
     json_to_moodle_xml.py <input.json> . --verbose
@@ -22,7 +22,7 @@ Examples:
     json_to_moodle_xml.py session.json easy_exam.xml --easy-only
 
     # Export approved + under-review questions
-    json_to_moodle_xml.py session.json exam.xml --status lista revisar
+    json_to_moodle_xml.py session.json exam.xml --status ready review
 
     # Export everything regardless of review status
     json_to_moodle_xml.py session.json exam.xml --all-statuses
@@ -38,8 +38,16 @@ import sys
 from pathlib import Path
 
 
-_VALID_STATUSES = {"pendiente", "revisar", "lista"}
-_DEFAULT_STATUSES = {"lista"}
+_VALID_STATUSES = {"pending", "review", "ready"}
+_DEFAULT_STATUSES = {"ready"}
+
+# Legacy Spanish status values, mapped to the current English values on read.
+_LEGACY_STATUSES = {"pendiente": "pending", "revisar": "review", "lista": "ready"}
+
+
+def _normalize_status(value: str) -> str:
+    """Map a (possibly legacy Spanish) status value to the current English value."""
+    return _LEGACY_STATUSES.get(value, value)
 
 
 def _wrap_cdata(text: str) -> str:
@@ -137,16 +145,17 @@ def _parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description=(
             "Convert a Stage 4 review-session JSON file to Moodle XML. "
-            "By default exports only questions with status 'lista' (human-approved)."
+            "By default exports only questions with status 'ready' (human-approved)."
         ),
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Status values:
-  pendiente  Not yet reviewed (default for newly generated questions)
-  revisar    Flagged for revision
-  lista      Approved — ready for students
+  pending  Not yet reviewed (default for newly generated questions)
+  review   Flagged for revision
+  ready    Approved — ready for students
 
-By default only 'lista' questions are exported. Use --all-statuses to override.
+Legacy Spanish values (pendiente/revisar/lista) are still accepted on input.
+By default only 'ready' questions are exported. Use --all-statuses to override.
 """,
     )
     parser.add_argument("input", type=Path, help="Input review-session JSON file.")
@@ -162,7 +171,7 @@ By default only 'lista' questions are exported. Use --all-statuses to override.
         choices=sorted(_VALID_STATUSES),
         default=None,
         metavar="STATUS",
-        help="Export questions with these statuses (space-separated). Default: lista",
+        help="Export questions with these statuses (space-separated). Default: ready",
     )
     status_group.add_argument(
         "--all-statuses",
@@ -172,7 +181,7 @@ By default only 'lista' questions are exported. Use --all-statuses to override.
     parser.add_argument(
         "--easy-only",
         action="store_true",
-        help="Export only questions with is_easy=true (implies --status lista).",
+        help="Export only questions with is_easy=true (implies --status ready).",
     )
     parser.add_argument("-v", "--verbose", action="store_true", help="Print export summary.")
     return parser.parse_args()
@@ -201,7 +210,7 @@ def main() -> None:
     else:
         selected_statuses = _DEFAULT_STATUSES
 
-    questions = [q for q in all_questions if q.get("status", "pendiente") in selected_statuses]
+    questions = [q for q in all_questions if _normalize_status(q.get("status", "pending")) in selected_statuses]
 
     if args.easy_only:
         questions = [q for q in questions if q.get("is_easy", False)]
@@ -225,14 +234,14 @@ def main() -> None:
     if args.verbose:
         by_status: dict[str, int] = {}
         for q in all_questions:
-            s = q.get("status", "pendiente")
+            s = _normalize_status(q.get("status", "pending"))
             by_status[s] = by_status.get(s, 0) + 1
 
         status_summary = ", ".join(f"{s}: {n}" for s, n in sorted(by_status.items()))
         print(f"Input : {input_path.name} ({len(all_questions)} total — {status_summary})")
-        easy_count = sum(1 for q in all_questions if q.get("is_easy", False) and q.get("status") == "lista")
+        easy_count = sum(1 for q in all_questions if q.get("is_easy", False) and _normalize_status(q.get("status", "")) == "ready")
         if args.easy_only:
-            print(f"Filter: {', '.join(sorted(selected_statuses))} + easy_only ({easy_count} easy-lista in file)")
+            print(f"Filter: {', '.join(sorted(selected_statuses))} + easy_only ({easy_count} easy-ready in file)")
         else:
             print(f"Filter: {', '.join(sorted(selected_statuses))}")
         print(f"Output: {output_path} ({len(questions)} questions)")

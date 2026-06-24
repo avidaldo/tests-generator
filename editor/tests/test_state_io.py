@@ -15,10 +15,35 @@ if str(EDITOR_DIR) not in sys.path:
 
 
 from file_io.state_io import load_review_session, load_stage3_batch, save_review_session  # noqa: E402
+from models.question import QuestionStatus  # noqa: E402
 from models.review_session import REVIEW_SESSION_ARTIFACT_TYPE, ReviewSession  # noqa: E402
 
 
 class StateIoArtifactTests(unittest.TestCase):
+
+    def test_legacy_spanish_status_values_map_to_english_enum(self) -> None:
+        self.assertEqual(QuestionStatus.from_value("pendiente"), QuestionStatus.PENDING)
+        self.assertEqual(QuestionStatus.from_value("revisar"), QuestionStatus.REVIEW)
+        self.assertEqual(QuestionStatus.from_value("lista"), QuestionStatus.READY)
+        self.assertEqual(QuestionStatus.from_value("ready"), QuestionStatus.READY)
+
+    def test_load_review_session_maps_legacy_status_and_resaves_english(self) -> None:
+        session_path = self._write_json({
+            "artifact_type": REVIEW_SESSION_ARTIFACT_TYPE,
+            "version": "1.0",
+            "imported_sources": [
+                {"origin_kind": "stage3_batch", "origin_path": "/x/batch-001.json", "label": "batch-001.json"}
+            ],
+            "questions": [self._make_question_data(status="lista")],
+        }, "legacy-session.json")
+
+        session = load_review_session(session_path)
+        self.assertEqual(session.questions[0].status, QuestionStatus.READY)
+
+        # Re-serialization writes the new English value.
+        out_path = self._write_json({"questions": []}, "resaved.json")
+        save_review_session(session, out_path)
+        self.assertEqual(json.loads(out_path.read_text())["questions"][0]["status"], "ready")
 
     def test_load_stage3_batch_accepts_raw_stage3_json(self) -> None:
         stage3_path = self._write_json({

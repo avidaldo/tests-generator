@@ -46,9 +46,9 @@ class ToggleStatusCommand(QUndoCommand):
         index = _get_question_index(self._model, self._question)
         if index != -1:
             self._question.status = (
-                QuestionStatus.LISTA
-                if self._question.status == QuestionStatus.REVISAR
-                else QuestionStatus.REVISAR
+                QuestionStatus.READY
+                if self._question.status == QuestionStatus.REVIEW
+                else QuestionStatus.REVIEW
             )
             self._model.update_question(index)
 

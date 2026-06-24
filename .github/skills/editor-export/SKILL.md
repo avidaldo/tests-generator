@@ -34,5 +34,5 @@ This skill covers the final stage of the quiz pipeline: reviewed JSON state to M
 ## Guardrails
 
 - Do not bypass the editor review step by default.
-- Do not assume `pendiente` or `revisar` should ship to Moodle unless the user explicitly requests that scope.
+- Do not assume `pending` or `review` (legacy: `pendiente`/`revisar`) should ship to Moodle unless the user explicitly requests that scope.
 - Keep the export script as the canonical XML path instead of hand-editing XML unless the task specifically requires XML changes.

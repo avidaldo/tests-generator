@@ -13,8 +13,20 @@ Every question must satisfy all of the following:
   - 1 correct answer (`fraction: "100"`)
   - 6 distractors (`fraction: "-50"`)
 - `answers[].feedback` is mandatory for all 7 options.
-- `status` must be `"pendiente"`.
+- `status` must be `"pending"`.
 - JSON must follow the editor schema and omit editor-populated fields (`default_grade`, `penalty`, `single`, `shuffle_answers`, `answer_numbering`, `correct_feedback`, `partially_correct_feedback`, `incorrect_feedback`).
+
+## Stem & Distractor Anti-Patterns (hard rejection)
+
+Regenerate any question that hits these (full detail: [questions_rules.md](questions_rules.md) and [rules/](rules/)):
+
+- Stem leaks the answer or presumes its conclusion ("¿Por qué X *puede ser preferible*…?"). Ask "what … and why?" instead.
+- Stem bundles unrelated concepts whose relationship is not what is tested (kernel/stride/padding/pooling; dataloaders/mini-batches/device-consistency). Split them.
+- Stem uses graded/superlative framing ("¿Qué … describe **mejor**…?", "más apropiada"). Use direct phrasing.
+- A distractor contradicts a fact the stem states or implies (stem says *híbrido* → distractor says *completamente compilado*). Distractors may ignore info, never contradict it.
+- A distractor is a lazy partial-element answer, a non-answer, childish/strawman, or merely "less correct" than the key.
+- "¿Por qué…?" stems: every option must begin "Porque…".
+- Avoid "y confiar en que…" and loaded adjectives ("enorme", "confuso") that tell which option is wrong.
 
 ## Content and Cognitive Rules
 

@@ -28,9 +28,9 @@ class QuizModel(QAbstractListModel):
         question = self._questions[index.row()]
 
         if role == Qt.ItemDataRole.DisplayRole:
-            if question.status == QuestionStatus.LISTA:
+            if question.status == QuestionStatus.READY:
                 status_icon = "✓"
-            elif question.status == QuestionStatus.REVISAR:
+            elif question.status == QuestionStatus.REVIEW:
                 status_icon = "↻"
             else:  # PENDIENTE
                 status_icon = "⋯"
@@ -41,9 +41,9 @@ class QuizModel(QAbstractListModel):
             return question
 
         elif role == Qt.ItemDataRole.ForegroundRole:
-            if question.status == QuestionStatus.LISTA:
+            if question.status == QuestionStatus.READY:
                 return QColor("#2E7D32")  # Dark green
-            elif question.status == QuestionStatus.REVISAR:
+            elif question.status == QuestionStatus.REVIEW:
                 return QColor("#E65100")  # Dark orange
             else:  # PENDIENTE
                 return QColor("#1565C0")  # Blue

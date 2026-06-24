@@ -85,7 +85,7 @@ The `Abrir sesión de revisión...` action accepts this envelope. Older editor-s
   "question_text": "<p>Enunciado de la pregunta en HTML.</p>",
   "general_feedback": "<p>Explicación didáctica completa.</p>",
   "category_path": "$course$/top/Categoria/Subcategoria",
-  "status": "pendiente",
+  "status": "pending",
   "source_ref": "NORM-01, NORM-03",
   "generated_by_model": "gpt-5.4",
   "answers": [ ... ]
@@ -99,9 +99,9 @@ The `Abrir sesión de revisión...` action accepts this envelope. Older editor-s
 | `question_text` | string | yes | HTML. Wrap code samples in `<code>` or `<pre>`. No inline styles. |
 | `general_feedback` | string | yes | HTML. Full didactic explanation of the correct answer and why distractors are wrong. Shown to the student after the attempt. |
 | `category_path` | string | yes | Full Moodle category path: `$course$/top/CategoryRoot/Subcategory`. |
-| `status` | string | yes | Review state. One of `"pendiente"` · `"revisar"` · `"lista"`. Generated questions always start as `"pendiente"`. |
-| `is_easy` | boolean | no | Difficulty flag. `true` marks the question as easy. Only meaningful on `"lista"` questions; used for difficulty-filtered exports. Defaults to `false` if omitted. |
-| `review_notes` | string | no | Reviewer notes explaining why a question is marked as `"revisar"` or needs revision. Defaults to `""` if omitted. |
+| `status` | string | yes | Review state. One of `"pending"` · `"review"` · `"ready"`. Generated questions always start as `"pending"`. Legacy Spanish values (`"pendiente"`/`"revisar"`/`"lista"`) are still accepted on load and migrated automatically. |
+| `is_easy` | boolean | no | Difficulty flag. `true` marks the question as easy. Only meaningful on `"ready"` questions; used for difficulty-filtered exports. Defaults to `false` if omitted. |
+| `review_notes` | string | no | Reviewer notes explaining why a question is marked as `"review"` or needs revision. Defaults to `""` if omitted. |
 | `source_ref` | string | Stage 3 yes | One or more concept IDs from the Stage 2 subcategory file, such as `"NORM-01"` or `"NORM-01, CV-03"`. XML-derived questions may leave this empty. |
 | `generated_by_model` | string | no | Optional question-level model label recorded during Stage 3 generation when the run already knows it. The editor preserves it into Stage 4 review-session JSON and shows it in the provenance metadata when present. |
 | `source_file` | string | no | Legacy compatibility field retained for imported XML or old saved states. New Stage 3 batches should omit it. |

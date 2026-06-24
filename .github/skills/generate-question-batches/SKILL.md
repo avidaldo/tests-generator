@@ -6,6 +6,13 @@ argument-hint: 'Required: Stage 2 subcategory paths or root; Stage 3 output root
 
 # Generate Question Batches Workflow
 
+> **Want complete coverage of every topic?** This skill writes **at most one batch per
+> subcategory** in a single breadth-first wave — it is *not* the exhaustive lane. For full
+> `SURF-*` coverage of an approved Stage 2 scope, use
+> [finish-question-coverage](../finish-question-coverage/SKILL.md), which keeps batching each
+> subcategory until its surfaces are exhausted. Use this breadth-first skill only when you
+> deliberately want one wave across many subcategories before review.
+
 This skill orchestrates Stage 3 of the quiz pipeline across multiple subcategory files. The canonical pipeline lives in [prompts/AGENTS.md](../../../prompts/AGENTS.md), and the per-subcategory generation rules live in [prompts/generate-questions.prompt.md](../../../prompts/generate-questions.prompt.md).
 
 ## When To Use
