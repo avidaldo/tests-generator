@@ -2,6 +2,9 @@
 
 AI-assisted generation, editing, and analysis of Moodle XML quiz exams.
 
+<!-- TODO: Clarify Terminology: in spanish "test" refer tipicaly to multi-choice, that is indeed what this project desing. It's so far restricted to those. Also, in moodle the resourse is "Proba" in galician (I use moodle for the galician education system) but that translation changes in spanish (and it's confusion with another resourse). So I need to clarify the terminology.
+ -->
+
 ## Components
 
 ### Test Generation (`prompts/`)
