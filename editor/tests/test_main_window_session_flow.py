@@ -17,9 +17,12 @@ if str(EDITOR_DIR) not in sys.path:
     sys.path.insert(0, str(EDITOR_DIR))
 
 
-from PyQt6.QtCore import QTimer  # noqa: E402
-from PyQt6.QtWidgets import QApplication, QMessageBox  # noqa: E402
+import tempfile  # noqa: E402
 
+from PyQt6.QtCore import QSettings, QTimer  # noqa: E402
+from PyQt6.QtWidgets import QApplication, QFileDialog, QMessageBox  # noqa: E402
+
+from file_io.state_io import load_review_session, save_state  # noqa: E402
 from models.question import Answer, Question  # noqa: E402
 from views.main_window import MainWindow  # noqa: E402
 
@@ -34,7 +37,9 @@ class MainWindowSessionFlowTests(unittest.TestCase):
         self.addCleanup(timer_patcher.stop)
         timer_patcher.start()
 
-        self.window = MainWindow()
+        self._temp_dir = tempfile.TemporaryDirectory()
+        self.addCleanup(self._temp_dir.cleanup)
+        self.window = MainWindow(autosave_file=Path(self._temp_dir.name) / "autosave.json")
         self.addCleanup(self._dispose_window)
 
     def test_confirm_session_replacement_skips_prompt_for_clean_loaded_session(self) -> None:
@@ -104,14 +109,63 @@ class MainWindowSessionFlowTests(unittest.TestCase):
         self.assertTrue(self.window._session_dirty)
         self.assertTrue(self.window.isWindowModified())
 
+    def test_restored_autosave_is_not_attached_to_the_last_saved_session(self) -> None:
+        temp_path = Path(self._temp_dir.name)
+        saved_session = temp_path / "saved.json"
+        save_state([_make_question('SAVED_Q001')], saved_session)
+        save_state([_make_question('UNSAVED_Q001')], self.window._autosave_file)
+        os.utime(saved_session, (1, 1))  # the backup must be the newest file to be offered
+        self.window._settings = QSettings(str(temp_path / "s.ini"), QSettings.Format.IniFormat)
+        self.window._settings.setValue("last_state_file", str(saved_session))
+
+        with patch.object(QMessageBox, 'question', return_value=QMessageBox.StandardButton.Yes):
+            self.window._auto_load_last_state()
+        self.window._do_autosave()  # what the debounce timer does after the next edit
+
+        self.assertIsNone(self.window._current_state_file)
+        self.assertTrue(self.window._session_dirty)
+        saved_ids = [question.id for question in load_review_session(saved_session).questions]
+        self.assertEqual(saved_ids, ['SAVED_Q001'])
+
+    def test_loading_a_session_does_not_schedule_a_rewrite_of_its_file(self) -> None:
+        session_path = Path(self._temp_dir.name) / "session.json"
+        save_state([_make_question()], session_path)
+
+        self.window._replace_loaded_session(load_review_session(session_path).questions, session_path, 'Loaded')
+
+        self.assertFalse(self.window._autosave_timer.isActive())
+
+    def test_unsaved_session_autosaves_to_the_injected_backup_path(self) -> None:
+        self.window._replace_loaded_session([_make_question()], None, 'Imported', is_dirty=True)
+
+        self.window._do_autosave()
+
+        self.assertTrue(self.window._autosave_file.exists())
+        self.assertEqual(self.window._autosave_file.parent, Path(self._temp_dir.name))
+
+    def test_xml_import_names_unreadable_files_and_keeps_the_readable_ones(self) -> None:
+        readable_xml = Path(self._temp_dir.name) / "readable.xml"
+        broken_xml = Path(self._temp_dir.name) / "broken.xml"
+        readable_xml.write_text(_ONE_QUESTION_XML.replace("{cdata_open}", "<![CDATA["), encoding="utf-8")
+        broken_xml.write_text(_ONE_QUESTION_XML.replace("{cdata_open}", "<![CDATA>"), encoding="utf-8")
+        chosen_files = ([str(readable_xml), str(broken_xml)], "XML Files (*.xml)")
+
+        with patch.object(QFileDialog, 'getOpenFileNames', return_value=chosen_files), \
+                patch.object(QMessageBox, 'warning') as warning_mock:
+            self.window._import_legacy_xml_files()
+
+        self.assertEqual([question.name for question in self.window._model.questions], ['Q1'])
+        warning_mock.assert_called_once()
+        self.assertIn("broken.xml: not well-formed", warning_mock.call_args.args[2])
+
     def _dispose_window(self) -> None:
         self.window.deleteLater()
         self._app.processEvents()
 
 
-def _make_question() -> Question:
+def _make_question(question_id: str = 'TST_Q001') -> Question:
     return Question(
-        id='TST_Q001',
+        id=question_id,
         name='Q001: Test question',
         question_text='<p>Question stem</p>',
         general_feedback='<p>Feedback</p>',
@@ -121,6 +175,18 @@ def _make_question() -> Question:
             Answer(text='<p>Distractor</p>', fraction='-50', feedback='<p>Wrong.</p>'),
         ],
     )
+
+
+_ONE_QUESTION_XML = """<?xml version="1.0" encoding="UTF-8"?>
+<quiz>
+  <question type="multichoice">
+    <name><text>Q1</text></name>
+    <questiontext format="html"><text>{cdata_open}<p>Stem</p>]]></text></questiontext>
+    <answer fraction="100" format="html"><text>Key</text><feedback><text>Correct.</text></feedback></answer>
+    <answer fraction="-50" format="html"><text>Distractor</text><feedback><text>Wrong.</text></feedback></answer>
+  </question>
+</quiz>
+"""
 
 
 if __name__ == '__main__':

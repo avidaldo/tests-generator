@@ -1,0 +1,76 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/avidaldo/tests-generator/blob/develop/qb/schemas/item-batch.schema.json",
+  "title": "Question batch",
+  "description": "A batch of generated multiple-choice questions, imported by the review editor. Version 1.0 is the Stage 3 output; version 2.0 adds the reasoning fields the checker verifies (evidence, claim, stem premises, misconceptions).",
+  "type": "object",
+  "required": ["version", "questions"],
+  "additionalProperties": false,
+  "properties": {
+    "version": {"enum": ["1.0", "2.0"]},
+    "sitting": {"type": "string"},
+    "questions": {"type": "array", "items": {"$ref": "#/$defs/question"}}
+  },
+  "$defs": {
+    "question": {
+      "type": "object",
+      "required": ["id", "name", "question_text", "answers"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "name": {"type": "string", "minLength": 1},
+        "question_text": {"type": "string"},
+        "general_feedback": {"type": "string"},
+        "category_path": {"type": "string"},
+        "status": {"enum": ["pending", "review", "ready", "pendiente", "revisar", "lista"]},
+        "source_ref": {"type": "string"},
+        "generated_by_model": {"type": "string"},
+        "is_easy": {"type": "boolean"},
+        "review_notes": {"type": "string"},
+        "target_id": {"type": "string", "minLength": 1},
+        "qtype": {"type": "string", "minLength": 1},
+        "tier": {"enum": ["core", "standard"]},
+        "ca": {"type": "string"},
+        "evidence": {"type": "array", "items": {"$ref": "#/$defs/evidence"}},
+        "claim": {"type": "string"},
+        "stem_premises": {"type": "array", "items": {"type": "string"}},
+        "lint": {"type": "array", "items": {"type": "object"}},
+        "checks": {"type": "object"},
+        "answers": {"type": "array", "minItems": 2, "items": {"$ref": "#/$defs/answer"}}
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "required": ["locator", "quote"],
+      "additionalProperties": false,
+      "properties": {
+        "locator": {"type": "string", "minLength": 1},
+        "quote": {"type": "string", "minLength": 1}
+      }
+    },
+    "answer": {
+      "type": "object",
+      "required": ["text", "fraction"],
+      "additionalProperties": false,
+      "properties": {
+        "text": {"type": "string"},
+        "fraction": {"type": "string", "pattern": "^-?[0-9]+(\\.[0-9]+)?$"},
+        "feedback": {"type": "string"},
+        "format": {"const": "html"},
+        "misconception": {"$ref": "#/$defs/misconception"},
+        "why_right": {"type": "string"},
+        "why_wrong": {"type": "string"}
+      }
+    },
+    "misconception": {
+      "type": "object",
+      "required": ["belief", "origin"],
+      "additionalProperties": false,
+      "properties": {
+        "belief": {"type": "string", "minLength": 1},
+        "origin": {"enum": ["observed", "inferred"]},
+        "ref": {"type": "string"}
+      }
+    }
+  }
+}

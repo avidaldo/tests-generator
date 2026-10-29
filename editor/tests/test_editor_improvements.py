@@ -5,6 +5,7 @@ from __future__ import annotations
 import os
 from pathlib import Path
 import sys
+import tempfile
 import unittest
 from unittest.mock import patch
 
@@ -35,6 +36,10 @@ class EditorImprovementsTests(unittest.TestCase):
         timer_patcher = patch.object(QTimer, 'singleShot', new=lambda *args, **kwargs: None)
         self.addCleanup(timer_patcher.stop)
         timer_patcher.start()
+
+        temp_dir = tempfile.TemporaryDirectory()
+        self.addCleanup(temp_dir.cleanup)
+        self._autosave_file = Path(temp_dir.name) / "autosave.json"
 
         self.model = QuizModel()
         self.undo_stack = QUndoStack()
@@ -194,6 +199,26 @@ class EditorImprovementsTests(unittest.TestCase):
         self.assertEqual(len(q.answers), 4)
         self.assertEqual(q.status, QuestionStatus.READY)
 
+    def test_purge_promotes_pending_question_to_ready(self) -> None:
+        q = _question_with_one_unreviewed_distractor(QuestionStatus.PENDING)
+        self.model.add_questions([q])
+        self.panel.set_question(q)
+
+        self.panel._on_purge_answers()
+
+        self.assertEqual(len(q.answers), 4)
+        self.assertEqual(q.status, QuestionStatus.READY)
+
+    def test_purge_keeps_question_marked_for_review(self) -> None:
+        q = _question_with_one_unreviewed_distractor(QuestionStatus.REVIEW)
+        self.model.add_questions([q])
+        self.panel.set_question(q)
+
+        self.panel._on_purge_answers()
+
+        self.assertEqual(len(q.answers), 4)
+        self.assertEqual(q.status, QuestionStatus.REVIEW)
+
     def test_set_status_lista_validation_fails(self) -> None:
         # Setting status to READY on an invalid question should show a transient inline
         # hint (not a blocking dialog) and remain at the previous status.
@@ -218,7 +243,7 @@ class EditorImprovementsTests(unittest.TestCase):
 
     def test_auto_navigation_on_status_lista(self) -> None:
         # Create a MainWindow instance
-        window = MainWindow()
+        window = MainWindow(autosave_file=self._autosave_file)
         self.addCleanup(self._dispose_window, window)
 
         # Create three questions
@@ -309,7 +334,7 @@ class EditorImprovementsTests(unittest.TestCase):
             self.assertEqual(len(session.questions), 1)
 
     def test_mainwindow_session_notes(self) -> None:
-        window = MainWindow()
+        window = MainWindow(autosave_file=self._autosave_file)
         self.addCleanup(self._dispose_window, window)
         
         self.assertEqual(window._session_notes, "")
@@ -365,6 +390,20 @@ class EditorImprovementsTests(unittest.TestCase):
     def _dispose_window(self, window: MainWindow) -> None:
         window.deleteLater()
         self._app.processEvents()
+
+
+def _question_with_one_unreviewed_distractor(status: QuestionStatus) -> Question:
+    return Question(
+        id="Q_PURGE", name="Q_PURGE", question_text="Stem", general_feedback="", category_path="Cat",
+        status=status,
+        answers=[
+            Answer(text="Correct", fraction="100"),
+            Answer(text="W1", fraction="-50", correct_reviewed=True),
+            Answer(text="W2", fraction="-50", correct_reviewed=True),
+            Answer(text="W3", fraction="-50", correct_reviewed=True),
+            Answer(text="W4", fraction="-50"),
+        ],
+    )
 
 
 if __name__ == '__main__':

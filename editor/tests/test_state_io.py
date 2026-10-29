@@ -120,6 +120,24 @@ class StateIoArtifactTests(unittest.TestCase):
         self.assertEqual(len(reloaded_session.questions), 1)
         self.assertEqual(reloaded_session.questions[0].generated_by_model, "gpt-5.4")
 
+    def test_round_trip_keeps_fields_the_editor_does_not_model(self) -> None:
+        question_data = self._make_question_data(
+            evidence=[{"locator": "knn.ipynb#Scaling", "quote": "The larger range dominates."}],
+            checks={"verdict": "repair"},
+        )
+        question_data["answers"][1]["misconception"] = {"belief": "k-NN scales by itself.", "origin": "inferred"}
+        questions = load_stage3_batch(self._write_json({"version": "2.0", "questions": [question_data]}, "b.json"))
+        temp_dir = tempfile.TemporaryDirectory()
+        self.addCleanup(temp_dir.cleanup)
+        session_path = Path(temp_dir.name) / "session.json"
+
+        save_review_session(ReviewSession.from_questions(questions), session_path)
+        saved_question = json.loads(session_path.read_text(encoding="utf-8"))["questions"][0]
+
+        self.assertEqual(saved_question["evidence"], question_data["evidence"])
+        self.assertEqual(saved_question["checks"], {"verdict": "repair"})
+        self.assertEqual(saved_question["answers"][1]["misconception"]["belief"], "k-NN scales by itself.")
+
     def _write_json(self, payload: dict, filename: str) -> Path:
         temp_dir = tempfile.TemporaryDirectory()
         self.addCleanup(temp_dir.cleanup)

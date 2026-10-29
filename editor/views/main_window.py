@@ -22,7 +22,7 @@ from models.undo_commands import DeleteQuestionCommand
 from views.question_detail import QuestionDetailPanel
 from views.theme import THEME_OPTIONS, THEME_SYSTEM, apply_app_theme, effective_theme_variant, build_text_edit_style
 from file_io.stage3_batch_finder import discover_stage3_batch_files
-from file_io.xml_parser import parse_multiple_files
+from file_io.xml_parser import parse_xml_file
 from file_io.xml_writer import generate_xml
 from file_io.state_io import load_review_session, load_stage3_batch, save_state
 
@@ -119,7 +119,13 @@ class MainWindow(QMainWindow):
         theme_mode: str = THEME_SYSTEM,
         system_palette: QPalette | None = None,
         system_style_name: str | None = None,
+        autosave_file: Path | None = None,
     ):
+        """Create the main window.
+
+        autosave_file: crash-recovery backup path; defaults to ~/.moodle_editor_autosave.json.
+        Tests must pass a temporary path, because clearing the backup deletes the file.
+        """
         super().__init__()
         self.setWindowTitle("Moodle Quiz Editor v3[*]")
         self.setMinimumSize(1000, 700)
@@ -157,8 +163,8 @@ class MainWindow(QMainWindow):
         self._system_style_name = system_style_name or (app.style().objectName() if app is not None else "Fusion")
         self._theme_actions: dict[str, QAction] = {}
 
-        # Autosave: backup file path (in user's home or current dir)
-        self._autosave_file = Path.home() / ".moodle_editor_autosave.json"
+        # Autosave: crash-recovery backup for sessions that have no file yet
+        self._autosave_file = autosave_file or Path.home() / ".moodle_editor_autosave.json"
         self._autosave_timer = QTimer(self)
         self._autosave_timer.setSingleShot(True)
         self._autosave_timer.setInterval(1000)  # 1 second debounce
@@ -524,6 +530,9 @@ class MainWindow(QMainWindow):
         self._set_session_dirty(is_dirty)
         if not is_dirty:
             self._clear_autosave()
+        # Loading is not an edit: cancel the autosave scheduled by the model's rowsInserted signal,
+        # so that opening a session never rewrites its file.
+        self._autosave_timer.stop()
         self._status_bar.showMessage(status_message, 3000)
 
     def _set_session_dirty(self, is_dirty: bool):
@@ -606,23 +615,39 @@ class MainWindow(QMainWindow):
             self._default_session_dir(),
             "XML Files (*.xml)",
         )
-        if files:
-            try:
-                paths = [Path(f) for f in files]
-                _, questions = parse_multiple_files(paths)
-                added_count = self._model.add_questions(questions)
-                self._refresh_category_tree()
-                self._update_stats()
+        if not files:
+            return
 
-                # Build status message
-                if added_count == len(questions):
-                    msg = f"Añadidas {added_count} preguntas a la sesión actual desde {len(files)} archivo(s)"
-                else:
-                    skipped = len(questions) - added_count
-                    msg = f"Añadidas {added_count} preguntas a la sesión actual ({skipped} duplicadas omitidas)"
-                self._status_bar.showMessage(msg, 5000)
-            except Exception as e:
-                QMessageBox.critical(self, "Error", f"Error al importar: {e}")
+        added_count = 0
+        skipped_count = 0
+        failed_files: list[str] = []
+
+        for path in [Path(file) for file in files]:
+            try:
+                _, questions = parse_xml_file(path)
+            except Exception as exc:
+                failed_files.append(f"{path.name}: {exc}")
+                continue
+            imported = self._model.add_questions(questions)
+            added_count += imported
+            skipped_count += len(questions) - imported
+
+        self._refresh_category_tree()
+        self._update_stats()
+
+        if failed_files:
+            QMessageBox.warning(
+                self,
+                "Importación incompleta",
+                "No se pudieron leer algunos archivos XML:\n\n" + "\n".join(failed_files),
+            )
+
+        failed_summary = f" | {len(failed_files)} archivo(s) rechazado(s)" if failed_files else ""
+        self._status_bar.showMessage(
+            f"Añadidas {added_count} preguntas a la sesión actual desde {len(files)} archivo(s) "
+            f"({skipped_count} duplicadas omitidas){failed_summary}",
+            5000,
+        )
 
     def _import_stage3_batches(self):
         files, _ = QFileDialog.getOpenFileNames(
@@ -983,7 +1008,9 @@ class MainWindow(QMainWindow):
             )
             if reply == QMessageBox.StandardButton.Yes:
                 try:
-                    self._restore_state_file(self._autosave_file, last_state_file)
+                    # The backup only ever holds a session that had no file yet (see _do_autosave).
+                    # Attaching it to last_state_file would make the next autosave overwrite that session.
+                    self._restore_state_file(self._autosave_file, None)
                 except Exception as e:
                     QMessageBox.warning(self, "Aviso", f"No se pudo restaurar la sesión: {e}")
             else:

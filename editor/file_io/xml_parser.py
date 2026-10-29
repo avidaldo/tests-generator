@@ -73,24 +73,3 @@ def parse_xml_file(xml_path: Path) -> tuple[list[Category], list[Question]]:
             questions.append(question)
 
     return categories, questions
-
-
-def parse_multiple_files(xml_paths: list[Path]) -> tuple[list[Category], list[Question]]:
-    """Parse multiple XML files and merge results."""
-    all_categories: list[Category] = []
-    all_questions: list[Question] = []
-    seen_category_paths: set[str] = set()
-
-    for path in xml_paths:
-        try:
-            categories, questions = parse_xml_file(path)
-            for cat in categories:
-                if cat.path not in seen_category_paths:
-                    all_categories.append(cat)
-                    seen_category_paths.add(cat.path)
-            all_questions.extend(questions)
-        except Exception as e:
-            print(f"Skipping {path.name}: {e}")
-            continue
-
-    return all_categories, all_questions

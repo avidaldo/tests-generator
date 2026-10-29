@@ -31,6 +31,7 @@ This is a PyQt-based Moodle XML quiz editor. All contributions MUST follow these
 - Modules communicate through well-defined interfaces (signals/slots for Qt, typed method signatures for models).
 - No module should import from more than one other layer.
 - Dependency direction: `views → models ← file_io`. Views and file_io never import each other.
+- Every layer may import `qb`, the Qt-free core at the repository root (HTML cleaning, length analysis, schema rules, Moodle export); `qb` never imports the editor.
 
 ### Interface Documentation
 
@@ -50,13 +51,22 @@ To keep AI agent context small and focused:
 
 ## Component Reference (v3 — current)
 
+### `main.py`
+
+Entry point: builds the `QApplication`, applies the saved language and theme, and shows `MainWindow`.
+
+- `snap_leak_fixes(environment, home) -> dict[str, str | None]`: the GTK and GLib variables to clean of snap paths inherited from the launcher; `main()` applies them before `QApplication` starts GTK. VS Code installed as a snap points them (and every terminal it opens) at its own old schemas and modules; GTK on Wayland then aborts at start-up under GNOME 50.
+
+Imports from: `i18n`, `views.main_window`, `views.theme`
+
 ### `models/question.py`
 
 Data classes for quiz content.
 
-- `QuestionStatus(Enum)`: `PENDIENTE`, `REVISAR`, `LISTA`
-- `Answer(dataclass)`: Single answer option (`text`, `fraction`, `feedback`, `format`). Property: `is_correct`.
-- `Question(dataclass)`: Full question with answers, category, status, `is_easy`, and provenance fields (`source_ref`, `origin_kind`, `origin_path`, `origin_question_id`, `generated_by_model`). Static: `generate_id()`. Properties: `category_name`, `correct_count`, `wrong_count`, `source_label`, `import_key`.
+- `QuestionStatus(Enum)`: `PENDING`, `REVIEW`, `READY` (legacy Spanish values are mapped on read)
+- `Answer(dataclass)`: Single answer option (`text`, `fraction`, `feedback`, `format`, `correct_reviewed`, `extra`). Property: `is_correct` (rule shared with `qb.schema.is_correct_fraction`).
+- `Question(dataclass)`: Full question with answers, category, status, `is_easy`, `review_notes`, provenance fields (`source_ref`, `origin_kind`, `origin_path`, `origin_question_id`, `generated_by_model`) and `extra`. Static: `generate_id()`. Properties: `category_name`, `correct_count`, `wrong_count`, `source_label`, `import_key`.
+- `extra` (both classes): fields the editor doesn't model, such as v2 `evidence`, `claim`, `checks` or an answer's `misconception`; loaded and saved back unchanged.
 - `Category(dataclass)`: Category path and info. Property: `name`.
 
 ### `models/review_session.py`
@@ -69,14 +79,13 @@ Session-level models for the Stage 4 workflow.
 
 ### `models/question_diagnostics.py`
 
-Derived non-blocking diagnostics for reviewed questions.
+Derived non-blocking diagnostics for reviewed questions: a thin adapter over the Qt-free core in `qb/`.
 
-- `AnswerLengthMetrics(dataclass)`: Visible-text metrics for one answer option.
-- `QuestionDiagnostics(dataclass)`: Question-level warning summary. Property: `has_warnings`.
-- `extract_visible_text(html_text: str) -> str`
+- `QuestionDiagnostics`: alias of `qb.length.LengthAnalysis`. Property: `has_warnings`.
+- `extract_visible_text(html_text: str) -> str`: alias of `qb.html.visible_text`.
 - `analyze_question(question: Question) -> QuestionDiagnostics`
 
-Imports from: `models.question`, stdlib only
+Imports from: `models.question`, `qb.html`, `qb.length`
 
 ### `models/quiz_model.py`
 
@@ -106,19 +115,17 @@ Imports from: `models.question`, `models.quiz_model`
 
 Moodle XML deserialization.
 
-- `parse_xml_file(path: Path) -> tuple[list[Category], list[Question]]`
-- `parse_multiple_files(paths: list[Path]) -> tuple[list[Category], list[Question]]`
+- `parse_xml_file(path: Path) -> tuple[list[Category], list[Question]]`: reads `multichoice` questions only; raises `xml.etree.ElementTree.ParseError` on a malformed file. The window imports file by file and lists the files it could not read.
 
 Imports from: `models.question`
 
 ### `file_io/xml_writer.py`
 
-Moodle XML serialization.
+Moodle XML serialization, delegated to `qb.export.moodle_xml`, the single writer shared with `qb export` (escaping, CDATA splitting, uncategorized questions first, HTML sanitizing, and the 1 key + 3 distractors check of ready questions).
 
-- `generate_xml(questions: Sequence[Question]) -> str`
-- `wrap_cdata(text: str) -> str`
+- `generate_xml(questions: Sequence[Question]) -> str`: raises `qb.export.ExportError` for a question with the wrong shape.
 
-Imports from: `models.question`
+Imports from: `models.question`, `file_io.state_io`, `qb.export`
 
 ### `file_io/stage3_batch_finder.py`
 
@@ -148,6 +155,7 @@ Top-level window with toolbar, question list, filter sidebar, detail panel.
 
 - `StatusFilterProxyModel(QSortFilterProxyModel)`: Filters by status, category, and easy-only mode.
 - `MainWindow(QMainWindow)`: Owns the Stage 4 review-session workflow, including Stage 3 JSON file import, recursive Stage 3 folder import, review-session save/load, dirty-state tracking, Save/Discard/Cancel replacement prompts, secondary XML import, export, autosave, and theme application.
+  - Autosave writes every change through to the session file; a session without a file goes to the crash-recovery backup (`autosave_file` argument, default `~/.moodle_editor_autosave.json`; tests must pass a temporary path). Loading a session is not an edit and never rewrites its file; a restored backup stays without a file until "Save as".
 
 Imports from: `models.*`, `views.question_detail`, `views.theme`, `file_io.*`
 

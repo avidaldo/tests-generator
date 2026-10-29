@@ -15,9 +15,18 @@ from models.review_session import (
 STAGE3_BATCH_ARTIFACT_KIND = "stage3_batch"
 LEGACY_STATE_ARTIFACT_KIND = "legacy_state"
 
+# Keys this module models; any other key of a question or answer is carried in `extra` and saved back.
+_QUESTION_FIELDS = {
+    "id", "name", "question_text", "general_feedback", "category_path", "status", "default_grade", "penalty",
+    "single", "shuffle_answers", "answer_numbering", "correct_feedback", "partially_correct_feedback",
+    "incorrect_feedback", "source_file", "source_ref", "origin_kind", "origin_path", "origin_question_id",
+    "generated_by_model", "is_easy", "review_notes", "answers",
+}
+_ANSWER_FIELDS = {"text", "fraction", "feedback", "format", "correct_reviewed"}
+
 
 def _serialize_question(question: Question) -> dict:
-    return {
+    data = {
         "id": question.id,
         "name": question.name,
         "question_text": question.question_text,
@@ -40,17 +49,20 @@ def _serialize_question(question: Question) -> dict:
         "generated_by_model": question.generated_by_model,
         "is_easy": question.is_easy,
         "review_notes": question.review_notes,
-        "answers": [
-            {
-                "text": answer.text,
-                "fraction": answer.fraction,
-                "feedback": answer.feedback,
-                "format": answer.format,
-                "correct_reviewed": getattr(answer, "correct_reviewed", False),
-            }
-            for answer in question.answers
-        ],
+        "answers": [_serialize_answer(answer) for answer in question.answers],
     }
+    return {**data, **{key: value for key, value in question.extra.items() if key not in data}}
+
+
+def _serialize_answer(answer: Answer) -> dict:
+    data = {
+        "text": answer.text,
+        "fraction": answer.fraction,
+        "feedback": answer.feedback,
+        "format": answer.format,
+        "correct_reviewed": answer.correct_reviewed,
+    }
+    return {**data, **{key: value for key, value in answer.extra.items() if key not in data}}
 
 
 def _serialize_imported_source(imported_source: ImportedSource) -> dict:
@@ -117,6 +129,7 @@ def _deserialize_question(question_data: dict, filepath: Path) -> Question:
             feedback=answer.get("feedback", ""),
             format=answer.get("format", "html"),
             correct_reviewed=answer.get("correct_reviewed", False),
+            extra={key: value for key, value in answer.items() if key not in _ANSWER_FIELDS},
         )
         for answer in question_data.get("answers", [])
     ]
@@ -161,6 +174,7 @@ def _deserialize_question(question_data: dict, filepath: Path) -> Question:
         generated_by_model=question_data.get("generated_by_model", ""),
         is_easy=bool(question_data.get("is_easy", False)),
         review_notes=question_data.get("review_notes", ""),
+        extra={key: value for key, value in question_data.items() if key not in _QUESTION_FIELDS},
     )
 
 

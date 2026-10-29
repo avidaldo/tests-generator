@@ -1,0 +1,125 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/avidaldo/tests-generator/blob/develop/qb/schemas/check-result.schema.json",
+  "title": "Checker results",
+  "description": "What the checker writes: steps A and B without the key (blind_checks, options named by the letters of the blind view) and step C with it (audit_checks, options named by answer index). Rule IDs are those of docs/item-rules.md.",
+  "oneOf": [{"$ref": "#/$defs/blind_checks"}, {"$ref": "#/$defs/audit_checks"}],
+  "$defs": {
+    "a_rule": {
+      "description": "Rules tested in step A, from the wording alone.",
+      "enum": ["KEY-LENGTH", "KEY-ECHO", "DIS-STEM", "DIS-ANSWERS", "DIS-TOPIC", "DIS-ELEMENTS", "DIS-ABSURD",
+               "DIS-LOADED", "DIS-ABSOLUTE", "OPT-PARALLEL", "OPT-PAIR"]
+    },
+    "c_rule": {
+      "description": "Rules tested in step C, with the key and the reasoning.",
+      "enum": ["GROUND-SUPPORT", "STEM-ONE", "STEM-CLAIM", "STEM-OPEN", "STEM-NEGATIVE", "DIS-BELIEF", "DIS-DISTINCT",
+               "FB-KEY", "FB-MATCH", "FB-HEDGE", "FB-GENERAL", "LANG-CLEAR", "LANG-GLOSSARY"]
+    },
+    "letter": {"type": "string", "pattern": "^[a-z]$"},
+    "why": {"type": "string", "minLength": 1},
+    "blind_checks": {
+      "type": "object",
+      "required": ["artifact_type", "version", "items"],
+      "additionalProperties": false,
+      "properties": {
+        "artifact_type": {"const": "blind_checks"},
+        "version": {"const": "1.0"},
+        "model": {"type": "string"},
+        "items": {"type": "array", "items": {"$ref": "#/$defs/blind_item"}}
+      }
+    },
+    "blind_item": {
+      "type": "object",
+      "required": ["n", "id", "form", "solve"],
+      "additionalProperties": false,
+      "properties": {
+        "n": {"type": "integer", "minimum": 0},
+        "id": {"type": "string"},
+        "form": {
+          "description": "Step A: what a test-wise student without the knowledge would eliminate, and pick, from the wording alone.",
+          "type": "object",
+          "required": ["eliminated", "picked"],
+          "additionalProperties": false,
+          "properties": {
+            "eliminated": {"type": "array", "items": {"$ref": "#/$defs/form_cue"}},
+            "picked": {"oneOf": [{"type": "null"}, {"$ref": "#/$defs/form_cue"}]}
+          }
+        },
+        "solve": {
+          "description": "Step B: the answer chosen with the source (null when it can't be decided) and every distractor that could be defended.",
+          "type": "object",
+          "required": ["answer", "confidence", "why", "defensible"],
+          "additionalProperties": false,
+          "properties": {
+            "answer": {"oneOf": [{"type": "null"}, {"$ref": "#/$defs/letter"}]},
+            "confidence": {"enum": ["high", "medium", "low"]},
+            "why": {"$ref": "#/$defs/why"},
+            "defensible": {"type": "array", "items": {"$ref": "#/$defs/option_note"}}
+          }
+        }
+      }
+    },
+    "form_cue": {
+      "type": "object",
+      "required": ["option", "rule", "why"],
+      "additionalProperties": false,
+      "properties": {"option": {"$ref": "#/$defs/letter"}, "rule": {"$ref": "#/$defs/a_rule"}, "why": {"$ref": "#/$defs/why"}}
+    },
+    "option_note": {
+      "type": "object",
+      "required": ["option", "why"],
+      "additionalProperties": false,
+      "properties": {"option": {"$ref": "#/$defs/letter"}, "why": {"$ref": "#/$defs/why"}}
+    },
+    "audit_checks": {
+      "type": "object",
+      "required": ["artifact_type", "version", "items"],
+      "additionalProperties": false,
+      "properties": {
+        "artifact_type": {"const": "audit_checks"},
+        "version": {"const": "1.0"},
+        "model": {"type": "string"},
+        "items": {"type": "array", "items": {"$ref": "#/$defs/audit_item"}}
+      }
+    },
+    "audit_item": {
+      "type": "object",
+      "required": ["n", "id", "findings", "options", "verdict"],
+      "additionalProperties": false,
+      "properties": {
+        "n": {"type": "integer", "minimum": 0},
+        "id": {"type": "string"},
+        "findings": {"type": "array", "items": {"$ref": "#/$defs/finding"}},
+        "options": {
+          "description": "A decision for every distractor: keep, spare (the one held back) or drop.",
+          "type": "array",
+          "items": {"$ref": "#/$defs/option_decision"}
+        },
+        "verdict": {"enum": ["accept", "repair", "reject"]},
+        "repair": {"description": "What to rewrite, only the failing parts.", "type": "string", "minLength": 1}
+      },
+      "if": {"properties": {"verdict": {"const": "repair"}}},
+      "then": {"required": ["repair"]}
+    },
+    "finding": {
+      "type": "object",
+      "required": ["rule", "answer_index", "why"],
+      "additionalProperties": false,
+      "properties": {
+        "rule": {"anyOf": [{"$ref": "#/$defs/c_rule"}, {"$ref": "#/$defs/a_rule"}]},
+        "answer_index": {"oneOf": [{"type": "null"}, {"type": "integer", "minimum": 0}]},
+        "why": {"$ref": "#/$defs/why"}
+      }
+    },
+    "option_decision": {
+      "type": "object",
+      "required": ["answer_index", "decision", "why"],
+      "additionalProperties": false,
+      "properties": {
+        "answer_index": {"type": "integer", "minimum": 0},
+        "decision": {"enum": ["keep", "spare", "drop"]},
+        "why": {"$ref": "#/$defs/why"}
+      }
+    }
+  }
+}

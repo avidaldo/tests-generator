@@ -9,6 +9,8 @@ from enum import Enum
 from pathlib import Path
 import uuid
 
+from qb.schema import is_correct_fraction
+
 
 class QuestionStatus(Enum):
     """Question review status."""
@@ -33,13 +35,11 @@ class Answer:
     feedback: str = ""
     format: str = "html"
     correct_reviewed: bool = False
+    extra: dict[str, object] = field(default_factory=dict)  # fields the editor doesn't model, kept on save
 
     @property
     def is_correct(self) -> bool:
-        try:
-            return float(self.fraction) >= 100
-        except ValueError:
-            return False
+        return is_correct_fraction(self.fraction)
 
 
 @dataclass
@@ -70,6 +70,7 @@ class Question:
     generated_by_model: str = ""
     is_easy: bool = False
     review_notes: str = ""
+    extra: dict[str, object] = field(default_factory=dict)  # e.g. evidence, claim, checks: kept on save
 
     @staticmethod
     def generate_id() -> str:

@@ -14,6 +14,8 @@ from PyQt6.QtGui import QUndoStack, QFont
 import re
 
 from i18n import tr
+from qb.html import sanitize
+from qb.schema import READY_DISTRACTORS, answer_shape_problems
 
 from models.question import Question, QuestionStatus
 from models.question_diagnostics import analyze_question
@@ -166,7 +168,7 @@ class AnswerWidget(QFrame):
         if self._is_updating:
             return
         self._adjust_text_height(self._text_edit)
-        new_text = self._text_edit.toHtml()
+        new_text = sanitize(self._text_edit.toHtml())
         if new_text != self._text:
             self._text = new_text
             self.text_changed.emit(self._index, new_text)
@@ -175,7 +177,7 @@ class AnswerWidget(QFrame):
         if self._is_updating:
             return
         self._adjust_text_height(self._feedback_edit)
-        new_feedback = self._feedback_edit.toHtml()
+        new_feedback = sanitize(self._feedback_edit.toHtml())
         if new_feedback != self._feedback:
             self._feedback = new_feedback
             self.feedback_changed.emit(self._index, new_feedback)
@@ -740,14 +742,13 @@ class QuestionDetailPanel(QWidget):
         self.question_changed.emit()
 
     def _validate_format(self, question: Question) -> list[str]:
-        errors = []
-        c_count = question.correct_count
-        w_count = question.wrong_count
-        if c_count != 1:
-            errors.append(tr("validate.need_one_correct", count=c_count))
-        if w_count != 3:
-            errors.append(tr("validate.need_three_distractors", count=w_count))
-        return errors
+        """Translate the ready-shape problems (rule shared with the exporter in qb.schema) for the UI."""
+        message_keys = {
+            "correct_count": "validate.need_one_correct",
+            "distractor_count": "validate.need_three_distractors",
+        }
+        problems = answer_shape_problems([answer.fraction for answer in question.answers], READY_DISTRACTORS)
+        return [tr(message_keys[problem], count=actual) for problem, actual, _ in problems]
 
     def _show_format_hint(self, text: str):
         """Show a transient inline hint (non-blocking) that auto-hides after a few seconds."""
@@ -785,7 +786,7 @@ class QuestionDetailPanel(QWidget):
     def _on_question_text_changed(self):
         if self._is_updating or not self._current_question:
             return
-        new_text = self._question_edit.toHtml()
+        new_text = sanitize(self._question_edit.toHtml())
         if new_text != self._current_question.question_text:
             cmd = EditQuestionFieldCommand(
                 self._model, self._current_question,
@@ -796,7 +797,7 @@ class QuestionDetailPanel(QWidget):
     def _on_feedback_changed(self):
         if self._is_updating or not self._current_question:
             return
-        new_text = self._feedback_edit.toHtml()
+        new_text = sanitize(self._feedback_edit.toHtml())
         if new_text != self._current_question.general_feedback:
             cmd = EditQuestionFieldCommand(
                 self._model, self._current_question,
@@ -858,9 +859,10 @@ class QuestionDetailPanel(QWidget):
                 if self._current_question.status == QuestionStatus.READY:
                     demote_cmd = SetStatusCommand(self._model, self._current_question, QuestionStatus.PENDING)
                     self._undo_stack.push(demote_cmd)
-            elif self._current_question.status != QuestionStatus.READY:
-                # Purge left a valid question (1 correct + 3 distractors): mark it Lista
-                # automatically to speed up review (todos line 15).
+            elif self._current_question.status == QuestionStatus.PENDING:
+                # Purge left a valid question (1 correct + 3 distractors): mark a pending question Lista
+                # automatically to speed up review (todos line 15). A question marked Revisar keeps that
+                # status, because pruning distractors doesn't resolve the reviewer's note.
                 self.status_about_to_change.emit(self._current_question, QuestionStatus.READY)
                 promote_cmd = SetStatusCommand(self._model, self._current_question, QuestionStatus.READY)
                 self._undo_stack.push(promote_cmd)

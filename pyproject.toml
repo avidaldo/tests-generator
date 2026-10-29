@@ -1,9 +1,9 @@
 [project]
 name = "tests-generator"
 version = "0.1.0"
-description = "Moodle Tests Generator and Results Analyzer"
+description = "Moodle quiz generation, review and results analysis"
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 dependencies = [
     "pyqt6>=6.0.0",
     "pandas>=2.0.0",
@@ -11,11 +11,26 @@ dependencies = [
     "matplotlib>=3.7.0",
     "nbformat>=5.9.0",
     "ipykernel>=6.25.0",
+    "jsonschema>=4.18",
 ]
+
+[project.scripts]
+qb = "qb.cli:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["qb"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests", "editor/tests"]
 
 [dependency-groups]
 dev = [
     "nbstripout>=0.7.0",
+    "pytest>=9.2.0",
     "yapf>=0.40.0",
 ]
 
