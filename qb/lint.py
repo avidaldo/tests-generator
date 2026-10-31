@@ -37,6 +37,7 @@ RULES: dict[str, tuple[str, str]] = {
         "Graded framing in the question (¿qué describe mejor...?, ¿la más precisa?) or a presupposed comparison "
         "(¿por qué X es mejor que Y?).",
     ),
+    "STEM-DIRECT": ("warning", "A 'which statement is correct' stem that can't be answered before reading the options."),
     "OPT-PORQUE": ("error", "An option to a '¿Por qué...?' stem that doesn't start with 'Porque'."),
     "LANG-SELF": ("error", "Learner-facing text that refers to the course material."),
     "LANG-TRUST": ("error", "'Confiar en que' framing."),
@@ -46,7 +47,9 @@ RULES: dict[str, tuple[str, str]] = {
     "FB-HEDGE": ("warning", "Distractor feedback that hedges about correctness (casi correcta, no es la mejor...)."),
     "FB-THIN": ("warning", "Option feedback too short to explain the option."),
     "GROUND-EVIDENCE": ("error", "An item without evidence: a locator and a quote from the material."),
-    "GROUND-REASONING": ("error", "Missing claim, a key without why_right, or a distractor without misconception or why_wrong."),
+    "GROUND-REASONING": (
+        "error", "Missing claim, a key without why_right, or a distractor without misconception or why_wrong."
+    ),
     "STEM-CLAIM": ("error", "The stem states the claim the item tests."),
 }
 
@@ -57,9 +60,22 @@ _GRADED = [
     re.compile(r"\bmejor\b"),
     re.compile(
         r"\bmas (adecuad|apropiad|precis|correct|acertad|exact|complet|razonabl|convenient|recomendabl|indicad"
-        r"|idone|solid|convincent)\w*"
+        r"|idone|solid|convincent|important|relevant|eficient|probabl|fiabl)\w*"
+    ),
+    re.compile(r"\bmas (util|utiles|eficaz|eficaces)\b"),
+    re.compile(r"\bpreferibles?\b"),
+    re.compile(r"\bmayor (precision|exactitud|claridad|rigor|acierto)\b"),
+    re.compile(
+        r"\b(la|el|las|los) principal(es)? (razon|ventaja|motivo|causa|diferencia|objetivo|problema|riesgo|limitacion"
+        r"|beneficio|funcion|proposito)"
     ),
     re.compile(r"\b(best|better|most appropriate|most accurate|most suitable|most correct|closest|least wrong)\b"),
+]
+# "Which statement is correct" stems can't be answered before reading the options (the cover-the-options test).
+_INDIRECT = [
+    re.compile(r"^¿(que|cual|cuales) (afirmacion|afirmaciones|opcion|opciones|enunciado|descripcion|explicacion"
+               r"|combinacion)\b"),
+    re.compile(r"\b(describe|describen|explica|explican|resume|define|refleja|evalua) correctamente\b"),
 ]
 _MATERIAL = [
     re.compile(
@@ -175,10 +191,15 @@ def lint_question(question: Mapping, expected_distractors: int | None, *, with_r
         if match := _first_match(_TRUST, text):
             add("LANG-TRUST", f"{field_name}: '{match}'", index)
 
-    for clause in _QUESTION_CLAUSE.findall(stem) or [stem]:
+    clauses = _QUESTION_CLAUSE.findall(stem) or [stem]
+    for clause in clauses:
         if _first_match(_GRADED, clause):
             kind = "presupposed comparison" if clause.startswith("¿por que") else "graded wording"
             add("STEM-GRADED", f"{kind}: '{clause[:90]}'")
+            break
+    for clause in clauses:
+        if _first_match(_INDIRECT, clause):
+            add("STEM-DIRECT", f"answerable only through the options: '{clause[:90]}'")
             break
 
     if "¿por que" in stem or stem.startswith("por que"):

@@ -195,3 +195,30 @@ def test_a_stem_that_states_its_claim() -> None:
         answer["why_wrong"] = "Una refutación."
 
     assert _rules(question, with_reasoning=True) == ["STEM-CLAIM"]
+
+
+def test_more_graded_wording_found_in_old_items() -> None:
+    for question_clause in (
+        "¿Por qué es preferible usar la curva precision-recall en lugar de la curva ROC?",
+        "¿Cuál es el principal objetivo de usar dropout?",
+        "¿Cuál es la consecuencia metodológica más importante?",
+        "¿Qué afirmación distingue con mayor precisión la clasificación multiclase de la multietiqueta?",
+    ):
+        question = _clean_question()
+        question["question_text"] = f"<p>{question_clause}</p>"
+
+        assert "STEM-GRADED" in _rules(question), question_clause
+
+
+def test_technical_terms_that_look_graded_are_not() -> None:
+    question = _clean_question()
+    question["question_text"] = "<p>¿Qué representa la primera componente principal de un conjunto de datos?</p>"
+
+    assert "STEM-GRADED" not in _rules(question)
+
+
+def test_a_stem_answerable_only_through_its_options() -> None:
+    question = _clean_question()
+    question["question_text"] = "<p>¿Qué afirmación sobre el escalado de variables en k-NN es correcta?</p>"
+
+    assert _rules(question) == ["STEM-DIRECT"]
