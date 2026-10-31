@@ -175,6 +175,14 @@ def attach_audit_checks(questions: Sequence[MutableMapping], results: Mapping) -
     return []
 
 
+def known_rules() -> frozenset[str]:
+    """Every rule ID of the rule page: the lint rules, those the checker reports, and the two step B implies."""
+    definitions = _schema()["$defs"]
+    return frozenset(RULES) | set(definitions["a_rule"]["enum"]) | set(definitions["c_rule"]["enum"]) | {
+        "KEY-UNIQUE", "DIS-FALSE"
+    }
+
+
 def rule_severity(rule: str) -> str:
     """Severity of a rule on the rule page: lint rules carry their own, checker rules are errors unless listed."""
     if rule in RULES:
@@ -273,7 +281,10 @@ def _checks_of(question: MutableMapping) -> dict:
 
 
 @cache
+def _schema() -> dict:
+    return json.loads(resources.files("qb").joinpath("schemas/check-result.schema.json").read_text(encoding="utf-8"))
+
+
+@cache
 def _result_validator(kind: str) -> Draft202012Validator:
-    schema_text = resources.files("qb").joinpath("schemas/check-result.schema.json").read_text(encoding="utf-8")
-    schema = json.loads(schema_text)
-    return Draft202012Validator({"$defs": schema["$defs"], "$ref": f"#/$defs/{kind}"})
+    return Draft202012Validator({"$defs": _schema()["$defs"], "$ref": f"#/$defs/{kind}"})

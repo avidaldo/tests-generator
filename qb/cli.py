@@ -11,6 +11,7 @@ from pathlib import Path
 import sys
 import tempfile
 
+from qb.calibration import calibration_report, unlabelled_copy
 from qb.checks import BLIND_CHECKS, BLIND_MAP, attach_audit_checks, attach_blind_checks, blind_view
 from qb.export import ExportError, moodle_xml, select_questions
 from qb.lint import RULES, Finding, lint_document
@@ -75,8 +76,25 @@ def main(argv: Sequence[str] | None = None) -> int:
     attach_parser.add_argument("results", type=Path, help="blind_checks or audit_checks JSON written by the checker")
     attach_parser.add_argument("--map", type=Path, help="the letter map from `qb blind` (steps A and B only)")
 
+    calibrate_parser = subcommands.add_parser(
+        "calibrate",
+        help="measure the checker on items a teacher has judged (Lista = good, Revisar = flawed, rules in the notes)",
+    )
+    calibrate_steps = calibrate_parser.add_subparsers(dest="step", required=True)
+    prepare_parser = calibrate_steps.add_parser("prepare", help="write the judged items without the judgement")
+    prepare_parser.add_argument("labelled", type=Path, help="review session with the teacher's statuses and notes")
+    prepare_parser.add_argument("--out", type=Path, required=True, help="the copy to run /quiz-check on")
+    report_parser = calibrate_steps.add_parser("report", help="compare the checked copy with the teacher's labels")
+    report_parser.add_argument("labelled", type=Path, help="review session with the teacher's statuses and notes")
+    report_parser.add_argument("checked", type=Path, help="the copy from `calibrate prepare`, after /quiz-check")
+    report_parser.add_argument("--catch", type=float, default=0.8, help="target share of flawed items flagged")
+    report_parser.add_argument("--false-alarms", type=float, default=0.2, help="maximum share of good items flagged")
+    report_parser.add_argument("--json", action="store_true", help="print the full report as JSON")
+
     args = parser.parse_args(argv)
-    commands = {"lint": _lint, "export": _export, "blind": _blind, "attach-checks": _attach_checks}
+    commands = {
+        "lint": _lint, "export": _export, "blind": _blind, "attach-checks": _attach_checks, "calibrate": _calibrate
+    }
     return commands[args.command](args)
 
 
@@ -213,18 +231,85 @@ def _attach_checks(args: argparse.Namespace) -> int:
     print("  failures by rule: " + (", ".join(f"{rule} {count}" for rule, count in failed_rules.most_common()) or "none"))
     verdicts = Counter(checks["verdict"] for checks in checked if "verdict" in checks)
     if verdicts:
-        stricter = sum(1 for checks in checked if checks.get("conflicts"))
+        stricter = sum(
+            1 for checks in checked if isinstance(checks.get("audit"), Mapping)
+            and checks["audit"].get("verdict") != checks.get("verdict")
+        )
         print("  verdicts: " + ", ".join(f"{verdict} {count}" for verdict, count in sorted(verdicts.items()))
               + f" ({stricter} made stricter than the checker's)")
     return 0
 
 
+def _calibrate(args: argparse.Namespace) -> int:
+    try:
+        labelled = load_json(args.labelled)
+        if args.step == "prepare":
+            copy = unlabelled_copy(labelled)
+            _write_json(args.out, copy)
+            print(f"{len(copy['questions'])} judged items, without statuses or notes: {args.out}")
+            return 0
+        report = calibration_report(labelled, load_json(args.checked))
+    except (OSError, ValueError) as error:
+        print(f"Error: {error}", file=sys.stderr)
+        return 1
+
+    if args.json:
+        print(json.dumps(report, indent=2, ensure_ascii=False))
+        return 0
+    summary = report["summary"]
+    print(f"{summary['items']} judged items, {summary['audited']} with a verdict")
+    for label, target, comparison in (("flawed", args.catch, ">="), ("good", args.false_alarms, "<=")):
+        group = summary[label]
+        if not group["items"]:
+            print(f"  {label} items: none audited")
+            continue
+        met = group["rate"] >= target if comparison == ">=" else group["rate"] <= target
+        print(f"  {label} items flagged: {group['flagged']} of {group['items']} ({group['rate']:.0%}); "
+              f"target {comparison} {target:.0%}: {'met' if met else 'NOT met'}")
+    results = summary["expected_rules"]
+    print(f"  rules the teacher named: {results.get('hit', 0)} found, {results.get('other rule', 0)} caught under "
+          f"another rule, {results.get('elsewhere', 0)} found on another option, {results.get('missed', 0)} missed")
+    for title, counts in (("missed", summary["missed_by_rule"]), ("false alarms", summary["false_alarms_by_rule"])):
+        if counts:
+            print(f"  {title}: " + ", ".join(f"{rule} {count}" for rule, count in Counter(counts).most_common()))
+    key_found = summary["key_found"]
+    print(f"  the blind solver chose the key in {key_found['found']} of {key_found['items']} items")
+    if summary["unknown_rules_in_notes"]:
+        print(f"  notes name unknown rules: {', '.join(summary['unknown_rules_in_notes'])}")
+    print("\n  n  id            label   verdict  rules the teacher named")
+    for row in report["items"]:
+        expected = "; ".join(_describe_expectation(expectation) for expectation in row["expected"])
+        alarms = ", ".join(sorted({alarm["rule"] for alarm in row["errors"]})) if row["label"] == "good" else ""
+        print(f"  {row['n']:<2} {row['id']:<13} {row['label']:<7} {row['verdict'] or '-':<8} "
+              f"{expected or ('false alarms: ' + alarms if alarms else '')}")
+    return 0
+
+
+def _describe_expectation(expectation: Mapping) -> str:
+    """'DIS-TOPIC 6 other rule: DIS-ELEMENTS (A)': the rule, the option, the result and what found it."""
+    option = f" {expectation['option']}" if expectation["option"] else ""
+    found = f": {'/'.join(expectation['found_rules'])}" if expectation["result"] == "other rule" else ""
+    steps = f" ({', '.join(expectation['steps'])})" if expectation["steps"] else ""
+    return f"{expectation['rules']}{option} {expectation['result']}{found}{steps}"
+
+
 def _write_json(path: Path, data: object) -> None:
-    """Write through a temporary file in the same folder, so a failure never leaves half a file."""
+    """Write through a temporary file in the same folder, so a failure never leaves half a file.
+
+    Temporary files are created owner-only, so the final file takes the mode of the file it replaces, or the
+    ordinary mode under the user's umask when it is new.
+    """
     path.parent.mkdir(parents=True, exist_ok=True)
     with tempfile.NamedTemporaryFile("w", encoding="utf-8", dir=path.parent, suffix=".tmp", delete=False) as handle:
         handle.write(json.dumps(data, indent=2, ensure_ascii=False) + "\n")
+    os.chmod(handle.name, path.stat().st_mode if path.exists() else 0o666 & ~_umask())
     os.replace(handle.name, path)
+
+
+def _umask() -> int:
+    current = os.umask(0)
+    os.umask(current)
+    return current
 
 
 if __name__ == "__main__":

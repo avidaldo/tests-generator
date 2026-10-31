@@ -2,6 +2,7 @@
 
 import copy
 import json
+import os
 from pathlib import Path
 import re
 
@@ -197,3 +198,43 @@ def test_the_command_line_round_trip_and_a_failed_attach_leaves_the_file_alone(t
     assert main(["attach-checks", str(batch_path), str(results_path), "--map", str(map_path)]) == 0
     checks = json.loads(batch_path.read_text(encoding="utf-8"))["questions"][0]["checks"]
     assert [failure["rule"] for failure in checks["failed"]] == ["DIS-FALSE"]
+
+
+def test_the_summary_counts_only_verdicts_the_code_changed(tmp_path: Path, capsys) -> None:
+    batch_path, view_path, map_path = tmp_path / "batch.json", tmp_path / "view.json", tmp_path / "map.json"
+    batch_path.write_text(json.dumps({"version": "1.0", "questions": [_item("T_Q001"), _item("T_Q002")]}),
+                          encoding="utf-8")
+    main(["blind", str(batch_path), "--out", str(view_path), "--map", str(map_path)])
+    letter_map = json.loads(map_path.read_text(encoding="utf-8"))
+    blind = _blind_results(letter_map, defensible=(1,))
+    blind["items"].append({**copy.deepcopy(_blind_results(letter_map)["items"][0]), "n": 1, "id": "T_Q002"})
+    blind["items"][1]["solve"]["answer"] = _letter(letter_map, 1, 0)
+    # The second item has a conflict too, but its step C already says repair: nothing for the code to change.
+    blind["items"][1]["solve"]["defensible"] = [{"option": _letter(letter_map, 1, 1), "why": "defendible"}]
+    (tmp_path / "blind.json").write_text(json.dumps(blind), encoding="utf-8")
+    main(["attach-checks", str(batch_path), str(tmp_path / "blind.json"), "--map", str(map_path)])
+    audit = _audit_results("accept")
+    audit["items"].append({**copy.deepcopy(audit["items"][0]), "n": 1, "id": "T_Q002", "verdict": "repair",
+                           "repair": "acortar la clave"})
+    (tmp_path / "audit.json").write_text(json.dumps(audit), encoding="utf-8")
+    capsys.readouterr()
+
+    assert main(["attach-checks", str(batch_path), str(tmp_path / "audit.json")]) == 0
+
+    assert "verdicts: repair 2 (1 made stricter than the checker's)" in capsys.readouterr().out
+
+
+def test_rewriting_a_file_keeps_its_permissions(tmp_path: Path) -> None:
+    batch_path = tmp_path / "batch.json"
+    batch_path.write_text(json.dumps({"version": "1.0", "questions": [_item()]}), encoding="utf-8")
+    batch_path.chmod(0o640)
+    main(["blind", str(batch_path), "--out", str(tmp_path / "view.json"), "--map", str(tmp_path / "map.json")])
+    letter_map = json.loads((tmp_path / "map.json").read_text(encoding="utf-8"))
+    (tmp_path / "blind.json").write_text(json.dumps(_blind_results(letter_map)), encoding="utf-8")
+
+    assert main(["attach-checks", str(batch_path), str(tmp_path / "blind.json"), "--map", str(tmp_path / "map.json")]) == 0
+
+    assert batch_path.stat().st_mode & 0o777 == 0o640
+    umask = os.umask(0)
+    os.umask(umask)
+    assert (tmp_path / "view.json").stat().st_mode & 0o777 == 0o666 & ~umask

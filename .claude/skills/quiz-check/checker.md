@@ -4,8 +4,8 @@
 
 You check multiple-choice quiz items in Spanish, written for students of a vocational AI course (FP de Grado Superior: junior developers, not researchers). You did not write them. Your job is to find what is wrong with each item, not to defend or fix it. The rules and their IDs are those of `docs/item-rules.md`; read that page once before you start.
 
-- Read only the files your task names, and check only the items it names.
-- Write every `why` as one short sentence in Spanish that names the concrete words or idea behind your judgement.
+- Read only the files your task names, and check only the items it names. Read all the files you need at once, in a single turn, and write your result with a single write at the end: every extra turn resends everything you have read so far.
+- Write every `why` as one short sentence in Spanish that names the concrete words or idea behind your judgement. Refer to other options by quoting their words, never by letter or index: letters are shuffled per pass and indices count from 0, so neither means anything to the teacher who reads your note.
 - Write exactly one JSON file, at the path your task gives, following the skeleton of your pass; then reply with one line.
 
 ## Steps A and B
@@ -18,9 +18,9 @@ Picture a test-wise student who has not studied this topic. Using only the wordi
 
 `eliminated` lists each option the student would discard, with the cue that gives it away:
 
-- DIS-STEM: it contradicts something the stem states or implies.
+- DIS-STEM: it denies a fact the stem states or implies (the stem says the validation error rises; the option says it falls). Disagreeing with the expected answer, or misjudging the situation, is not denying the stem.
 - DIS-ANSWERS: it doesn't answer the question asked, or answers in another form (a "¿Por qué…?" answered without "Porque", a definition where a consequence is asked, "todas las anteriores").
-- DIS-TOPIC: it brings in a term from another topic.
+- DIS-TOPIC: it brings in a term from another unit of the course (a convolution term in a question about linear regression). A term of the same unit that the stem doesn't mention is not off-topic.
 - DIS-ELEMENTS: it leaves out one of the elements the stem names.
 - DIS-ABSURD: it reads as a joke, a strawman or a random mix of technical terms.
 - DIS-LOADED: an adjective marks it as wrong ("enorme", "caótico").
@@ -64,7 +64,7 @@ Your input is the question file itself and its lint report (`qb lint --json`). N
 
 For each item:
 
-1. **`findings`**: every break of a rule tested in step C, with the option's `answer_index`, or `null` when it concerns the whole item. You may also report a step A rule that step A missed. Don't repeat what the lint report or `checks.failed` already record. How to judge the less obvious ones:
+1. **`findings`**: every break of a rule tested in step C, with the option's `answer_index`, or `null` when it concerns the whole item. You may also report a step A rule that step A missed. Use only rules the rule page marks `C` or `A`: rules marked only `lint` (FB-THIN, STEM-GRADED…) are code's, and the result is refused if you name them. Don't repeat what the lint report or `checks.failed` already record. How to judge the less obvious ones:
    - GROUND-SUPPORT: compare the claim, `why_right` and each `why_wrong` with the evidence. Without evidence, report it when the key's justification or a refutation is false.
    - STEM-CLAIM and STEM-OPEN: ask what the stem takes for granted. If that is the claim being tested, even paraphrased, it fails.
    - DIS-BELIEF: would a student who holds the stated belief really give this answer, and do these students plausibly hold it? In a numeric item, can the wrong value be reproduced from a named slip?

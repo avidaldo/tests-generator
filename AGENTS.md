@@ -87,9 +87,11 @@ Each step is run manually. See the [Usage guide in README.md](README.md#usage-ge
 
 ## Practical Commands
 
-- Sync Python dependencies with `uv sync`.
+- Sync Python dependencies with `uv sync`; run the tests with `uv run pytest`.
 - Run the editor with `uv run python editor/main.py`.
-- Export a reviewed Stage 4 review-session JSON to Moodle XML with `python resources/json_to_moodle_xml.py <input.json> <output.xml>`.
+- Item rules, with the IDs every tool uses, are in [`docs/item-rules.md`](docs/item-rules.md). Check batches or review sessions against the deterministic ones with `uv run qb lint <files>` (`--summary` for counts per rule).
+- Export a review session to Moodle XML with `uv run qb export <input.json> <output.xml>` (ready questions only by default). `resources/json_to_moodle_xml.py` still works and calls it.
+- The independent checker is the `/quiz-check` skill (`.claude/skills/quiz-check/`); it drives `qb blind` and `qb attach-checks`. Measure it on teacher-judged items with `qb calibrate prepare` and `qb calibrate report`.
 - Verify the notebook output filter is active with `nbstripout --status`.
 
 ## Planning Workflow
